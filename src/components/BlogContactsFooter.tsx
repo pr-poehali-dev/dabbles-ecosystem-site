@@ -29,31 +29,31 @@ export default function BlogContactsFooter({
   return (
     <>
       {/* BLOG */}
-      <section id="blog" className="bg-[#f5f5f7] py-16 px-6 md:px-12">
+      <section id="blog" className="bg-[#f0f0f5] py-10 px-6 md:px-10 pb-16">
         <div className="max-w-7xl mx-auto">
-          <FadeIn className="flex items-end justify-between mb-8">
-            <h2 className="font-display text-3xl md:text-4xl font-black text-black">Блог</h2>
+          <FadeIn className="flex items-end justify-between mb-7">
+            <h2 className="font-display text-[28px] md:text-[36px] font-black text-black">Блог</h2>
             <a href="#" className="hidden md:flex items-center gap-1.5 text-[#0077FF] text-sm font-semibold hover:underline">
               Все статьи <Icon name="ArrowRight" size={14} />
             </a>
           </FadeIn>
-          <div className="grid md:grid-cols-3 gap-5">
+          <div className="grid md:grid-cols-3 gap-4">
             {BLOG_POSTS.map((post, i) => (
               <FadeIn key={i} delay={i * 80}>
                 <article className="bg-white rounded-3xl overflow-hidden group cursor-pointer hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
-                  <div className={`h-1.5 bg-gradient-to-r ${post.color}`} />
+                  <div className={`h-1 bg-gradient-to-r ${post.color}`} />
                   <div className="p-6">
-                    <div className="flex items-center gap-2.5 mb-4">
-                      <span className={`text-xs font-bold px-3 py-1 rounded-full text-white bg-gradient-to-r ${post.color}`}>
+                    <div className="flex items-center gap-2.5 mb-3">
+                      <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full text-white bg-gradient-to-r ${post.color}`}>
                         {post.tag}
                       </span>
                       <span className="text-black/30 text-xs">{post.date}</span>
                     </div>
-                    <h3 className="font-display text-base font-bold text-black mb-2 group-hover:text-[#0077FF] transition-colors leading-snug">
+                    <h3 className="font-display text-[15px] font-bold text-black mb-2 group-hover:text-[#0077FF] transition-colors leading-snug">
                       {post.title}
                     </h3>
                     <p className="text-black/45 text-sm leading-relaxed">{post.desc}</p>
-                    <div className="mt-5 flex items-center gap-1.5 text-[#0077FF] text-sm font-semibold">
+                    <div className="mt-4 flex items-center gap-1.5 text-[#0077FF] text-sm font-semibold">
                       <span>Читать</span>
                       <Icon name="ArrowRight" size={13} />
                     </div>
@@ -66,7 +66,7 @@ export default function BlogContactsFooter({
       </section>
 
       {/* CONTACTS */}
-      <section id="contacts" className="bg-white py-16 px-6 md:px-12">
+      <section id="contacts" className="bg-white py-14 px-6 md:px-10">
         <div className="max-w-3xl mx-auto">
           <FadeIn className="text-center mb-10">
             <h2 className="font-display text-3xl md:text-4xl font-black text-black mb-3">Напишите нам</h2>
