@@ -157,111 +157,129 @@ export default function HeroSections({ scrollTo, setActiveForm }: HeroSectionsPr
   return (
     <>
       {/* ═══ HERO SLIDER ═══ */}
-      <section
-        id="hero"
-        className="relative overflow-hidden"
-        style={{ paddingTop: "68px", minHeight: "calc(100vh - 68px)", maxHeight: "780px" }}
-      >
-        {/* BG IMAGE */}
-        <div
-          className="absolute inset-0 transition-opacity duration-500"
-          style={{ opacity: animating ? 0 : 1 }}
+      {/* Обёртка: задаёт отступ-перекрытие на следующий блок */}
+      <div className="relative z-10" style={{ paddingTop: "68px", marginBottom: "-48px" }}>
+        <section
+          id="hero"
+          className="relative mx-3 md:mx-5"
+          style={{
+            minHeight: "calc(100vh - 68px - 20px)",
+            maxHeight: "800px",
+            borderRadius: "24px",
+            overflow: "hidden",
+          }}
         >
-          <img
-            src={current.image}
-            alt=""
-            className="w-full h-full object-cover"
-            style={{ filter: "brightness(0.45)" }}
-          />
+          {/* BG IMAGE */}
           <div
-            className="absolute inset-0"
-            style={{ background: current.bg, opacity: 0.75 }}
-          />
-        </div>
-
-        {/* CONTENT */}
-        <div
-          className="relative z-10 flex flex-col justify-end h-full px-8 md:px-14"
-          style={{ minHeight: "calc(100vh - 68px)", maxHeight: "712px" }}
-        >
-          {/* TEXT BLOCK */}
-          <div
-            className="max-w-xl mb-10 transition-all duration-500"
-            style={{ opacity: animating ? 0 : 1, transform: animating ? "translateY(16px)" : "translateY(0)" }}
+            className="absolute inset-0 transition-opacity duration-500"
+            style={{ opacity: animating ? 0 : 1 }}
           >
-            <h1
-              className="font-display text-4xl md:text-6xl font-black text-white leading-tight mb-4 whitespace-pre-line"
-            >
-              {current.title}
-            </h1>
-            <p className="text-white/60 text-lg leading-relaxed mb-7 max-w-md">
-              {current.subtitle}
-            </p>
-            <button
-              onClick={() => scrollTo("#products")}
-              className="px-6 py-3 rounded-2xl font-semibold text-sm transition-all hover:opacity-90"
-              style={{ background: current.accent, color: current.accent === "#C1F089" ? "#000" : "#fff" }}
-            >
-              Узнать больше
-            </button>
+            <img
+              src={current.image}
+              alt=""
+              className="w-full h-full object-cover"
+              style={{ filter: "brightness(0.45)" }}
+            />
+            <div
+              className="absolute inset-0"
+              style={{ background: current.bg, opacity: 0.75 }}
+            />
           </div>
 
-          {/* SLIDER DOTS + ARROWS */}
-          <div className="flex items-center gap-4 mb-6 md:mb-8">
-            <button
-              onClick={() => resetTimer((slide - 1 + SLIDES.length) % SLIDES.length)}
-              className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+          {/* CONTENT */}
+          <div
+            className="relative z-10 flex flex-col justify-end h-full px-8 md:px-14 pb-16"
+            style={{ minHeight: "calc(100vh - 68px - 20px)", maxHeight: "800px" }}
+          >
+            {/* TEXT BLOCK */}
+            <div
+              className="max-w-xl mb-8 transition-all duration-500"
+              style={{ opacity: animating ? 0 : 1, transform: animating ? "translateY(16px)" : "translateY(0)" }}
             >
-              <Icon name="ChevronLeft" size={18} className="text-white" />
-            </button>
-            <div className="flex gap-2">
-              {SLIDES.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => resetTimer(i)}
-                  className="transition-all duration-300 rounded-full"
-                  style={{
-                    width: i === slide ? 28 : 8,
-                    height: 8,
-                    background: i === slide ? current.accent : "rgba(255,255,255,0.3)",
-                  }}
-                />
-              ))}
-            </div>
-            <button
-              onClick={() => resetTimer((slide + 1) % SLIDES.length)}
-              className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-            >
-              <Icon name="ChevronRight" size={18} className="text-white" />
-            </button>
-          </div>
-
-          {/* TAGS PILLS */}
-          <div className="flex gap-2.5 pb-6 overflow-x-auto" style={{ scrollbarWidth: "none" }}>
-            {HERO_TAGS.map((tag, i) => (
-              <button
-                key={i}
-                onClick={() => scrollTo("#products")}
-                className="flex items-center gap-2 shrink-0 pl-1.5 pr-4 py-1.5 rounded-full text-sm font-semibold transition-transform hover:scale-105"
-                style={{ background: "rgba(255,255,255,0.12)", backdropFilter: "blur(8px)", color: "#fff", border: "1px solid rgba(255,255,255,0.15)" }}
+              <h1
+                className="font-display text-4xl md:text-6xl font-black text-white leading-tight mb-4 whitespace-pre-line"
               >
-                <span
-                  className="w-6 h-6 rounded-full shrink-0 overflow-hidden"
-                  style={{ background: tag.bg }}
-                >
-                  {tag.thumbBg && (
-                    <img src={tag.thumbBg} alt="" className="w-full h-full object-cover" />
-                  )}
-                </span>
-                {tag.label}
+                {current.title}
+              </h1>
+              <p className="text-white/60 text-lg leading-relaxed mb-7 max-w-md">
+                {current.subtitle}
+              </p>
+              <button
+                onClick={() => scrollTo("#products")}
+                className="px-6 py-3 rounded-2xl font-semibold text-sm transition-all hover:opacity-90"
+                style={{ background: current.accent, color: current.accent === "#C1F089" ? "#000" : "#fff" }}
+              >
+                Узнать больше
               </button>
-            ))}
+            </div>
+
+            {/* SLIDER DOTS + ARROWS */}
+            <div className="flex items-center gap-4 mb-5">
+              <button
+                onClick={() => resetTimer((slide - 1 + SLIDES.length) % SLIDES.length)}
+                className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+              >
+                <Icon name="ChevronLeft" size={18} className="text-white" />
+              </button>
+              <div className="flex gap-2">
+                {SLIDES.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => resetTimer(i)}
+                    className="transition-all duration-300 rounded-full"
+                    style={{
+                      width: i === slide ? 28 : 8,
+                      height: 8,
+                      background: i === slide ? current.accent : "rgba(255,255,255,0.3)",
+                    }}
+                  />
+                ))}
+              </div>
+              <button
+                onClick={() => resetTimer((slide + 1) % SLIDES.length)}
+                className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+              >
+                <Icon name="ChevronRight" size={18} className="text-white" />
+              </button>
+            </div>
+
+            {/* TAGS PILLS — вынесены за пределы section, чтобы не обрезались */}
           </div>
+        </section>
+
+        {/* TAGS PILLS — снаружи section, поверх следующего блока */}
+        <div
+          className="flex gap-2.5 px-8 md:px-10 pt-4 overflow-x-auto"
+          style={{ scrollbarWidth: "none" }}
+        >
+          {HERO_TAGS.map((tag, i) => (
+            <button
+              key={i}
+              onClick={() => scrollTo("#products")}
+              className="flex items-center gap-2 shrink-0 pl-1.5 pr-4 py-1.5 rounded-full text-sm font-semibold transition-transform hover:scale-105"
+              style={{
+                background: "rgba(30,20,60,0.75)",
+                backdropFilter: "blur(12px)",
+                color: "#fff",
+                border: "1px solid rgba(255,255,255,0.15)",
+              }}
+            >
+              <span
+                className="w-6 h-6 rounded-full shrink-0 overflow-hidden"
+                style={{ background: tag.bg }}
+              >
+                {tag.thumbBg && (
+                  <img src={tag.thumbBg} alt="" className="w-full h-full object-cover" />
+                )}
+              </span>
+              {tag.label}
+            </button>
+          ))}
         </div>
-      </section>
+      </div>
 
       {/* ═══ ЧТО НОВОГО ═══ */}
-      <section id="products" className="bg-[#f0f0f5] px-6 md:px-10 py-10 pb-16">
+      <section id="products" className="bg-[#f0f0f5] px-6 md:px-10 pb-16" style={{ paddingTop: "72px" }}>
         <div className="max-w-7xl mx-auto">
           <FadeIn className="mb-7">
             <h2 className="font-display text-[28px] md:text-[36px] font-black text-black">Что нового</h2>
