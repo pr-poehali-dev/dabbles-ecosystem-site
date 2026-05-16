@@ -37,7 +37,7 @@ export default function Navbar({ activeNav, menuOpen, scrollTo, setMenuOpen }: N
         </ul>
         <button
           onClick={() => scrollTo("#contacts")}
-          className="hidden md:block px-4 py-2 text-sm font-semibold rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white hover:opacity-90 transition-opacity"
+          className="hidden md:block px-4 py-2 text-sm font-semibold rounded-xl bg-gradient-to-r from-[#FD4160] to-[#0077FF] text-white hover:opacity-90 transition-opacity"
         >
           Связаться
         </button>

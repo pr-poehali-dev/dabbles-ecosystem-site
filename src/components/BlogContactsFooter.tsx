@@ -31,12 +31,12 @@ export default function BlogContactsFooter({
       {/* BLOG */}
       <section id="blog" className="py-24 px-6 md:px-12 relative">
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full bg-cyan-500/8 blur-[120px]" />
+          <div className="absolute bottom-0 right-0 w-[500px] h-[500px] rounded-full bg-[#0077FF]/8 blur-[120px]" />
         </div>
         <div className="max-w-6xl mx-auto relative">
           <FadeIn className="flex items-end justify-between mb-16">
             <div>
-              <span className="text-orange-400 text-sm font-semibold tracking-widest uppercase mb-4 block">
+              <span className="text-[#C1F089] text-sm font-semibold tracking-widest uppercase mb-4 block">
                 Блог
               </span>
               <h2 className="font-display text-4xl md:text-5xl font-black">
@@ -83,7 +83,7 @@ export default function BlogContactsFooter({
       {/* CONTACTS */}
       <section id="contacts" className="py-24 px-6 md:px-12 max-w-4xl mx-auto">
         <FadeIn className="text-center mb-12">
-          <span className="text-violet-400 text-sm font-semibold tracking-widest uppercase mb-4 block">
+          <span className="text-[#FD4160] text-sm font-semibold tracking-widest uppercase mb-4 block">
             Контакты
           </span>
           <h2 className="font-display text-4xl md:text-5xl font-black mb-4">
@@ -102,7 +102,7 @@ export default function BlogContactsFooter({
                 onClick={() => setActiveForm(tab.key)}
                 className={`px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
                   activeForm === tab.key
-                    ? "bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white shadow-lg"
+                    ? "bg-gradient-to-r from-[#FD4160] to-[#0077FF] text-white shadow-lg"
                     : "text-white/40 hover:text-white"
                 }`}
               >
@@ -114,13 +114,13 @@ export default function BlogContactsFooter({
 
         <FadeIn delay={200}>
           <div className="p-8 md:p-12 rounded-3xl border border-white/8 bg-white/3 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-72 h-72 bg-violet-500/5 blur-3xl rounded-full pointer-events-none" />
+            <div className="absolute top-0 right-0 w-72 h-72 bg-[#FD4160]/5 blur-3xl rounded-full pointer-events-none" />
             {submitted ? (
               <div
                 className="flex flex-col items-center justify-center py-16 text-center gap-4"
                 style={{ animation: "fadeSlideIn 0.5s ease" }}
               >
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center mb-2">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#FD4160] to-[#0077FF] flex items-center justify-center mb-2">
                   <Icon name="Check" size={28} className="text-white" />
                 </div>
                 <h3 className="font-display text-2xl font-bold">Отправлено!</h3>
@@ -138,7 +138,7 @@ export default function BlogContactsFooter({
                       value={formData.name}
                       onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
                       placeholder="Как вас зовут?"
-                      className="w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/25 focus:outline-none focus:border-violet-500/60 transition-all"
+                      className="w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/25 focus:outline-none focus:border-[#0077FF]/60 transition-all"
                     />
                   </div>
                   <div>
@@ -149,7 +149,7 @@ export default function BlogContactsFooter({
                       value={formData.email}
                       onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
                       placeholder="your@email.com"
-                      className="w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/25 focus:outline-none focus:border-violet-500/60 transition-all"
+                      className="w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/25 focus:outline-none focus:border-[#0077FF]/60 transition-all"
                     />
                   </div>
                 </div>
@@ -161,7 +161,7 @@ export default function BlogContactsFooter({
                         value={formData.phone}
                         onChange={(e) => setFormData((p) => ({ ...p, phone: e.target.value }))}
                         placeholder="+7 (999) 000-00-00"
-                        className="w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/25 focus:outline-none focus:border-violet-500/60 transition-all"
+                        className="w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/25 focus:outline-none focus:border-[#0077FF]/60 transition-all"
                       />
                     </div>
                     <div>
@@ -172,7 +172,7 @@ export default function BlogContactsFooter({
                         value={formData.company}
                         onChange={(e) => setFormData((p) => ({ ...p, company: e.target.value }))}
                         placeholder="ООО «Пример»"
-                        className="w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/25 focus:outline-none focus:border-violet-500/60 transition-all"
+                        className="w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/25 focus:outline-none focus:border-[#0077FF]/60 transition-all"
                       />
                     </div>
                   </div>
@@ -191,12 +191,12 @@ export default function BlogContactsFooter({
                     onChange={(e) => setFormData((p) => ({ ...p, message: e.target.value }))}
                     rows={4}
                     placeholder="Напишите здесь..."
-                    className="w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/25 focus:outline-none focus:border-violet-500/60 transition-all resize-none"
+                    className="w-full px-4 py-3.5 rounded-xl bg-white/5 border border-white/10 text-white placeholder-white/25 focus:outline-none focus:border-[#0077FF]/60 transition-all resize-none"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="w-full py-4 rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white font-semibold text-lg hover:opacity-90 hover:scale-[1.01] transition-all duration-200 shadow-lg shadow-violet-500/20"
+                  className="w-full py-4 rounded-xl bg-gradient-to-r from-[#FD4160] to-[#0077FF] text-white font-semibold text-lg hover:opacity-90 hover:scale-[1.01] transition-all duration-200 shadow-lg shadow-[#FD4160]/20"
                 >
                   {activeForm === "request"
                     ? "Отправить заявку"
