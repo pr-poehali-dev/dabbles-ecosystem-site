@@ -213,11 +213,11 @@ export default function BlogContactsFooter({
       {/* FOOTER */}
       <footer className="border-t border-white/5 px-6 md:px-12 py-10">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="font-display text-xl font-bold">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">
-              Даббл
-            </span>
-          </div>
+          <img
+            src="https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/bucket/279bdee6-7783-4862-83f9-25bd24811276.png"
+            alt="Даббл"
+            className="h-7 w-auto object-contain opacity-70 hover:opacity-100 transition-opacity"
+          />
           <div className="flex flex-wrap justify-center gap-6 text-white/30 text-sm">
             {NAV_LINKS.map((l) => (
               <button

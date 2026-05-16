@@ -12,13 +12,12 @@ export default function Navbar({ activeNav, menuOpen, scrollTo, setMenuOpen }: N
   return (
     <>
       <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 h-16 border-b border-white/5 backdrop-blur-xl bg-[#080810]/80">
-        <button
-          onClick={() => scrollTo("#hero")}
-          className="font-display text-xl font-bold tracking-tight"
-        >
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-400">
-            Даббл
-          </span>
+        <button onClick={() => scrollTo("#hero")} className="flex items-center">
+          <img
+            src="https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/bucket/279bdee6-7783-4862-83f9-25bd24811276.png"
+            alt="Даббл"
+            className="h-8 w-auto object-contain"
+          />
         </button>
         <ul className="hidden md:flex gap-1">
           {NAV_LINKS.map((l) => (
