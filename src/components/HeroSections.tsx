@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import Icon from "@/components/ui/icon";
 import { FadeIn, FormType } from "@/components/shared";
+import { request } from "@/lib/api";
 
 interface HeroSectionsProps {
   scrollTo: (href: string) => void;
@@ -9,7 +10,7 @@ interface HeroSectionsProps {
   setHoveredProduct: (i: number | null) => void;
 }
 
-const SLIDES = [
+const FALLBACK_SLIDES = [
   {
     id: 0,
     title: "Даббл Про —\nинструмент роста",
@@ -47,7 +48,7 @@ const HERO_TAGS = [
   { label: "Карьера", bg: "#555", textColor: "#fff", thumbBg: null },
 ];
 
-const NEWS_CARDS = [
+const FALLBACK_NEWS_CARDS = [
   {
     id: 1,
     colSpan: 1,
@@ -126,10 +127,57 @@ const NEWS_CARDS = [
   },
 ];
 
+type SlideShape = { title: string; subtitle: string; bg: string; image: string; accent: string };
+type NewsShape = typeof FALLBACK_NEWS_CARDS[0];
+
 export default function HeroSections({ scrollTo, setActiveForm }: HeroSectionsProps) {
   const [slide, setSlide] = useState(0);
   const [animating, setAnimating] = useState(false);
+  const [slides, setSlides] = useState<SlideShape[]>(FALLBACK_SLIDES);
+  const [newsCards, setNewsCards] = useState<NewsShape[]>(FALLBACK_NEWS_CARDS);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    request<{ items: Array<{ title: string; subtitle: string; bg_gradient: string; image_url: string; accent_color: string }> }>(
+      "content",
+      { query: { kind: "hero" }, auth: false },
+    )
+      .then(({ items }) => {
+        if (items.length) {
+          setSlides(items.map((i) => ({
+            title: i.title,
+            subtitle: i.subtitle,
+            bg: i.bg_gradient,
+            image: i.image_url,
+            accent: i.accent_color,
+          })));
+        }
+      })
+      .catch(() => {});
+
+    request<{ items: Array<{ id: number; title: string; tag: string; tag_icon: string; image_url: string; image_position: string; bg_color: string; is_light: boolean }> }>(
+      "content",
+      { query: { kind: "news" }, auth: false },
+    )
+      .then(({ items }) => {
+        if (items.length) {
+          setNewsCards(items.map((i) => ({
+            id: i.id,
+            colSpan: 1,
+            rowSpan: 1,
+            bg: `bg-[${i.bg_color}]`,
+            image: i.image_url || null,
+            imagePosition: i.image_position,
+            tag: i.tag,
+            tagIcon: i.tag_icon,
+            title: i.title,
+            light: i.is_light,
+            tall: false,
+          })) as NewsShape[]);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const goTo = useCallback((idx: number) => {
     if (animating) return;
@@ -140,7 +188,7 @@ export default function HeroSections({ scrollTo, setActiveForm }: HeroSectionsPr
     }, 300);
   }, [animating]);
 
-  const next = useCallback(() => goTo((slide + 1) % SLIDES.length), [slide, goTo]);
+  const next = useCallback(() => goTo((slide + 1) % slides.length), [slide, goTo, slides.length]);
 
   useEffect(() => {
     intervalRef.current = setInterval(next, 5000);
@@ -152,7 +200,7 @@ export default function HeroSections({ scrollTo, setActiveForm }: HeroSectionsPr
     goTo(idx);
   };
 
-  const current = SLIDES[slide];
+  const current = slides[Math.min(slide, slides.length - 1)];
 
   return (
     <>
@@ -216,13 +264,13 @@ export default function HeroSections({ scrollTo, setActiveForm }: HeroSectionsPr
             {/* SLIDER DOTS + ARROWS */}
             <div className="flex items-center gap-4 mb-5">
               <button
-                onClick={() => resetTimer((slide - 1 + SLIDES.length) % SLIDES.length)}
+                onClick={() => resetTimer((slide - 1 + slides.length) % slides.length)}
                 className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
               >
                 <Icon name="ChevronLeft" size={18} className="text-white" />
               </button>
               <div className="flex gap-2">
-                {SLIDES.map((_, i) => (
+                {slides.map((_, i) => (
                   <button
                     key={i}
                     onClick={() => resetTimer(i)}
@@ -236,7 +284,7 @@ export default function HeroSections({ scrollTo, setActiveForm }: HeroSectionsPr
                 ))}
               </div>
               <button
-                onClick={() => resetTimer((slide + 1) % SLIDES.length)}
+                onClick={() => resetTimer((slide + 1) % slides.length)}
                 className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
               >
                 <Icon name="ChevronRight" size={18} className="text-white" />
@@ -287,7 +335,7 @@ export default function HeroSections({ scrollTo, setActiveForm }: HeroSectionsPr
 
           {/* TOP ROW: 3 columns equal */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            {NEWS_CARDS.slice(0, 3).map((card, i) => (
+            {newsCards.slice(0, 3).map((card, i) => (
               <FadeIn key={card.id} delay={i * 70}>
                 <NewsCard card={card} scrollTo={scrollTo} />
               </FadeIn>
@@ -295,23 +343,29 @@ export default function HeroSections({ scrollTo, setActiveForm }: HeroSectionsPr
           </div>
 
           {/* BOTTOM ROW: 2/5 + 1/5 + 2/5  */}
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            <div className="md:col-span-2">
-              <FadeIn delay={210}>
-                <NewsCard card={NEWS_CARDS[3]} scrollTo={scrollTo} tall />
-              </FadeIn>
+          {newsCards.length > 3 && (
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+              <div className="md:col-span-2">
+                <FadeIn delay={210}>
+                  <NewsCard card={newsCards[3]} scrollTo={scrollTo} tall />
+                </FadeIn>
+              </div>
+              {newsCards[4] && (
+                <div className="md:col-span-2">
+                  <FadeIn delay={280}>
+                    <NewsCard card={newsCards[4]} scrollTo={scrollTo} tall />
+                  </FadeIn>
+                </div>
+              )}
+              {newsCards[5] && (
+                <div className="md:col-span-1">
+                  <FadeIn delay={350}>
+                    <NewsCard card={newsCards[5]} scrollTo={scrollTo} tall />
+                  </FadeIn>
+                </div>
+              )}
             </div>
-            <div className="md:col-span-2">
-              <FadeIn delay={280}>
-                <NewsCard card={NEWS_CARDS[4]} scrollTo={scrollTo} tall />
-              </FadeIn>
-            </div>
-            <div className="md:col-span-1">
-              <FadeIn delay={350}>
-                <NewsCard card={NEWS_CARDS[5]} scrollTo={scrollTo} tall />
-              </FadeIn>
-            </div>
-          </div>
+          )}
         </div>
       </section>
 
@@ -381,18 +435,21 @@ export default function HeroSections({ scrollTo, setActiveForm }: HeroSectionsPr
 }
 
 function NewsCard({ card, scrollTo, tall }: {
-  card: typeof NEWS_CARDS[0];
+  card: NewsShape;
   scrollTo: (href: string) => void;
   tall?: boolean;
 }) {
   const isLight = card.light;
   const titleColor = isLight ? "text-white" : "text-black";
   const tagColor = isLight ? "text-white/55" : "text-black/40";
+  // Извлекаем HEX из bg-[#XXXXXX] для инлайн-стиля
+  const bgMatch = typeof card.bg === "string" ? card.bg.match(/#[0-9A-Fa-f]{3,8}/) : null;
+  const bgColor = bgMatch ? bgMatch[0] : "#FFFFFF";
 
   return (
     <div
-      className={`rounded-3xl overflow-hidden cursor-pointer group transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${card.bg} flex flex-col`}
-      style={{ minHeight: tall ? 240 : 300 }}
+      className="rounded-3xl overflow-hidden cursor-pointer group transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg flex flex-col"
+      style={{ minHeight: tall ? 240 : 300, background: bgColor }}
       onClick={() => scrollTo("#contacts")}
     >
       {card.imagePosition === "top" && card.image && (

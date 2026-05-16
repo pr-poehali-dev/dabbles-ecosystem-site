@@ -1,5 +1,9 @@
+import { useEffect, useState } from "react";
 import Icon from "@/components/ui/icon";
 import { FadeIn, BLOG_POSTS, NAV_LINKS, FormType } from "@/components/shared";
+import { request } from "@/lib/api";
+
+type BlogPost = { id?: number; date: string; tag: string; title: string; desc: string; color: string };
 
 interface BlogContactsFooterProps {
   activeForm: FormType;
@@ -26,6 +30,28 @@ export default function BlogContactsFooter({
   handleSubmit,
   scrollTo,
 }: BlogContactsFooterProps) {
+  const [posts, setPosts] = useState<BlogPost[]>(BLOG_POSTS);
+
+  useEffect(() => {
+    request<{ items: Array<{ id: number; title: string; excerpt: string; tag: string; color: string; published_at: string }> }>(
+      "content",
+      { query: { kind: "blog" }, auth: false },
+    )
+      .then(({ items }) => {
+        if (items.length) {
+          setPosts(items.map((p) => ({
+            id: p.id,
+            title: p.title,
+            desc: p.excerpt,
+            tag: p.tag,
+            color: p.color,
+            date: new Date(p.published_at).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" }),
+          })));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <>
       {/* BLOG */}
@@ -38,7 +64,7 @@ export default function BlogContactsFooter({
             </a>
           </FadeIn>
           <div className="grid md:grid-cols-3 gap-4">
-            {BLOG_POSTS.map((post, i) => (
+            {posts.map((post, i) => (
               <FadeIn key={i} delay={i * 80}>
                 <article className="bg-white rounded-3xl overflow-hidden group cursor-pointer hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
                   <div className={`h-1 bg-gradient-to-r ${post.color}`} />

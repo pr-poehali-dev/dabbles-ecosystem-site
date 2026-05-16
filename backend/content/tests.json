@@ -1,0 +1,28 @@
+{
+  "tests": [
+    {
+      "name": "Invalid kind",
+      "method": "GET",
+      "path": "/?kind=other",
+      "expectedStatus": 400
+    },
+    {
+      "name": "Hero list returns 200",
+      "method": "GET",
+      "path": "/?kind=hero",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Blog list returns 200",
+      "method": "GET",
+      "path": "/?kind=blog",
+      "expectedStatus": 200
+    },
+    {
+      "name": "News list returns 200",
+      "method": "GET",
+      "path": "/?kind=news",
+      "expectedStatus": 200
+    }
+  ]
+}

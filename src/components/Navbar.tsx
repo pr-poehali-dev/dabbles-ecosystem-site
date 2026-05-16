@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { NAV_LINKS } from "@/components/shared";
+import { useAuth } from "@/lib/auth";
 
 interface NavbarProps {
   activeNav: string;
@@ -21,6 +23,7 @@ const NAV_ITEMS = [
 export default function Navbar({ menuOpen, scrollTo, setMenuOpen }: NavbarProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [gridOpen, setGridOpen] = useState(false);
+  const { user } = useAuth();
 
   return (
     <>
@@ -106,6 +109,15 @@ export default function Navbar({ menuOpen, scrollTo, setMenuOpen }: NavbarProps)
               )}
             </div>
 
+            {/* CABINET / LOGIN */}
+            <Link
+              to={user ? "/cabinet" : "/login"}
+              className="hidden md:flex items-center gap-2 ml-1 px-4 py-2 rounded-xl bg-black hover:bg-black/85 text-white text-sm font-semibold transition-colors"
+            >
+              <Icon name={user ? "User" : "LogIn"} size={15} />
+              {user ? "Кабинет" : "Войти"}
+            </Link>
+
             {/* MOBILE MENU */}
             <button
               onClick={() => setMenuOpen(!menuOpen)}
@@ -130,6 +142,13 @@ export default function Navbar({ menuOpen, scrollTo, setMenuOpen }: NavbarProps)
                 {l.label}
               </button>
             ))}
+            <Link
+              to={user ? "/cabinet" : "/login"}
+              className="mt-4 flex items-center gap-2 px-4 py-3 rounded-xl bg-black text-white text-lg font-semibold"
+            >
+              <Icon name={user ? "User" : "LogIn"} size={18} />
+              {user ? "Личный кабинет" : "Войти"}
+            </Link>
           </div>
         </div>
       )}

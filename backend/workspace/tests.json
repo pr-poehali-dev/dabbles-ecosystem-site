@@ -1,0 +1,16 @@
+{
+  "tests": [
+    {
+      "name": "No token",
+      "method": "GET",
+      "path": "/?kind=tasks",
+      "expectedStatus": 401
+    },
+    {
+      "name": "Bad kind",
+      "method": "GET",
+      "path": "/?kind=xxx",
+      "expectedStatus": 400
+    }
+  ]
+}
