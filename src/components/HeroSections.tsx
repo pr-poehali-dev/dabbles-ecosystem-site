@@ -1,5 +1,6 @@
+import { useRef, useState } from "react";
 import Icon from "@/components/ui/icon";
-import { FadeIn, PRODUCTS, INITIATIVES, FormType } from "@/components/shared";
+import { FadeIn, FormType } from "@/components/shared";
 
 interface HeroSectionsProps {
   scrollTo: (href: string) => void;
@@ -8,240 +9,342 @@ interface HeroSectionsProps {
   setHoveredProduct: (i: number | null) => void;
 }
 
+const HERO_TAGS = [
+  { label: "Даббл Про", color: "bg-[#FD4160]", icon: "Zap" },
+  { label: "Нетворк", color: "bg-black", icon: "Globe" },
+  { label: "Инициативы", color: "bg-[#0077FF]", icon: "Heart" },
+  { label: "AI Studio", color: "bg-[#C1F089]", textColor: "text-black", icon: "Sparkles" },
+  { label: "Карьера", color: "bg-gray-700", icon: "Briefcase" },
+];
+
+const NEWS_CARDS = [
+  {
+    id: 1,
+    size: "tall",
+    bg: "bg-white",
+    image: "https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/files/eaefd714-ab4f-4158-a1b7-7e4338893ed4.jpg",
+    tag: "Продукты",
+    tagIcon: "Package",
+    title: "Даббл Аналитика: умные данные для вашего роста",
+    imageTop: true,
+  },
+  {
+    id: 2,
+    size: "tall",
+    bg: "bg-[#0077FF]",
+    image: null,
+    tag: "Партнёрство",
+    tagIcon: "Handshake",
+    title: "Как Даббл Нетворк меняет экосистему бизнеса",
+    desc: "Рассказываем о первых результатах и новых участниках платформы",
+    imageIllustration: "https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/files/a716bdd3-a613-4e25-9502-5a090b4daa82.jpg",
+    light: true,
+  },
+  {
+    id: 3,
+    size: "wide",
+    bg: "bg-white",
+    image: "https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/files/d6ebc285-9c49-4230-92c3-6d233f410578.jpg",
+    tag: "Технологии",
+    tagIcon: "Cpu",
+    title: "ИИ в центре всего: новая стратегия Даббл на 2026 год",
+    imageTop: false,
+    video: "1:25:25",
+    light: true,
+  },
+  {
+    id: 4,
+    size: "normal",
+    bg: "bg-[#1a1a1a]",
+    image: null,
+    tag: "Устройства",
+    tagIcon: "Monitor",
+    title: "Даббл Стэк или Даббл Про? Всё сразу",
+    light: true,
+  },
+  {
+    id: 5,
+    size: "normal",
+    bg: "bg-white",
+    image: "https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/files/eaefd714-ab4f-4158-a1b7-7e4338893ed4.jpg",
+    tag: "Кейсы",
+    tagIcon: "TrendingUp",
+    title: "Рост ×3 за полгода: история клиента",
+    imageTop: true,
+  },
+  {
+    id: 6,
+    size: "normal",
+    bg: "bg-[#C1F089]",
+    image: null,
+    tag: "Инфраструктура",
+    tagIcon: "Server",
+    title: "R&D: что мы исследуем прямо сейчас",
+    textColor: "text-black",
+  },
+];
+
+const STATS = [
+  { num: "150+", label: "Клиентов" },
+  { num: "×3.2", label: "Рост выручки" },
+  { num: "47", label: "Стран" },
+  { num: "98%", label: "Удовлетворённость" },
+];
+
 export default function HeroSections({
   scrollTo,
   setActiveForm,
-  hoveredProduct,
-  setHoveredProduct,
 }: HeroSectionsProps) {
+  const tagsRef = useRef<HTMLDivElement>(null);
+  const [dragStart, setDragStart] = useState<number | null>(null);
+  const [scrollLeft, setScrollLeft] = useState(0);
+
+  const onMouseDown = (e: React.MouseEvent) => {
+    setDragStart(e.clientX);
+    setScrollLeft(tagsRef.current?.scrollLeft ?? 0);
+  };
+  const onMouseMove = (e: React.MouseEvent) => {
+    if (dragStart === null || !tagsRef.current) return;
+    tagsRef.current.scrollLeft = scrollLeft - (e.clientX - dragStart);
+  };
+  const onMouseUp = () => setDragStart(null);
+
   return (
     <>
       {/* HERO */}
       <section
         id="hero"
-        className="relative min-h-screen flex flex-col items-center justify-center text-center px-6 pt-16 overflow-hidden"
+        className="relative overflow-hidden pt-[72px]"
+        style={{
+          background: "linear-gradient(135deg, #0a0a1a 0%, #1a0533 40%, #0c1a4a 70%, #0a2a1a 100%)",
+          minHeight: "580px",
+        }}
       >
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-[#FD4160]/15 blur-[120px] animate-pulse" />
-          <div
-            className="absolute top-1/3 left-1/4 w-[400px] h-[400px] rounded-full bg-[#0077FF]/12 blur-[100px]"
-            style={{ animation: "pulse 4s ease-in-out 1s infinite" }}
-          />
-          <div
-            className="absolute top-1/2 right-1/4 w-[300px] h-[300px] rounded-full bg-[#C1F089]/8 blur-[80px]"
-            style={{ animation: "pulse 5s ease-in-out 2s infinite" }}
-          />
+          <div className="absolute top-0 left-1/3 w-[500px] h-[500px] rounded-full bg-[#FD4160]/20 blur-[100px]" />
+          <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] rounded-full bg-[#0077FF]/20 blur-[100px]" />
         </div>
-        <div
-          className="absolute inset-0 pointer-events-none opacity-[0.03]"
-          style={{
-            backgroundImage:
-              "linear-gradient(rgba(255,255,255,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.5) 1px,transparent 1px)",
-            backgroundSize: "60px 60px",
-          }}
-        />
-        <div className="relative z-10 max-w-4xl mx-auto">
-          <div
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#FD4160]/30 bg-[#FD4160]/10 text-[#FD4160] text-sm mb-8"
-            style={{ opacity: 0, animation: "fadeSlideIn 0.8s ease 0.2s forwards" }}
-          >
-            <span className="w-2 h-2 rounded-full bg-[#FD4160] animate-pulse" />
-            Новая эра возможностей
-          </div>
-          <h1
-            className="font-display text-5xl md:text-7xl xl:text-8xl font-black leading-none mb-6 tracking-tight"
-            style={{ opacity: 0, animation: "fadeSlideIn 0.9s ease 0.4s forwards" }}
-          >
-            Двигаться вперёд —<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FD4160] via-[#0077FF] to-[#C1F089]">
-              это Даббл
-            </span>
-          </h1>
-          <p
-            className="text-lg md:text-xl text-white/50 max-w-2xl mx-auto mb-10"
-            style={{ opacity: 0, animation: "fadeSlideIn 0.9s ease 0.6s forwards" }}
-          >
-            Мы создаём продукты и инициативы, которые меняют то, как люди работают, думают и строят будущее.
-          </p>
-          <div
-            className="flex flex-col sm:flex-row gap-4 justify-center"
-            style={{ opacity: 0, animation: "fadeSlideIn 0.9s ease 0.8s forwards" }}
-          >
-            <button
-              onClick={() => scrollTo("#products")}
-              className="px-8 py-4 rounded-2xl bg-gradient-to-r from-[#FD4160] to-[#0077FF] text-white font-semibold text-lg hover:scale-105 transition-transform shadow-lg shadow-[#FD4160]/25"
-            >
-              Наши продукты
-            </button>
-            <button
-              onClick={() => scrollTo("#about")}
-              className="px-8 py-4 rounded-2xl border border-white/15 text-white/70 hover:text-white hover:border-white/30 font-semibold text-lg transition-all hover:bg-white/5"
-            >
-              О компании
-            </button>
-          </div>
-        </div>
-        <div
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-white/25 text-xs"
-          style={{ animation: "bounce 2s infinite" }}
-        >
-          <span>Прокрути вниз</span>
-          <Icon name="ChevronDown" size={16} />
-        </div>
-      </section>
 
-      {/* ABOUT */}
-      <section id="about" className="py-24 px-6 md:px-12 max-w-6xl mx-auto">
-        <FadeIn className="grid md:grid-cols-2 gap-16 items-center">
-          <div>
-            <span className="text-[#FD4160] text-sm font-semibold tracking-widest uppercase mb-4 block">
-              О компании
-            </span>
-            <h2 className="font-display text-4xl md:text-5xl font-black leading-tight mb-6">
-              Мы строим<br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#FD4160] to-[#0077FF]">
-                завтра сегодня
-              </span>
-            </h2>
-            <p className="text-white/50 text-lg leading-relaxed mb-6">
-              Даббл — это команда инженеров, стратегов и мечтателей, которые верят: лучшие решения рождаются на стыке технологий и человечности.
+        <div className="relative max-w-7xl mx-auto px-6 md:px-12 flex flex-col md:flex-row items-center min-h-[480px]">
+          <div className="flex-1 py-16 md:py-20 z-10">
+            <div
+              className="text-white/60 text-sm font-medium mb-4 tracking-wide"
+              style={{ opacity: 0, animation: "fadeSlideIn 0.7s ease 0.1s forwards" }}
+            >
+              Добро пожаловать в Даббл
+            </div>
+            <h1
+              className="font-display text-4xl md:text-6xl font-black text-white leading-tight mb-6"
+              style={{ opacity: 0, animation: "fadeSlideIn 0.7s ease 0.25s forwards" }}
+            >
+              Новые продукты<br />
+              <span style={{ color: "#C1F089" }}>для вашего роста</span>
+            </h1>
+            <p
+              className="text-white/55 text-lg max-w-md mb-8 leading-relaxed"
+              style={{ opacity: 0, animation: "fadeSlideIn 0.7s ease 0.4s forwards" }}
+            >
+              Мы создаём инструменты, инициативы и партнёрства — всё, что нужно бизнесу будущего.
             </p>
-            <p className="text-white/40 leading-relaxed">
-              С 2019 года мы помогаем бизнесам всех размеров расти быстрее, думать смелее и действовать эффективнее. Каждый продукт — это не просто инструмент, а катализатор изменений.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            {[
-              { num: "150+", label: "Клиентов по всему миру" },
-              { num: "×3.2", label: "Средний рост выручки" },
-              { num: "47", label: "Стран присутствия" },
-              { num: "98%", label: "Уровень удовлетворённости" },
-            ].map((s, i) => (
-              <FadeIn
-                key={i}
-                delay={i * 100}
-                className="p-6 rounded-2xl border border-white/8 bg-white/3 hover:bg-white/6 transition-colors group"
+            <div
+              className="flex gap-3"
+              style={{ opacity: 0, animation: "fadeSlideIn 0.7s ease 0.55s forwards" }}
+            >
+              <button
+                onClick={() => scrollTo("#products")}
+                className="px-6 py-3 rounded-2xl bg-[#FD4160] text-white font-semibold hover:bg-[#e0324f] transition-colors"
               >
-                <div className="font-display text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FD4160] to-[#0077FF] mb-1 group-hover:scale-110 transition-transform origin-left">
-                  {s.num}
-                </div>
-                <div className="text-white/40 text-sm">{s.label}</div>
-              </FadeIn>
-            ))}
+                Наши продукты
+              </button>
+              <button
+                onClick={() => scrollTo("#about")}
+                className="px-6 py-3 rounded-2xl border border-white/20 text-white/70 hover:text-white hover:border-white/40 font-semibold transition-all"
+              >
+                О компании
+              </button>
+            </div>
           </div>
-        </FadeIn>
-      </section>
 
-      {/* PRODUCTS */}
-      <section id="products" className="py-24 px-6 md:px-12 relative">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-[#0077FF]/8 blur-[150px]" />
-        </div>
-        <div className="max-w-6xl mx-auto relative">
-          <FadeIn className="text-center mb-16">
-            <span className="text-[#0077FF] text-sm font-semibold tracking-widest uppercase mb-4 block">
-              Продукты
-            </span>
-            <h2 className="font-display text-4xl md:text-5xl font-black mb-4">
-              Инструменты роста
-            </h2>
-            <p className="text-white/40 text-lg max-w-xl mx-auto">
-              Каждый продукт создан с одной целью — дать вашему бизнесу настоящий импульс.
-            </p>
-          </FadeIn>
-          <div className="grid sm:grid-cols-2 gap-6">
-            {PRODUCTS.map((p, i) => (
-              <FadeIn key={i} delay={i * 80}>
-                <div
-                  className="relative p-8 rounded-3xl border border-white/8 bg-white/3 hover:bg-white/5 transition-all duration-300 cursor-pointer group overflow-hidden"
-                  onMouseEnter={() => setHoveredProduct(i)}
-                  onMouseLeave={() => setHoveredProduct(null)}
-                  style={{
-                    transform: hoveredProduct === i ? "translateY(-4px)" : "translateY(0)",
-                    transition: "transform 0.3s ease",
-                  }}
-                >
-                  <div
-                    className={`absolute inset-0 bg-gradient-to-br ${p.color} transition-opacity duration-500`}
-                    style={{
-                      filter: "blur(60px)",
-                      transform: "scale(0.7)",
-                      opacity: hoveredProduct === i ? 0.08 : 0,
-                    }}
-                  />
-                  <div className={`inline-flex p-3 rounded-2xl bg-gradient-to-br ${p.color} mb-4`}>
-                    <Icon name={p.icon} fallback="Zap" size={22} className="text-white" />
-                  </div>
-                  <div className="flex items-start justify-between mb-3">
-                    <h3 className="font-display text-xl font-bold">{p.title}</h3>
-                    <span
-                      className={`text-xs font-semibold px-3 py-1 rounded-full bg-gradient-to-r ${p.color} text-white`}
-                    >
-                      {p.tag}
-                    </span>
-                  </div>
-                  <p className="text-white/45 leading-relaxed">{p.desc}</p>
-                  <div className="mt-6 flex items-center gap-2 text-white/30 group-hover:text-white/60 transition-colors text-sm">
-                    <span>Подробнее</span>
-                    <Icon name="ArrowRight" size={14} />
-                  </div>
-                </div>
-              </FadeIn>
-            ))}
+          <div
+            className="hidden md:flex flex-1 items-center justify-center py-8"
+            style={{ opacity: 0, animation: "fadeSlideIn 0.9s ease 0.3s forwards" }}
+          >
+            <img
+              src="https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/files/d6ebc285-9c49-4230-92c3-6d233f410578.jpg"
+              alt="Даббл"
+              className="w-full max-w-lg rounded-3xl object-cover shadow-2xl shadow-black/50"
+              style={{ maxHeight: "380px" }}
+            />
           </div>
+        </div>
+
+        {/* TAGS PILLS ROW */}
+        <div
+          ref={tagsRef}
+          className="flex gap-3 px-6 md:px-12 pb-6 overflow-x-auto scrollbar-hide cursor-grab select-none"
+          style={{ scrollbarWidth: "none" }}
+          onMouseDown={onMouseDown}
+          onMouseMove={onMouseMove}
+          onMouseUp={onMouseUp}
+          onMouseLeave={onMouseUp}
+        >
+          {HERO_TAGS.map((tag, i) => (
+            <button
+              key={i}
+              onClick={() => scrollTo("#products")}
+              className={`flex items-center gap-2 shrink-0 px-4 py-2 rounded-full text-sm font-semibold text-white transition-transform hover:scale-105 ${tag.color} ${tag.textColor ?? ""}`}
+              style={{ opacity: 0, animation: `fadeSlideIn 0.5s ease ${0.6 + i * 0.08}s forwards` }}
+            >
+              <Icon name={tag.icon} size={14} />
+              {tag.label}
+            </button>
+          ))}
         </div>
       </section>
 
-      {/* INITIATIVES */}
-      <section id="initiatives" className="py-24 px-6 md:px-12 max-w-6xl mx-auto">
-        <FadeIn className="text-center mb-16">
-          <span className="text-[#C1F089] text-sm font-semibold tracking-widest uppercase mb-4 block">
-            Инициативы
-          </span>
-          <h2 className="font-display text-4xl md:text-5xl font-black mb-4">
-            Больше, чем бизнес
-          </h2>
-          <p className="text-white/40 text-lg max-w-xl mx-auto">
-            Мы берём на себя ответственность за мир, в котором работаем.
-          </p>
-        </FadeIn>
-        <div className="grid md:grid-cols-3 gap-6">
-          {INITIATIVES.map((item, i) => (
-            <FadeIn key={i} delay={i * 120}>
-              <div className="p-8 rounded-3xl border border-white/8 bg-white/3 hover:bg-[#C1F089]/5 hover:border-[#C1F089]/20 transition-all duration-300 group text-center">
-                <div className="text-5xl mb-6">{item.emoji}</div>
-                <h3 className="font-display text-xl font-bold mb-3 group-hover:text-[#C1F089] transition-colors">
-                  {item.title}
-                </h3>
-                <p className="text-white/40 leading-relaxed">{item.desc}</p>
-              </div>
+      {/* ABOUT STATS */}
+      <section id="about" className="bg-[#f5f5f7] py-10 px-6 md:px-12">
+        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
+          {STATS.map((s, i) => (
+            <FadeIn key={i} delay={i * 80} className="text-center">
+              <div className="font-display text-4xl font-black text-black mb-1">{s.num}</div>
+              <div className="text-black/45 text-sm">{s.label}</div>
             </FadeIn>
           ))}
         </div>
-        <FadeIn
-          delay={400}
-          className="mt-12 p-8 md:p-12 rounded-3xl relative overflow-hidden border border-[#FD4160]/20 bg-gradient-to-br from-[#FD4160]/10 to-[#0077FF]/10"
-        >
-          <div className="absolute right-0 top-0 w-64 h-64 bg-[#0077FF]/10 blur-3xl rounded-full pointer-events-none" />
-          <div className="relative max-w-2xl">
-            <h3 className="font-display text-2xl md:text-3xl font-black mb-3">
-              Стань частью движения
-            </h3>
-            <p className="text-white/50 mb-6">
-              Присоединяйся к сети партнёров, которые меняют правила игры вместе с Даббл.
+      </section>
+
+      {/* NEWS SECTION */}
+      <section id="products" className="bg-[#f5f5f7] py-10 px-6 md:px-12 pb-16">
+        <div className="max-w-7xl mx-auto">
+          <FadeIn className="mb-8">
+            <h2 className="font-display text-3xl md:text-4xl font-black text-black">Что нового</h2>
+          </FadeIn>
+
+          {/* MASONRY GRID */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 auto-rows-auto">
+
+            {/* ROW 1: tall | tall | wide */}
+            <FadeIn delay={0}>
+              <NewsCard card={NEWS_CARDS[0]} />
+            </FadeIn>
+            <FadeIn delay={80}>
+              <NewsCard card={NEWS_CARDS[1]} scrollTo={scrollTo} setActiveForm={setActiveForm} />
+            </FadeIn>
+            <FadeIn delay={160}>
+              <NewsCard card={NEWS_CARDS[2]} />
+            </FadeIn>
+
+            {/* ROW 2: normal | normal | normal */}
+            <FadeIn delay={240}>
+              <NewsCard card={NEWS_CARDS[3]} />
+            </FadeIn>
+            <FadeIn delay={320}>
+              <NewsCard card={NEWS_CARDS[4]} />
+            </FadeIn>
+            <FadeIn delay={400}>
+              <NewsCard card={NEWS_CARDS[5]} />
+            </FadeIn>
+          </div>
+        </div>
+      </section>
+
+      {/* ABOUT SECTION */}
+      <section id="initiatives" className="bg-white py-16 px-6 md:px-12">
+        <div className="max-w-7xl mx-auto">
+          <FadeIn className="mb-10">
+            <h2 className="font-display text-3xl md:text-4xl font-black text-black mb-3">О компании</h2>
+            <p className="text-black/50 text-lg max-w-2xl">
+              Даббл — команда инженеров, стратегов и мечтателей, которые верят: лучшие решения рождаются на стыке технологий и человечности.
             </p>
+          </FadeIn>
+          <div className="grid md:grid-cols-3 gap-6">
+            {[
+              { emoji: "🌱", title: "Зелёный курс", desc: "Сокращаем углеродный след и инвестируем в устойчивое будущее." },
+              { emoji: "🤝", title: "Сообщество", desc: "Поддерживаем стартапы, образование и социальные проекты." },
+              { emoji: "🔬", title: "R&D Лаборатория", desc: "Исследуем технологии будущего: ИИ, квантовые вычисления, биотех." },
+            ].map((item, i) => (
+              <FadeIn key={i} delay={i * 100}>
+                <div className="p-7 rounded-3xl bg-[#f5f5f7] hover:bg-[#ebebeb] transition-colors group cursor-default">
+                  <div className="text-4xl mb-4">{item.emoji}</div>
+                  <h3 className="font-display text-xl font-bold text-black mb-2">{item.title}</h3>
+                  <p className="text-black/50 leading-relaxed text-sm">{item.desc}</p>
+                </div>
+              </FadeIn>
+            ))}
+          </div>
+
+          <FadeIn delay={300} className="mt-8 p-8 md:p-12 rounded-3xl bg-black text-white flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div>
+              <h3 className="font-display text-2xl md:text-3xl font-black mb-2">Стань частью движения</h3>
+              <p className="text-white/50">Присоединяйся к партнёрской сети Даббл</p>
+            </div>
             <button
-              onClick={() => {
-                scrollTo("#contacts");
-                setActiveForm("partner");
-              }}
-              className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#FD4160] to-[#0077FF] text-white font-semibold hover:opacity-90 transition-opacity"
+              onClick={() => { scrollTo("#contacts"); setActiveForm("partner"); }}
+              className="shrink-0 px-7 py-3.5 rounded-2xl bg-[#FD4160] text-white font-semibold hover:bg-[#e0324f] transition-colors"
             >
               Стать партнёром
             </button>
-          </div>
-        </FadeIn>
+          </FadeIn>
+        </div>
       </section>
     </>
+  );
+}
+
+function NewsCard({ card, scrollTo, setActiveForm }: {
+  card: typeof NEWS_CARDS[0];
+  scrollTo?: (href: string) => void;
+  setActiveForm?: (f: FormType) => void;
+}) {
+  const isLight = card.light;
+  const textColor = card.textColor ?? (isLight ? "text-white" : "text-black");
+  const subColor = isLight ? "text-white/60" : "text-black/45";
+
+  return (
+    <div
+      className={`rounded-3xl overflow-hidden cursor-pointer group transition-transform duration-300 hover:-translate-y-1 hover:shadow-lg ${card.bg}`}
+      style={{ minHeight: card.size === "wide" ? 340 : card.size === "tall" ? 400 : 280 }}
+      onClick={() => scrollTo && scrollTo("#contacts")}
+    >
+      {card.imageTop && card.image && (
+        <div className="w-full h-44 overflow-hidden">
+          <img src={card.image} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+        </div>
+      )}
+      {card.imageIllustration && (
+        <div className="w-full h-44 overflow-hidden">
+          <img src={card.imageIllustration} alt="" className="w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-500" />
+        </div>
+      )}
+      {!card.imageTop && card.image && !card.imageIllustration && (
+        <div className="relative w-full" style={{ height: "100%", minHeight: 300 }}>
+          <img src={card.image} alt="" className="absolute inset-0 w-full h-full object-cover opacity-40 group-hover:scale-105 transition-transform duration-500" />
+          {card.video && (
+            <div className={`absolute top-4 left-4 flex items-center gap-1.5 ${subColor} text-xs font-medium`}>
+              <Icon name="Play" size={12} />
+              {card.video}
+            </div>
+          )}
+          <div className="absolute bottom-0 left-0 right-0 p-6">
+            <div className={`flex items-center gap-2 mb-3 ${subColor} text-xs font-semibold uppercase tracking-wider`}>
+              <Icon name={card.tagIcon ?? "Tag"} size={12} />
+              {card.tag}
+            </div>
+            <h3 className={`font-display text-xl font-bold leading-snug ${textColor}`}>{card.title}</h3>
+          </div>
+        </div>
+      )}
+      {(card.imageTop || card.imageIllustration || (!card.image && !card.imageIllustration)) && (
+        <div className="p-6">
+          <div className={`flex items-center gap-2 mb-3 ${subColor} text-xs font-semibold uppercase tracking-wider`}>
+            <Icon name={card.tagIcon ?? "Tag"} size={12} />
+            {card.tag}
+          </div>
+          <h3 className={`font-display text-lg font-bold leading-snug mb-2 ${textColor}`}>{card.title}</h3>
+          {card.desc && <p className={`text-sm leading-relaxed ${subColor}`}>{card.desc}</p>}
+        </div>
+      )}
+    </div>
   );
 }
