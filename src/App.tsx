@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Cabinet from "./pages/Cabinet";
+import Vibe from "./pages/Vibe";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "@/lib/auth";
 
@@ -22,6 +23,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/cabinet" element={<Cabinet />} />
+            <Route path="/vibe" element={<Vibe />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
