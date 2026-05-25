@@ -85,6 +85,78 @@ def handler(event, context):
                 'access_tasks': r[7], 'access_documents': r[8], 'access_crm': r[9],
             } for r in rows]})
 
+        # === OAUTH APPS ===
+        if action == 'oauth-list' and method == 'GET':
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT id, client_id, client_secret, name, description, logo_url, "
+                    "redirect_uris, is_internal, is_active, created_at FROM oauth_clients ORDER BY id ASC"
+                )
+                rows = cur.fetchall()
+            return resp(200, {'apps': [{
+                'id': r[0], 'client_id': r[1], 'client_secret': r[2], 'name': r[3],
+                'description': r[4], 'logo_url': r[5], 'redirect_uris': r[6],
+                'is_internal': r[7], 'is_active': r[8], 'created_at': r[9],
+            } for r in rows]})
+
+        if action == 'oauth-create' and method == 'POST':
+            data = json.loads(event.get('body') or '{}')
+            name = (data.get('name') or '').strip()
+            if not name:
+                return resp(400, {'error': 'Название обязательно'})
+            client_id = (data.get('client_id') or '').strip().lower().replace(' ', '-')
+            if not client_id:
+                client_id = 'app-' + secrets.token_urlsafe(6).lower()
+            client_secret = secrets.token_urlsafe(32)
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"SELECT id FROM oauth_clients WHERE client_id = {esc(client_id)}"
+                )
+                if cur.fetchone():
+                    return resp(400, {'error': 'Такой client_id уже занят'})
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"INSERT INTO oauth_clients (client_id, client_secret, name, description, "
+                    f"logo_url, redirect_uris, is_internal, is_active) VALUES ("
+                    f"{esc(client_id)}, {esc(client_secret)}, {esc(name)}, "
+                    f"{esc(data.get('description') or '')}, {esc(data.get('logo_url') or '')}, "
+                    f"{esc(data.get('redirect_uris') or '')}, FALSE, TRUE) RETURNING id"
+                )
+                new_id = cur.fetchone()[0]
+            conn.commit()
+            return resp(200, {'id': new_id, 'client_id': client_id, 'client_secret': client_secret})
+
+        if action == 'oauth-update' and method == 'PUT':
+            data = json.loads(event.get('body') or '{}')
+            aid = int(data.get('id') or 0)
+            if not aid:
+                return resp(400, {'error': 'id обязателен'})
+            sets = []
+            for k in ['name', 'description', 'logo_url', 'redirect_uris']:
+                if k in data:
+                    sets.append(f"{k} = {esc(data[k])}")
+            if 'is_active' in data:
+                sets.append(f"is_active = {esc(bool(data['is_active']))}")
+            if not sets:
+                return resp(400, {'error': 'Нет полей для обновления'})
+            with conn.cursor() as cur:
+                cur.execute(f"UPDATE oauth_clients SET {', '.join(sets)} WHERE id = {aid}")
+            conn.commit()
+            return resp(200, {'ok': True})
+
+        if action == 'oauth-rotate-secret' and method == 'POST':
+            data = json.loads(event.get('body') or '{}')
+            aid = int(data.get('id') or 0)
+            if not aid:
+                return resp(400, {'error': 'id обязателен'})
+            new_secret = secrets.token_urlsafe(32)
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"UPDATE oauth_clients SET client_secret = {esc(new_secret)} WHERE id = {aid} AND is_internal = FALSE"
+                )
+            conn.commit()
+            return resp(200, {'client_secret': new_secret})
+
         if action == 'invite-create' and method == 'POST':
             data = json.loads(event.get('body') or '{}')
             email = (data.get('email') or '').strip().lower()
