@@ -7,6 +7,9 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Cabinet from "./pages/Cabinet";
 import Vibe from "./pages/Vibe";
+import IdAuth from "./pages/id/IdAuth";
+import IdProfile from "./pages/id/IdProfile";
+import IdInvite from "./pages/id/IdInvite";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "@/lib/auth";
 
@@ -24,6 +27,10 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/cabinet" element={<Cabinet />} />
             <Route path="/vibe" element={<Vibe />} />
+            <Route path="/id" element={<IdAuth />} />
+            <Route path="/id/auth" element={<IdAuth />} />
+            <Route path="/id/profile" element={<IdProfile />} />
+            <Route path="/id/invite/:token" element={<IdInvite />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>

@@ -108,6 +108,12 @@ export default function Cabinet() {
             <div className="text-sm font-semibold text-black truncate">{user.full_name || user.email}</div>
             <div className="text-[11px] text-black/40 truncate">{user.position || user.email}</div>
           </div>
+          <Link
+            to="/id/profile"
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-black/60 hover:bg-black/5 hover:text-black transition-colors mb-1"
+          >
+            <Icon name="IdCard" size={16} /> Даббл ID
+          </Link>
           <button
             onClick={async () => { await logout(); nav("/"); }}
             className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-black/60 hover:bg-black/5 hover:text-black transition-colors"
@@ -133,7 +139,7 @@ export default function Cabinet() {
         <ChangePasswordModal
           onClose={async () => {
             setMustChange(false);
-            await request("auth", { query: { action: "me" } });
+            await request("dabbl-id", { query: { action: "me" } });
           }}
         />
       )}

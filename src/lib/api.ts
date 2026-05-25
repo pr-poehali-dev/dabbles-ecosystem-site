@@ -49,4 +49,7 @@ export type User = {
   access_documents: boolean;
   access_crm: boolean;
   is_active: boolean;
+  avatar_url?: string;
+  phone?: string;
+  tfa_enabled?: boolean;
 };

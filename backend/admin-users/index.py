@@ -1,6 +1,8 @@
 import json
 import os
 import hashlib
+import secrets
+from datetime import datetime, timedelta, timezone
 import psycopg2
 
 CORS = {
@@ -61,11 +63,46 @@ def handler(event, context):
 
     headers = event.get('headers') or {}
     token = headers.get('X-Auth-Token') or headers.get('x-auth-token') or ''
+    qs = event.get('queryStringParameters') or {}
+    action = qs.get('action', '')
     conn = db()
     try:
         admin = get_admin(conn, token)
         if not admin:
             return resp(403, {'error': 'Доступ запрещён'})
+
+        # === INVITES ===
+        if action == 'invites' and method == 'GET':
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT token, email, full_name, position, used, expires_at, created_at, "
+                    "access_tasks, access_documents, access_crm FROM invites ORDER BY id DESC LIMIT 50"
+                )
+                rows = cur.fetchall()
+            return resp(200, {'invites': [{
+                'token': r[0], 'email': r[1], 'full_name': r[2], 'position': r[3], 'used': r[4],
+                'expires_at': r[5], 'created_at': r[6],
+                'access_tasks': r[7], 'access_documents': r[8], 'access_crm': r[9],
+            } for r in rows]})
+
+        if action == 'invite-create' and method == 'POST':
+            data = json.loads(event.get('body') or '{}')
+            email = (data.get('email') or '').strip().lower()
+            if not email:
+                return resp(400, {'error': 'Email обязателен'})
+            inv_token = secrets.token_urlsafe(24)
+            exp = (datetime.now(timezone.utc) + timedelta(days=7)).isoformat()
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"INSERT INTO invites (token, email, full_name, position, access_tasks, "
+                    f"access_documents, access_crm, invited_by, expires_at) "
+                    f"VALUES ({esc(inv_token)}, {esc(email)}, {esc(data.get('full_name') or '')}, "
+                    f"{esc(data.get('position') or '')}, {esc(bool(data.get('access_tasks')))}, "
+                    f"{esc(bool(data.get('access_documents')))}, {esc(bool(data.get('access_crm')))}, "
+                    f"{admin['id']}, '{exp}')"
+                )
+            conn.commit()
+            return resp(200, {'token': inv_token, 'invite_url': f"/id/invite/{inv_token}"})
 
         if method == 'GET':
             with conn.cursor() as cur:

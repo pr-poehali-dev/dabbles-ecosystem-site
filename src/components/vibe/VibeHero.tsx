@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { FadeIn } from "@/components/shared";
 import { LOGO_URL, NAV } from "./constants";
@@ -31,13 +32,23 @@ export default function VibeHero({ scrollTo }: VibeHeroProps) {
             ))}
           </div>
 
-          <button
-            onClick={() => scrollTo("#contacts")}
-            className="px-4 py-2 rounded-full bg-[#1a1410] hover:bg-black text-white text-xs md:text-sm font-semibold transition-colors"
-          >
-            <span className="hidden sm:inline">Написать нам</span>
-            <span className="sm:hidden">Написать</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/id/auth?client_id=vibe&redirect_uri=%2Fvibe"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-full bg-white hover:bg-[#f4ecdd] text-[#1a1410] text-sm font-semibold border border-black/10 transition-colors"
+              title="Вход для партнёров"
+            >
+              <Icon name="LogIn" size={14} />
+              Партнёрам
+            </Link>
+            <button
+              onClick={() => scrollTo("#contacts")}
+              className="px-4 py-2 rounded-full bg-[#1a1410] hover:bg-black text-white text-xs md:text-sm font-semibold transition-colors"
+            >
+              <span className="hidden sm:inline">Написать нам</span>
+              <span className="sm:hidden">Написать</span>
+            </button>
+          </div>
         </div>
       </nav>
 

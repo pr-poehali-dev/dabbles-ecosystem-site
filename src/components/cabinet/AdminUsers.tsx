@@ -12,6 +12,8 @@ const emptyUser = {
   access_crm: true,
 };
 
+const ORIGIN = typeof window !== "undefined" ? window.location.origin : "";
+
 export default function AdminUsers() {
   const [users, setUsers] = useState<User[]>([]);
   const [editing, setEditing] = useState<User | null>(null);
@@ -32,8 +34,20 @@ export default function AdminUsers() {
 
   const create = async () => {
     if (!form.email) return;
-    await request("admin-users", { method: "POST", body: form });
-    setTempInfo(`Сотрудник создан. Временный пароль: ${form.password}`);
+    // Отправляем приглашение через Даббл ID — сотрудник сам задаст пароль
+    const res = await request<{ invite_url: string }>("admin-users", {
+      method: "POST",
+      query: { action: "invite-create" },
+      body: {
+        email: form.email,
+        full_name: form.full_name,
+        position: form.position,
+        access_tasks: form.access_tasks,
+        access_documents: form.access_documents,
+        access_crm: form.access_crm,
+      },
+    });
+    setTempInfo(`Приглашение создано. Отправьте сотруднику ссылку: ${ORIGIN}${res.invite_url}`);
     setCreating(false);
     setForm({ ...emptyUser });
     load();
@@ -62,7 +76,7 @@ export default function AdminUsers() {
           onClick={() => { setCreating(true); setForm({ ...emptyUser }); }}
           className="px-5 py-2.5 rounded-xl bg-[#FD4160] text-white font-semibold text-sm hover:bg-[#e0324f] flex items-center gap-2"
         >
-          <Icon name="UserPlus" size={16} /> Добавить
+          <Icon name="UserPlus" size={16} /> Пригласить
         </button>
       </div>
 
@@ -120,7 +134,7 @@ export default function AdminUsers() {
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={() => { setCreating(false); setEditing(null); }}>
           <div className="bg-white rounded-3xl p-7 w-full max-w-md" onClick={(e) => e.stopPropagation()}>
             <h2 className="font-display text-xl font-black text-black mb-5">
-              {creating ? "Новый сотрудник" : "Редактировать"}
+              {creating ? "Пригласить сотрудника" : "Редактировать"}
             </h2>
             <div className="space-y-3">
               {creating && (
@@ -137,7 +151,10 @@ export default function AdminUsers() {
                 onChange={(v) => creating ? setForm({ ...form, position: v }) : setEditing({ ...editing!, position: v })}
               />
               {creating && (
-                <Input label="Временный пароль" value={form.password} onChange={(v) => setForm({ ...form, password: v })} />
+                <div className="text-xs text-black/55 bg-[#FBF6EE] rounded-xl p-3">
+                  <Icon name="Info" size={13} className="inline mr-1" />
+                  Сотрудник получит ссылку-приглашение и сам задаст пароль через Даббл ID.
+                </div>
               )}
               <div className="flex gap-2 pt-2">
                 <button

@@ -23,7 +23,7 @@ export default function ProfileSection() {
     setBusy(true);
     setMsg("");
     try {
-      await request("auth", {
+      await request("dabbl-id", {
         method: "POST",
         query: { action: "change-password" },
         body: { old_password: oldPw, new_password: newPw },
