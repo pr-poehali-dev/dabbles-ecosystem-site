@@ -1,5 +1,8 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { FadeIn, NAV_LINKS, FormType } from "@/components/shared";
+import { request } from "@/lib/api";
 
 interface BlogContactsFooterProps {
   activeForm: FormType;
@@ -17,15 +20,75 @@ const FORM_TABS: { key: FormType; label: string }[] = [
   { key: "feedback", label: "Обратная связь" },
 ];
 
+const FOOTER_LINKS = [
+  {
+    title: "Компания",
+    links: [
+      { label: "О компании", to: "/about" },
+      { label: "Инвесторам", href: "#initiatives" },
+      { label: "Контакты", href: "#contacts" },
+    ],
+  },
+  {
+    title: "Сервисы",
+    links: [
+      { label: "Даббл.Трекер", to: null },
+      { label: "Формус", external: "https://forms-dubble.ru" },
+      { label: "Компас", external: "https://даббл-компас.рф" },
+      { label: "Карьера", to: null },
+    ],
+  },
+  {
+    title: "Документы",
+    links: [
+      { label: "Политика конфиденциальности", to: "/privacy" },
+      { label: "Реквизиты организации", to: "/legal" },
+    ],
+  },
+];
+
 export default function BlogContactsFooter({
   activeForm,
   setActiveForm,
   formData,
   setFormData,
-  submitted,
-  handleSubmit,
   scrollTo,
 }: BlogContactsFooterProps) {
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
+  const [consent, setConsent] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!consent) { setError("Необходимо согласие на обработку персональных данных"); return; }
+    setSubmitting(true);
+    setError("");
+    try {
+      await request("public-data", {
+        method: "POST",
+        query: { action: "contact" },
+        auth: false,
+        body: {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          company: formData.company,
+          message: formData.message,
+          form_type: activeForm,
+        },
+      });
+      setSubmitted(true);
+      setFormData({ name: "", email: "", phone: "", company: "", message: "" });
+      setConsent(false);
+      setTimeout(() => setSubmitted(false), 5000);
+    } catch {
+      setError("Ошибка отправки. Попробуйте позже.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
     <>
       {/* CONTACTS */}
@@ -115,11 +178,7 @@ export default function BlogContactsFooter({
                   )}
                   <div>
                     <label className="text-black/50 text-sm mb-1.5 block font-medium">
-                      {activeForm === "request"
-                        ? "Расскажите о задаче"
-                        : activeForm === "partner"
-                        ? "Предложение по партнёрству"
-                        : "Ваш отзыв"}
+                      {activeForm === "request" ? "Расскажите о задаче" : activeForm === "partner" ? "Предложение по партнёрству" : "Ваш отзыв"}
                     </label>
                     <textarea
                       required
@@ -130,15 +189,41 @@ export default function BlogContactsFooter({
                       className="w-full px-4 py-3 rounded-xl bg-white border border-black/10 text-black placeholder-black/25 focus:outline-none focus:border-[#0077FF]/50 focus:ring-2 focus:ring-[#0077FF]/10 transition-all resize-none"
                     />
                   </div>
+
+                  {/* CONSENT */}
+                  <label className="flex items-start gap-3 cursor-pointer group">
+                    <div
+                      className={`mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center shrink-0 transition-all ${
+                        consent ? "bg-[#1a0a6e] border-[#1a0a6e]" : "border-black/20 group-hover:border-black/40"
+                      }`}
+                      onClick={() => setConsent(!consent)}
+                    >
+                      {consent && <Icon name="Check" size={12} className="text-white" />}
+                    </div>
+                    <input type="checkbox" className="sr-only" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
+                    <span className="text-xs text-black/45 leading-relaxed">
+                      Я даю согласие на обработку персональных данных в соответствии с{" "}
+                      <Link to="/privacy" className="text-[#0077FF] hover:underline" target="_blank">
+                        Политикой конфиденциальности
+                      </Link>{" "}
+                      ООО «ДАББЛ РУС»
+                    </span>
+                  </label>
+
+                  {error && (
+                    <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 px-4 py-3 rounded-xl">
+                      <Icon name="AlertCircle" size={15} />
+                      {error}
+                    </div>
+                  )}
+
                   <button
                     type="submit"
-                    className="w-full py-4 rounded-2xl bg-[#FD4160] text-white font-semibold text-base hover:bg-[#e0324f] transition-colors shadow-sm"
+                    disabled={submitting}
+                    className="w-full py-4 rounded-2xl bg-[#FD4160] text-white font-semibold text-base hover:bg-[#e0324f] transition-colors shadow-sm disabled:opacity-60 flex items-center justify-center gap-2"
                   >
-                    {activeForm === "request"
-                      ? "Отправить заявку"
-                      : activeForm === "partner"
-                      ? "Предложить партнёрство"
-                      : "Отправить отзыв"}
+                    {submitting && <Icon name="Loader" size={16} className="animate-spin" />}
+                    {activeForm === "request" ? "Отправить заявку" : activeForm === "partner" ? "Предложить партнёрство" : "Отправить отзыв"}
                   </button>
                 </form>
               )}
@@ -148,25 +233,76 @@ export default function BlogContactsFooter({
       </section>
 
       {/* FOOTER */}
-      <footer className="bg-black px-6 md:px-12 py-10">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <img
-            src="https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/bucket/279bdee6-7783-4862-83f9-25bd24811276.png"
-            alt="Даббл"
-            className="h-7 w-auto object-contain opacity-80 hover:opacity-100 transition-opacity"
-          />
-          <div className="flex flex-wrap justify-center gap-6 text-white/35 text-sm">
-            {NAV_LINKS.map((l) => (
-              <button
-                key={l.href}
-                onClick={() => scrollTo(l.href)}
-                className="hover:text-white/70 transition-colors"
-              >
-                {l.label}
-              </button>
+      <footer className="bg-[#0a0535] text-white">
+        {/* TOP */}
+        <div className="max-w-7xl mx-auto px-6 md:px-12 pt-14 pb-10">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-10">
+            {/* BRAND */}
+            <div className="md:col-span-2">
+              <img
+                src="https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/bucket/279bdee6-7783-4862-83f9-25bd24811276.png"
+                alt="Даббл"
+                className="h-8 w-auto object-contain mb-4"
+              />
+              <p className="text-white/40 text-sm leading-relaxed max-w-xs mb-5">
+                Экосистема сервисов для бизнеса и повседневной жизни. Единая точка доступа к инструментам роста.
+              </p>
+              <div className="flex gap-2">
+                {[
+                  { icon: "Send", label: "Telegram" },
+                  { icon: "MessageCircle", label: "ВКонтакте" },
+                ].map((s) => (
+                  <button
+                    key={s.label}
+                    title={s.label}
+                    className="w-9 h-9 rounded-xl bg-white/8 hover:bg-white/15 flex items-center justify-center transition-colors"
+                  >
+                    <Icon name={s.icon} size={16} className="text-white/60" />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* LINKS */}
+            {FOOTER_LINKS.map((col) => (
+              <div key={col.title}>
+                <div className="text-white/30 text-xs font-bold uppercase tracking-widest mb-4">{col.title}</div>
+                <ul className="space-y-2.5">
+                  {col.links.map((l) => (
+                    <li key={l.label}>
+                      {"to" in l && l.to ? (
+                        <Link to={l.to} className="text-white/55 hover:text-white text-sm transition-colors">
+                          {l.label}
+                        </Link>
+                      ) : "external" in l && l.external ? (
+                        <a href={l.external} target="_blank" rel="noreferrer" className="text-white/55 hover:text-white text-sm transition-colors flex items-center gap-1">
+                          {l.label} <Icon name="ExternalLink" size={11} className="opacity-50" />
+                        </a>
+                      ) : "href" in l && l.href ? (
+                        <button onClick={() => scrollTo(l.href as string)} className="text-white/55 hover:text-white text-sm transition-colors">
+                          {l.label}
+                        </button>
+                      ) : (
+                        <span className="text-white/25 text-sm">{l.label} <span className="text-[10px]">(скоро)</span></span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             ))}
           </div>
-          <p className="text-white/20 text-sm">© 2026 Даббл</p>
+        </div>
+
+        {/* DIVIDER */}
+        <div className="border-t border-white/8" />
+
+        {/* BOTTOM */}
+        <div className="max-w-7xl mx-auto px-6 md:px-12 py-6 flex flex-col md:flex-row items-center justify-between gap-3">
+          <p className="text-white/25 text-xs">© 2025 ООО «ДАББЛ РУС» · ОГРН 1258900000050 · ИНН 8905069677</p>
+          <div className="flex gap-5">
+            <Link to="/privacy" className="text-white/25 hover:text-white/50 text-xs transition-colors">Политика конфиденциальности</Link>
+            <Link to="/legal" className="text-white/25 hover:text-white/50 text-xs transition-colors">Реквизиты</Link>
+          </div>
         </div>
       </footer>
     </>

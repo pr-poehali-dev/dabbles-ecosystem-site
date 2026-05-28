@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect, useCallback } from "react";
+import { Link } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { FadeIn, FormType } from "@/components/shared";
 import { request } from "@/lib/api";
@@ -288,19 +289,27 @@ export default function HeroSections({ scrollTo, setActiveForm }: HeroSectionsPr
       {/* ═══ О КОМПАНИИ + ИНИЦИАТИВЫ ═══ */}
       <section id="about" className="bg-white px-6 md:px-10 py-14">
         <div className="max-w-7xl mx-auto">
-          <FadeIn className="mb-10">
-            <h2 className="font-display text-[28px] md:text-[36px] font-black text-black mb-3">О компании</h2>
-            <p className="text-black/50 text-lg max-w-2xl">
-              Даббл — команда инженеров, стратегов и мечтателей, которые верят: лучшие решения рождаются на стыке технологий и человечности.
-            </p>
+          <FadeIn className="mb-10 flex flex-col md:flex-row md:items-end gap-4 justify-between">
+            <div>
+              <h2 className="font-display text-[28px] md:text-[36px] font-black text-black mb-3">О компании</h2>
+              <p className="text-black/50 text-lg max-w-2xl">
+                «Даббл» — не просто корпорация, а архитектор будущего комфорта. Мы создаём экосистему сервисов, где бизнес и повседневная жизнь сливаются в единый бесшовный поток возможностей.
+              </p>
+            </div>
+            <Link
+              to="/about"
+              className="shrink-0 flex items-center gap-1.5 text-[#1a0a6e] text-sm font-semibold hover:underline"
+            >
+              Подробнее <Icon name="ArrowRight" size={14} />
+            </Link>
           </FadeIn>
 
           {/* STATS */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5 mb-12">
             {[
-              { num: "150+", label: "Клиентов по всему миру" },
+              { num: "250+", label: "Участников проектов в России" },
               { num: "×3.2", label: "Средний рост выручки" },
-              { num: "47", label: "Стран присутствия" },
+              { num: "5+", label: "Образовательных программ" },
               { num: "98%", label: "Удовлетворённость" },
             ].map((s, i) => (
               <FadeIn key={i} delay={i * 80} className="p-6 bg-[#f0f0f5] rounded-2xl">
@@ -330,18 +339,18 @@ export default function HeroSections({ scrollTo, setActiveForm }: HeroSectionsPr
           <FadeIn delay={300}>
             <div
               className="p-8 md:p-12 rounded-3xl flex flex-col md:flex-row items-start md:items-center justify-between gap-6"
-              style={{ background: "#111" }}
+              style={{ background: "linear-gradient(135deg, #0a0535 0%, #1a0a6e 60%, #2d0060 100%)" }}
             >
               <div>
-                <h3 className="font-display text-2xl md:text-3xl font-black text-white mb-2">Стань частью движения</h3>
-                <p className="text-white/45">Присоединяйся к партнёрской сети Даббл</p>
+                <h3 className="font-display text-2xl md:text-3xl font-black text-white mb-2">Стань участником наших проектов</h3>
+                <p className="text-white/45">Исследуй экосистему сервисов «Даббл»</p>
               </div>
-              <button
-                onClick={() => { scrollTo("#contacts"); setActiveForm("partner"); }}
-                className="shrink-0 px-7 py-3.5 rounded-2xl bg-[#FD4160] text-white font-semibold hover:bg-[#e0324f] transition-colors"
+              <Link
+                to="/about"
+                className="shrink-0 px-7 py-3.5 rounded-2xl bg-[#FD4160] text-white font-semibold hover:bg-[#e0324f] transition-colors whitespace-nowrap"
               >
-                Стать партнёром
-              </button>
+                Наши сервисы
+              </Link>
             </div>
           </FadeIn>
         </div>

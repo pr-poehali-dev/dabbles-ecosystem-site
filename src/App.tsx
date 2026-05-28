@@ -7,6 +7,9 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Cabinet from "./pages/Cabinet";
 import Vibe from "./pages/Vibe";
+import About from "./pages/About";
+import Privacy from "./pages/Privacy";
+import Legal from "./pages/Legal";
 import IdAuth from "./pages/id/IdAuth";
 import IdProfile from "./pages/id/IdProfile";
 import IdInvite from "./pages/id/IdInvite";
@@ -24,6 +27,9 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/legal" element={<Legal />} />
             <Route path="/login" element={<Login />} />
             <Route path="/cabinet" element={<Cabinet />} />
             <Route path="/vibe" element={<Vibe />} />

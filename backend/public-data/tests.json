@@ -1,0 +1,21 @@
+{
+  "tests": [
+    {
+      "name": "Получить орг-схему",
+      "method": "GET",
+      "path": "/?action=org",
+      "expectedStatus": 200,
+      "expectedBody": {"nodes": []},
+      "bodyMatcher": "keys_exist"
+    },
+    {
+      "name": "Отправить форму без данных — ошибка",
+      "method": "POST",
+      "path": "/?action=contact",
+      "body": {"name": "", "email": ""},
+      "expectedStatus": 400,
+      "expectedBody": {"error": "Имя и email обязательны"},
+      "bodyMatcher": "partial"
+    }
+  ]
+}

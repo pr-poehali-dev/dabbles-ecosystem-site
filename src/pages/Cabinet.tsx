@@ -10,9 +10,10 @@ import CrmSection from "@/components/cabinet/CrmSection";
 import AdminUsers from "@/components/cabinet/AdminUsers";
 import AdminContent from "@/components/cabinet/AdminContent";
 import AdminOAuth from "@/components/cabinet/AdminOAuth";
+import AdminOrgChart from "@/components/cabinet/AdminOrgChart";
 import ChangePasswordModal from "@/components/cabinet/ChangePasswordModal";
 
-type Section = "profile" | "tasks" | "documents" | "crm" | "admin-users" | "admin-oauth" | "admin-hero" | "admin-news" | "admin-blog";
+type Section = "profile" | "tasks" | "documents" | "crm" | "admin-users" | "admin-oauth" | "admin-org" | "admin-hero" | "admin-news" | "admin-blog";
 
 export default function Cabinet() {
   const { user, loading, logout } = useAuth();
@@ -51,6 +52,7 @@ export default function Cabinet() {
   const adminItems: { key: Section; label: string; icon: string }[] = [
     { key: "admin-users", label: "Сотрудники", icon: "UserPlus" },
     { key: "admin-oauth", label: "OAuth-приложения", icon: "KeyRound" },
+    { key: "admin-org", label: "Структура компании", icon: "Network" },
     { key: "admin-hero", label: "Обложка", icon: "Image" },
     { key: "admin-news", label: "Что нового", icon: "LayoutGrid" },
     { key: "admin-blog", label: "Блог", icon: "FileEdit" },
@@ -133,6 +135,7 @@ export default function Cabinet() {
         {section === "crm" && user.access_crm && <CrmSection />}
         {section === "admin-users" && isAdmin && <AdminUsers />}
         {section === "admin-oauth" && isAdmin && <AdminOAuth />}
+        {section === "admin-org" && isAdmin && <AdminOrgChart />}
         {section === "admin-hero" && isAdmin && <AdminContent kind="hero" />}
         {section === "admin-news" && isAdmin && <AdminContent kind="news" />}
         {section === "admin-blog" && isAdmin && <AdminContent kind="blog" />}

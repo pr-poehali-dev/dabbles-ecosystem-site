@@ -157,6 +157,54 @@ def handler(event, context):
             conn.commit()
             return resp(200, {'client_secret': new_secret})
 
+        # === ORG CHART ===
+        if action == 'org-create' and method == 'POST':
+            data = json.loads(event.get('body') or '{}')
+            title = (data.get('title') or '').strip()
+            if not title:
+                return resp(400, {'error': 'Название обязательно'})
+            pid = data.get('parent_id')
+            pid_sql = esc(int(pid)) if pid not in (None, '', 'null') else 'NULL'
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"INSERT INTO org_nodes (parent_id, title, subtitle, description, sort_order) "
+                    f"VALUES ({pid_sql}, {esc(title)}, {esc(data.get('subtitle') or '')}, "
+                    f"{esc(data.get('description') or '')}, {esc(int(data.get('sort_order') or 0))}) RETURNING id"
+                )
+                new_id = cur.fetchone()[0]
+            conn.commit()
+            return resp(200, {'id': new_id})
+
+        if action == 'org-update' and method == 'PUT':
+            data = json.loads(event.get('body') or '{}')
+            nid = int(data.get('id') or 0)
+            if not nid:
+                return resp(400, {'error': 'id обязателен'})
+            pid = data.get('parent_id')
+            pid_sql = esc(int(pid)) if pid not in (None, '', 'null') else 'NULL'
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"UPDATE org_nodes SET title={esc(data.get('title') or '')}, "
+                    f"subtitle={esc(data.get('subtitle') or '')}, "
+                    f"description={esc(data.get('description') or '')}, "
+                    f"parent_id={pid_sql}, "
+                    f"sort_order={esc(int(data.get('sort_order') or 0))} "
+                    f"WHERE id={nid}"
+                )
+            conn.commit()
+            return resp(200, {'ok': True})
+
+        if action == 'org-delete' and method == 'PUT':
+            data = json.loads(event.get('body') or '{}')
+            nid = int(data.get('id') or 0)
+            if not nid:
+                return resp(400, {'error': 'id обязателен'})
+            with conn.cursor() as cur:
+                cur.execute(f"UPDATE org_nodes SET parent_id = NULL WHERE parent_id = {nid}")
+                cur.execute(f"DELETE FROM org_nodes WHERE id = {nid}")
+            conn.commit()
+            return resp(200, {'ok': True})
+
         if action == 'invite-create' and method == 'POST':
             data = json.loads(event.get('body') or '{}')
             email = (data.get('email') or '').strip().lower()

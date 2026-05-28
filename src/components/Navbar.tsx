@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { useAuth } from "@/lib/auth";
 
@@ -17,10 +17,20 @@ const NAV_ITEMS = [
   { label: "Контакты", href: "#contacts" },
 ];
 
+const SERVICES_GRID = [
+  { icon: "CheckSquare", label: "Трекер", href: "" },
+  { icon: "FileText", label: "Формус", href: "https://forms-dubble.ru" },
+  { icon: "Compass", label: "Компас", href: "https://даббл-компас.рф" },
+  { icon: "Briefcase", label: "Карьера", href: "" },
+  { icon: "Building2", label: "О нас", href: "/about" },
+  { icon: "Mail", label: "Контакты", href: "#contacts" },
+];
+
 export default function Navbar({ menuOpen, scrollTo, setMenuOpen }: NavbarProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [gridOpen, setGridOpen] = useState(false);
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <>
@@ -72,7 +82,7 @@ export default function Navbar({ menuOpen, scrollTo, setMenuOpen }: NavbarProps)
               </button>
             )}
 
-            {/* GRID ICON (как у Яндекса) */}
+            {/* GRID — сервисы */}
             <div className="relative">
               <button
                 onClick={() => setGridOpen(!gridOpen)}
@@ -82,27 +92,32 @@ export default function Navbar({ menuOpen, scrollTo, setMenuOpen }: NavbarProps)
                 <Icon name="LayoutGrid" size={20} />
               </button>
               {gridOpen && (
-                <div className="absolute right-0 top-12 w-56 bg-white rounded-2xl shadow-xl border border-black/8 p-3 grid grid-cols-3 gap-2">
-                  {[
-                    { icon: "Zap", label: "Про" },
-                    { icon: "Globe", label: "Нетворк" },
-                    { icon: "Layers", label: "Стэк" },
-                    { icon: "BarChart3", label: "Аналитика" },
-                    { icon: "Heart", label: "Инициативы" },
-                    { icon: "Briefcase", label: "Карьера" },
-                  ].map((s) => (
-                    <button
-                      key={s.label}
-                      onClick={() => { scrollTo("#products"); setGridOpen(false); }}
-                      className="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-black/5 transition-colors"
-                    >
-                      <div className="w-9 h-9 rounded-xl bg-black/5 flex items-center justify-center">
-                        <Icon name={s.icon} size={18} className="text-black/60" />
-                      </div>
-                      <span className="text-[11px] text-black/50 font-medium">{s.label}</span>
-                    </button>
-                  ))}
-                </div>
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setGridOpen(false)} />
+                  <div className="absolute right-0 top-12 w-60 bg-white rounded-2xl shadow-xl border border-black/8 p-3 grid grid-cols-3 gap-1.5 z-50">
+                    {SERVICES_GRID.map((s) => (
+                      <button
+                        key={s.label}
+                        onClick={() => {
+                          setGridOpen(false);
+                          if (s.href.startsWith("http")) {
+                            window.open(s.href, "_blank");
+                          } else if (s.href.startsWith("/about")) {
+                            navigate("/about");
+                          } else if (s.href) {
+                            scrollTo(s.href);
+                          }
+                        }}
+                        className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl hover:bg-black/5 transition-colors"
+                      >
+                        <div className="w-10 h-10 rounded-xl bg-[#f0f0f5] flex items-center justify-center">
+                          <Icon name={s.icon} size={18} className="text-black/60" />
+                        </div>
+                        <span className="text-[11px] text-black/55 font-medium leading-tight text-center">{s.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </>
               )}
             </div>
 

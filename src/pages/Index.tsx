@@ -15,7 +15,6 @@ export default function Index() {
     company: "",
     message: "",
   });
-  const [submitted, setSubmitted] = useState(false);
   const [hoveredProduct, setHoveredProduct] = useState<number | null>(null);
 
   useEffect(() => {
@@ -39,13 +38,6 @@ export default function Index() {
     setMenuOpen(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => setSubmitted(false), 3500);
-    setFormData({ name: "", email: "", phone: "", company: "", message: "" });
-  };
-
   return (
     <div className="min-h-screen bg-white text-black font-body overflow-x-hidden">
       <Navbar
@@ -65,8 +57,8 @@ export default function Index() {
         setActiveForm={setActiveForm}
         formData={formData}
         setFormData={setFormData}
-        submitted={submitted}
-        handleSubmit={handleSubmit}
+        submitted={false}
+        handleSubmit={() => {}}
         scrollTo={scrollTo}
       />
     </div>
