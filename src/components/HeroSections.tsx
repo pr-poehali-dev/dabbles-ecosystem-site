@@ -3,6 +3,37 @@ import Icon from "@/components/ui/icon";
 import { FadeIn, FormType } from "@/components/shared";
 import { request } from "@/lib/api";
 
+const SERVICES = [
+  {
+    icon: "CheckSquare",
+    title: "Даббл.Трекер",
+    desc: "Управление задачами и проектами внутри команды. Просто, быстро, без лишнего.",
+    color: "from-[#FD4160] to-[#0077FF]",
+    href: "",
+  },
+  {
+    icon: "FileText",
+    title: "Формус",
+    desc: "Онлайн-формы и сбор данных для бизнеса. Опросы, заявки, обратная связь.",
+    color: "from-[#0077FF] to-[#C1F089]",
+    href: "https://forms-dubble.ru",
+  },
+  {
+    icon: "Compass",
+    title: "Компас",
+    desc: "Навигатор в мире бизнеса Даббл. Всё, что нужно для старта и роста.",
+    color: "from-[#1a0a6e] to-[#2d0060]",
+    href: "https://даббл-компас.рф",
+  },
+  {
+    icon: "Briefcase",
+    title: "Карьера",
+    desc: "Открытые вакансии и возможности внутри экосистемы Даббл.",
+    color: "from-[#222] to-[#444]",
+    href: "",
+  },
+];
+
 interface HeroSectionsProps {
   scrollTo: (href: string) => void;
   setActiveForm: (form: FormType) => void;
@@ -41,100 +72,18 @@ const FALLBACK_SLIDES = [
 ];
 
 const HERO_TAGS = [
-  { label: "Даббл Про", bg: "#FD4160", textColor: "#fff", thumbBg: "https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/files/eaefd714-ab4f-4158-a1b7-7e4338893ed4.jpg" },
-  { label: "Нетворк", bg: "#222", textColor: "#fff", thumbBg: null },
-  { label: "Инициативы", bg: "#0077FF", textColor: "#fff", thumbBg: null },
-  { label: "AI Studio", bg: "#C1F089", textColor: "#000", thumbBg: null },
-  { label: "Карьера", bg: "#555", textColor: "#fff", thumbBg: null },
-];
-
-const FALLBACK_NEWS_CARDS = [
-  {
-    id: 1,
-    colSpan: 1,
-    rowSpan: 1,
-    bg: "bg-white",
-    image: "https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/files/eaefd714-ab4f-4158-a1b7-7e4338893ed4.jpg",
-    imagePosition: "top",
-    tag: "Автономный транспорт",
-    tagIcon: "Car",
-    title: "Роботы Даббл появились в новых городах. Уже четвёртый миллион доставок",
-    light: false,
-  },
-  {
-    id: 2,
-    colSpan: 1,
-    rowSpan: 1,
-    bg: "bg-[#6B4FBB]",
-    image: "https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/files/a716bdd3-a613-4e25-9502-5a090b4daa82.jpg",
-    imagePosition: "center",
-    tag: "Даббл",
-    tagIcon: "Zap",
-    title: "Как используют Даббл Про в работе",
-    light: true,
-  },
-  {
-    id: 3,
-    colSpan: 1,
-    rowSpan: 1,
-    bg: "bg-white",
-    image: "https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/files/d6ebc285-9c49-4230-92c3-6d233f410578.jpg",
-    imagePosition: "top",
-    tag: "Музыка",
-    tagIcon: "Music",
-    title: "Как устроены рекомендации Даббл нового поколения",
-    video: "1:25:25",
-    light: false,
-  },
-  {
-    id: 4,
-    colSpan: 1,
-    rowSpan: 1,
-    bg: "bg-[#2a2018]",
-    image: null,
-    imagePosition: null,
-    tag: "Устройства",
-    tagIcon: "Monitor",
-    title: "Нетворк или Про?\nВсё сразу",
-    light: true,
-    tall: true,
-  },
-  {
-    id: 5,
-    colSpan: 1,
-    rowSpan: 1,
-    bg: "bg-white",
-    image: "https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/files/eaefd714-ab4f-4158-a1b7-7e4338893ed4.jpg",
-    imagePosition: "center",
-    tag: "Кейс",
-    tagIcon: "Briefcase",
-    title: "Рост ×3 за полгода",
-    light: false,
-    tall: true,
-  },
-  {
-    id: 6,
-    colSpan: 1,
-    rowSpan: 1,
-    bg: "bg-[#5a0090]",
-    image: null,
-    imagePosition: null,
-    tag: "Инфраструктура",
-    tagIcon: "Server",
-    title: "Инфраструктура будущего",
-    light: true,
-    tall: true,
-  },
+  { label: "Даббл.Трекер", bg: "#FD4160", textColor: "#fff", thumbBg: null, href: "" },
+  { label: "Формус", bg: "#0077FF", textColor: "#fff", thumbBg: null, href: "https://forms-dubble.ru" },
+  { label: "Компас", bg: "#1a0a6e", textColor: "#fff", thumbBg: null, href: "https://даббл-компас.рф" },
+  { label: "Карьера", bg: "#222", textColor: "#fff", thumbBg: null, href: "" },
 ];
 
 type SlideShape = { title: string; subtitle: string; bg: string; image: string; accent: string };
-type NewsShape = typeof FALLBACK_NEWS_CARDS[0];
 
 export default function HeroSections({ scrollTo, setActiveForm }: HeroSectionsProps) {
   const [slide, setSlide] = useState(0);
   const [animating, setAnimating] = useState(false);
   const [slides, setSlides] = useState<SlideShape[]>(FALLBACK_SLIDES);
-  const [newsCards, setNewsCards] = useState<NewsShape[]>(FALLBACK_NEWS_CARDS);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
@@ -151,29 +100,6 @@ export default function HeroSections({ scrollTo, setActiveForm }: HeroSectionsPr
             image: i.image_url,
             accent: i.accent_color,
           })));
-        }
-      })
-      .catch(() => {});
-
-    request<{ items: Array<{ id: number; title: string; tag: string; tag_icon: string; image_url: string; image_position: string; bg_color: string; is_light: boolean }> }>(
-      "content",
-      { query: { kind: "news" }, auth: false },
-    )
-      .then(({ items }) => {
-        if (items.length) {
-          setNewsCards(items.map((i) => ({
-            id: i.id,
-            colSpan: 1,
-            rowSpan: 1,
-            bg: `bg-[${i.bg_color}]`,
-            image: i.image_url || null,
-            imagePosition: i.image_position,
-            tag: i.tag,
-            tagIcon: i.tag_icon,
-            title: i.title,
-            light: i.is_light,
-            tall: false,
-          })) as NewsShape[]);
         }
       })
       .catch(() => {});
@@ -303,7 +229,7 @@ export default function HeroSections({ scrollTo, setActiveForm }: HeroSectionsPr
           {HERO_TAGS.map((tag, i) => (
             <button
               key={i}
-              onClick={() => scrollTo("#products")}
+              onClick={() => tag.href ? window.open(tag.href, "_blank") : scrollTo("#products")}
               className="flex items-center gap-2 shrink-0 pl-1.5 pr-4 py-1.5 rounded-full text-sm font-semibold transition-transform hover:scale-105"
               style={{
                 background: "rgba(30,20,60,0.75)",
@@ -326,46 +252,36 @@ export default function HeroSections({ scrollTo, setActiveForm }: HeroSectionsPr
         </div>
       </div>
 
-      {/* ═══ ЧТО НОВОГО ═══ */}
+      {/* ═══ НАШИ СЕРВИСЫ ═══ */}
       <section id="products" className="bg-[#f0f0f5] px-6 md:px-10 pb-16" style={{ paddingTop: "72px" }}>
         <div className="max-w-7xl mx-auto">
           <FadeIn className="mb-7">
-            <h2 className="font-display text-[28px] md:text-[36px] font-black text-black">Что нового</h2>
+            <h2 className="font-display text-[28px] md:text-[36px] font-black text-black">Наши сервисы</h2>
           </FadeIn>
-
-          {/* TOP ROW: 3 columns equal */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            {newsCards.slice(0, 3).map((card, i) => (
-              <FadeIn key={card.id} delay={i * 70}>
-                <NewsCard card={card} scrollTo={scrollTo} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            {SERVICES.map((svc, i) => (
+              <FadeIn key={i} delay={i * 80}>
+                <div
+                  className="relative rounded-3xl overflow-hidden group cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                  style={{ minHeight: 220 }}
+                  onClick={() => svc.href ? window.open(svc.href, "_blank") : scrollTo("#contacts")}
+                >
+                  <div className={`absolute inset-0 bg-gradient-to-br ${svc.color}`} />
+                  <div className="relative z-10 p-7 flex flex-col h-full" style={{ minHeight: 220 }}>
+                    <div className="w-11 h-11 rounded-2xl bg-white/15 flex items-center justify-center mb-5">
+                      <Icon name={svc.icon} size={22} className="text-white" />
+                    </div>
+                    <div className="font-display text-xl font-black text-white mb-2">{svc.title}</div>
+                    <div className="text-white/65 text-sm leading-relaxed flex-1">{svc.desc}</div>
+                    <div className="mt-4 flex items-center gap-1.5 text-white/80 text-xs font-semibold">
+                      {svc.href ? "Перейти" : "Скоро"}
+                      {svc.href && <Icon name="ArrowRight" size={13} className="group-hover:translate-x-1 transition-transform" />}
+                    </div>
+                  </div>
+                </div>
               </FadeIn>
             ))}
           </div>
-
-          {/* BOTTOM ROW: 2/5 + 1/5 + 2/5  */}
-          {newsCards.length > 3 && (
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-              <div className="md:col-span-2">
-                <FadeIn delay={210}>
-                  <NewsCard card={newsCards[3]} scrollTo={scrollTo} tall />
-                </FadeIn>
-              </div>
-              {newsCards[4] && (
-                <div className="md:col-span-2">
-                  <FadeIn delay={280}>
-                    <NewsCard card={newsCards[4]} scrollTo={scrollTo} tall />
-                  </FadeIn>
-                </div>
-              )}
-              {newsCards[5] && (
-                <div className="md:col-span-1">
-                  <FadeIn delay={350}>
-                    <NewsCard card={newsCards[5]} scrollTo={scrollTo} tall />
-                  </FadeIn>
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </section>
 

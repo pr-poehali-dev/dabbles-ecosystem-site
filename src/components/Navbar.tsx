@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import Icon from "@/components/ui/icon";
-import { NAV_LINKS } from "@/components/shared";
 import { useAuth } from "@/lib/auth";
 
 interface NavbarProps {
@@ -12,11 +11,9 @@ interface NavbarProps {
 }
 
 const NAV_ITEMS = [
-  { label: "Новости", href: "#blog" },
-  { label: "Продукты", href: "#products" },
-  { label: "Инвесторам", href: "#about" },
-  { label: "Партнёрам", href: "#initiatives" },
   { label: "О компании", href: "#about" },
+  { label: "Продукты", href: "#products" },
+  { label: "Инвесторам", href: "#initiatives" },
   { label: "Контакты", href: "#contacts" },
 ];
 

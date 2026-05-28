@@ -1,9 +1,5 @@
-import { useEffect, useState } from "react";
 import Icon from "@/components/ui/icon";
-import { FadeIn, BLOG_POSTS, NAV_LINKS, FormType } from "@/components/shared";
-import { request } from "@/lib/api";
-
-type BlogPost = { id?: number; date: string; tag: string; title: string; desc: string; color: string };
+import { FadeIn, NAV_LINKS, FormType } from "@/components/shared";
 
 interface BlogContactsFooterProps {
   activeForm: FormType;
@@ -30,67 +26,8 @@ export default function BlogContactsFooter({
   handleSubmit,
   scrollTo,
 }: BlogContactsFooterProps) {
-  const [posts, setPosts] = useState<BlogPost[]>(BLOG_POSTS);
-
-  useEffect(() => {
-    request<{ items: Array<{ id: number; title: string; excerpt: string; tag: string; color: string; published_at: string }> }>(
-      "content",
-      { query: { kind: "blog" }, auth: false },
-    )
-      .then(({ items }) => {
-        if (items.length) {
-          setPosts(items.map((p) => ({
-            id: p.id,
-            title: p.title,
-            desc: p.excerpt,
-            tag: p.tag,
-            color: p.color,
-            date: new Date(p.published_at).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" }),
-          })));
-        }
-      })
-      .catch(() => {});
-  }, []);
-
   return (
     <>
-      {/* BLOG */}
-      <section id="blog" className="bg-[#f0f0f5] py-10 px-6 md:px-10 pb-16">
-        <div className="max-w-7xl mx-auto">
-          <FadeIn className="flex items-end justify-between mb-7">
-            <h2 className="font-display text-[28px] md:text-[36px] font-black text-black">Блог</h2>
-            <a href="#" className="hidden md:flex items-center gap-1.5 text-[#0077FF] text-sm font-semibold hover:underline">
-              Все статьи <Icon name="ArrowRight" size={14} />
-            </a>
-          </FadeIn>
-          <div className="grid md:grid-cols-3 gap-4">
-            {posts.map((post, i) => (
-              <FadeIn key={i} delay={i * 80}>
-                <article className="bg-white rounded-3xl overflow-hidden group cursor-pointer hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
-                  <div className={`h-1 bg-gradient-to-r ${post.color}`} />
-                  <div className="p-6">
-                    <div className="flex items-center gap-2.5 mb-3">
-                      <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full text-white bg-gradient-to-r ${post.color}`}>
-                        {post.tag}
-                      </span>
-                      <span className="text-black/30 text-xs">{post.date}</span>
-                    </div>
-                    <h3 className="font-display text-[15px] font-bold text-black mb-2 group-hover:text-[#0077FF] transition-colors leading-snug">
-                      {post.title}
-                    </h3>
-                    <p className="text-black/45 text-sm leading-relaxed">{post.desc}</p>
-                    <div className="mt-4 flex items-center gap-1.5 text-[#0077FF] text-sm font-semibold">
-                      <span>Читать</span>
-                      <Icon name="ArrowRight" size={13} />
-                    </div>
-                  </div>
-                </article>
-              </FadeIn>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CONTACTS */}
       <section id="contacts" className="bg-white py-14 px-6 md:px-10">
         <div className="max-w-3xl mx-auto">
