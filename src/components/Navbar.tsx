@@ -21,7 +21,7 @@ const SERVICES_GRID = [
   { icon: "CheckSquare", label: "Трекер", href: "" },
   { icon: "FileText", label: "Формус", href: "https://forms-dubble.ru" },
   { icon: "Compass", label: "Компас", href: "https://даббл-компас.рф" },
-  { icon: "CalendarDays", label: "Мерошкинс", href: "" },
+  { icon: "CalendarDays", label: "Мерошкинс", href: "/meroshkins" },
   { icon: "Briefcase", label: "Карьера", href: "" },
   { icon: "Building2", label: "О нас", href: "/about" },
   { icon: "Mail", label: "Контакты", href: "#contacts" },
@@ -103,8 +103,8 @@ export default function Navbar({ menuOpen, scrollTo, setMenuOpen }: NavbarProps)
                           setGridOpen(false);
                           if (s.href.startsWith("http")) {
                             window.open(s.href, "_blank");
-                          } else if (s.href.startsWith("/about")) {
-                            navigate("/about");
+                          } else if (s.href.startsWith("/")) {
+                            navigate(s.href);
                           } else if (s.href) {
                             scrollTo(s.href);
                           }

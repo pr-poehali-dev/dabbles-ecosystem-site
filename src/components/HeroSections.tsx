@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { FadeIn, FormType } from "@/components/shared";
 import { request } from "@/lib/api";
@@ -31,7 +31,7 @@ const SERVICES = [
     title: "Мерошкинс",
     desc: "Единый центр управления мероприятиями. Календарь, залы, команды и пресс-релизы.",
     color: "from-[#7c3aed] to-[#4f46e5]",
-    href: "",
+    href: "/meroshkins",
   },
   {
     icon: "Briefcase",
@@ -83,12 +83,14 @@ const HERO_TAGS = [
   { label: "Даббл.Трекер", bg: "#FD4160", textColor: "#fff", thumbBg: null, href: "" },
   { label: "Формус", bg: "#0077FF", textColor: "#fff", thumbBg: null, href: "https://forms-dubble.ru" },
   { label: "Компас", bg: "#1a0a6e", textColor: "#fff", thumbBg: null, href: "https://даббл-компас.рф" },
+  { label: "Мерошкинс", bg: "#7c3aed", textColor: "#fff", thumbBg: null, href: "/meroshkins" },
   { label: "Карьера", bg: "#222", textColor: "#fff", thumbBg: null, href: "" },
 ];
 
 type SlideShape = { title: string; subtitle: string; bg: string; image: string; accent: string };
 
 export default function HeroSections({ scrollTo, setActiveForm }: HeroSectionsProps) {
+  const navigate = useNavigate();
   const [slide, setSlide] = useState(0);
   const [animating, setAnimating] = useState(false);
   const [slides, setSlides] = useState<SlideShape[]>(FALLBACK_SLIDES);
@@ -237,7 +239,11 @@ export default function HeroSections({ scrollTo, setActiveForm }: HeroSectionsPr
           {HERO_TAGS.map((tag, i) => (
             <button
               key={i}
-              onClick={() => tag.href ? window.open(tag.href, "_blank") : scrollTo("#products")}
+              onClick={() => {
+                if (!tag.href) return scrollTo("#products");
+                if (tag.href.startsWith("http")) window.open(tag.href, "_blank");
+                else navigate(tag.href);
+              }}
               className="flex items-center gap-2 shrink-0 pl-1.5 pr-4 py-1.5 rounded-full text-sm font-semibold transition-transform hover:scale-105"
               style={{
                 background: "rgba(30,20,60,0.75)",
@@ -272,7 +278,11 @@ export default function HeroSections({ scrollTo, setActiveForm }: HeroSectionsPr
                 <div
                   className="relative rounded-3xl overflow-hidden group cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
                   style={{ minHeight: 220 }}
-                  onClick={() => svc.href ? window.open(svc.href, "_blank") : scrollTo("#contacts")}
+                  onClick={() => {
+                    if (!svc.href) return scrollTo("#contacts");
+                    if (svc.href.startsWith("http")) window.open(svc.href, "_blank");
+                    else navigate(svc.href);
+                  }}
                 >
                   <div className={`absolute inset-0 bg-gradient-to-br ${svc.color}`} />
                   <div className="relative z-10 p-7 flex flex-col h-full" style={{ minHeight: 220 }}>

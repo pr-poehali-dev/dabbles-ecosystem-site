@@ -1,0 +1,12 @@
+{
+  "tests": [
+    {
+      "name": "No auth → 403",
+      "method": "GET",
+      "path": "/?action=events",
+      "expectedStatus": 403,
+      "expectedBody": {"error": "Необходима авторизация"},
+      "bodyMatcher": "partial"
+    }
+  ]
+}

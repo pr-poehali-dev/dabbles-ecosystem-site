@@ -1,0 +1,48 @@
+
+CREATE TABLE IF NOT EXISTS m_venues (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  name VARCHAR(255) NOT NULL,
+  address TEXT NOT NULL DEFAULT '',
+  description TEXT NOT NULL DEFAULT '',
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS m_rooms (
+  id SERIAL PRIMARY KEY,
+  venue_id INTEGER NOT NULL REFERENCES m_venues(id),
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  name VARCHAR(255) NOT NULL,
+  capacity INTEGER NOT NULL DEFAULT 0,
+  features TEXT NOT NULL DEFAULT '',
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS m_events (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  title VARCHAR(255) NOT NULL,
+  event_type VARCHAR(64) NOT NULL DEFAULT 'other',
+  status VARCHAR(32) NOT NULL DEFAULT 'planned',
+  starts_at TIMESTAMPTZ NOT NULL,
+  ends_at TIMESTAMPTZ NOT NULL,
+  room_id INTEGER REFERENCES m_rooms(id),
+  responsible VARCHAR(255) NOT NULL DEFAULT '',
+  description TEXT NOT NULL DEFAULT '',
+  info_reason TEXT NOT NULL DEFAULT '',
+  press_release TEXT NOT NULL DEFAULT '',
+  color VARCHAR(32) NOT NULL DEFAULT '#7c3aed',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS m_event_shares (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  token VARCHAR(64) NOT NULL UNIQUE,
+  date_from DATE,
+  date_to DATE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
