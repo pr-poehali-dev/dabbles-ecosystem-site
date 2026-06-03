@@ -21,6 +21,7 @@ const SERVICES_GRID = [
   { icon: "CheckSquare", label: "Трекер", href: "" },
   { icon: "FileText", label: "Формус", href: "https://forms-dubble.ru" },
   { icon: "Compass", label: "Компас", href: "https://даббл-компас.рф" },
+  { icon: "CalendarDays", label: "Мерошкинс", href: "" },
   { icon: "Briefcase", label: "Карьера", href: "" },
   { icon: "Building2", label: "О нас", href: "/about" },
   { icon: "Mail", label: "Контакты", href: "#contacts" },
