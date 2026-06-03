@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 CORS = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, X-Authorization',
+    'Access-Control-Allow-Headers': 'Content-Type, X-Authorization, X-Auth-Token',
 }
 
 def db():
@@ -22,7 +22,9 @@ def resp(status, body):
             'isBase64Encoded': False, 'body': json.dumps(body, ensure_ascii=False, default=str)}
 
 def get_user(conn, event):
-    token = (event.get('headers') or {}).get('X-Authorization', '').replace('Bearer ', '').strip()
+    headers = event.get('headers') or {}
+    raw = (headers.get('X-Auth-Token') or headers.get('X-Authorization') or '').replace('Bearer ', '').strip()
+    token = raw
     if not token: return None
     with conn.cursor() as cur:
         cur.execute(

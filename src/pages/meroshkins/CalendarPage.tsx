@@ -4,6 +4,7 @@ import {
   MEvent, MRoom, MVenue, mApi, EVENT_TYPES, EVENT_STATUSES,
   daysInMonth, firstWeekday, formatTime, isoDate,
 } from "@/lib/meroshkins";
+import { exportEventsPdf } from "@/lib/exportPdf";
 import EventModal from "./EventModal";
 
 type ViewMode = "month" | "week" | "day";
@@ -32,6 +33,8 @@ export default function CalendarPage() {
   const [shareModal, setShareModal] = useState(false);
   const [shareToken, setShareToken] = useState("");
   const [shareCopied, setShareCopied] = useState(false);
+  const [pdfModal, setPdfModal] = useState(false);
+  const [pdfPeriod, setPdfPeriod] = useState<"month" | "week">("month");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -127,6 +130,10 @@ export default function CalendarPage() {
         </select>
 
         <div className="ml-auto flex gap-2">
+          <button onClick={() => setPdfModal(true)}
+            className="px-3 py-2 rounded-xl bg-white border border-black/8 text-black/60 hover:text-black text-xs font-semibold flex items-center gap-1.5">
+            <Icon name="FileDown" size={14} /> PDF
+          </button>
           <button onClick={() => setShareModal(true)}
             className="px-3 py-2 rounded-xl bg-white border border-black/8 text-black/60 hover:text-black text-xs font-semibold flex items-center gap-1.5">
             <Icon name="Share2" size={14} /> Поделиться
@@ -223,6 +230,51 @@ export default function CalendarPage() {
           <div className="font-bold mb-0.5">{tooltip.event.title}</div>
           <div className="text-white/60">{formatTime(tooltip.event.starts_at)} — {formatTime(tooltip.event.ends_at)}</div>
           {tooltip.event.room_name && <div className="text-white/50">{tooltip.event.venue_name}, {tooltip.event.room_name}</div>}
+        </div>
+      )}
+
+      {/* PDF MODAL */}
+      {pdfModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setPdfModal(false)}>
+          <div className="bg-white rounded-3xl p-8 w-full max-w-sm" onClick={e => e.stopPropagation()}>
+            <h3 className="font-display font-black text-xl text-black mb-2">Выгрузка в PDF</h3>
+            <p className="text-black/45 text-sm mb-6">Выберите период для выгрузки мероприятий</p>
+            <div className="flex gap-2 mb-6">
+              <button
+                onClick={() => setPdfPeriod("month")}
+                className={`flex-1 py-3 rounded-2xl text-sm font-semibold border-2 transition-all ${pdfPeriod === "month" ? "border-[#7c3aed] bg-[#7c3aed]/5 text-[#7c3aed]" : "border-black/10 text-black/50"}`}
+              >
+                <Icon name="Calendar" size={16} className="mx-auto mb-1" />
+                {MONTHS[month]} {year}
+              </button>
+              <button
+                onClick={() => setPdfPeriod("week")}
+                className={`flex-1 py-3 rounded-2xl text-sm font-semibold border-2 transition-all ${pdfPeriod === "week" ? "border-[#7c3aed] bg-[#7c3aed]/5 text-[#7c3aed]" : "border-black/10 text-black/50"}`}
+              >
+                <Icon name="CalendarDays" size={16} className="mx-auto mb-1" />
+                Текущая неделя
+              </button>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => setPdfModal(false)} className="flex-1 py-2.5 rounded-xl bg-black/5 text-black/60 font-semibold text-sm">
+                Отмена
+              </button>
+              <button
+                onClick={() => {
+                  const weekStart = new Date(today);
+                  const wd = weekStart.getDay() === 0 ? 6 : weekStart.getDay() - 1;
+                  weekStart.setDate(weekStart.getDate() - wd);
+                  weekStart.setHours(0, 0, 0, 0);
+                  exportEventsPdf(events, year, month, pdfPeriod, weekStart);
+                  setPdfModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-[#7c3aed] text-white font-semibold text-sm hover:bg-[#6d28d9] flex items-center justify-center gap-2"
+              >
+                <Icon name="Download" size={15} />
+                Скачать PDF
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
