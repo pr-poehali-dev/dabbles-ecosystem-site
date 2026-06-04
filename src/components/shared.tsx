@@ -38,7 +38,7 @@ export const PRODUCTS = [
     desc: "Единый центр управления мероприятиями. Календарь, залы, команды и пресс-релизы.",
     tag: "Сервис",
     color: "from-[#7c3aed] to-[#4f46e5]",
-    href: "",
+    href: "/meroshkins/promo",
   },
   {
     icon: "Briefcase",

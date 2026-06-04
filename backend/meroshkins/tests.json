@@ -1,11 +1,19 @@
 {
   "tests": [
     {
-      "name": "No auth → 403",
+      "name": "No auth returns 403",
       "method": "GET",
       "path": "/?action=events",
       "expectedStatus": 403,
       "expectedBody": {"error": "Необходима авторизация"},
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Share view without token",
+      "method": "GET",
+      "path": "/?action=share-view",
+      "expectedStatus": 400,
+      "expectedBody": {"error": "token required"},
       "bodyMatcher": "partial"
     }
   ]

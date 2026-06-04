@@ -90,6 +90,21 @@ export const mApi = {
 
   shareCreate: (date_from?: string, date_to?: string) =>
     request<{ token: string }>("meroshkins", { method: "POST", query: { action: "share-create" }, body: { date_from, date_to } }),
+
+  collaborators: () =>
+    request<{ collaborators: { id: number; invite_email: string; role: string; status: string; created_at: string; full_name: string | null; email: string | null }[] }>("meroshkins", { query: { action: "collaborators" } }),
+
+  inviteCollaborator: (email: string, role: string) =>
+    request<{ id: number; token: string; auto_accepted: boolean }>("meroshkins", { method: "POST", query: { action: "collaborators" }, body: { email, role } }),
+
+  acceptInvite: (token: string) =>
+    request<{ ok: boolean }>("meroshkins", { method: "PUT", query: { action: "collaborators" }, body: { token } }),
+
+  revokeCollaborator: (id: number) =>
+    request<{ ok: boolean }>("meroshkins", { method: "PUT", query: { action: "collaborator-revoke" }, body: { id } }),
+
+  inviteInfo: (token: string) =>
+    request<{ invite_id: number; owner_id: number; invite_email: string; status: string; token: string }>("meroshkins", { query: { action: "invite-accept", token }, auth: false }),
 };
 
 export function isoDate(d: Date) {
