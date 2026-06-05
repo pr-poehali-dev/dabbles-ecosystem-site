@@ -26,50 +26,69 @@ function buildTree(nodes: OrgNode[]): (OrgNode & { children: OrgNode[] })[] {
   return roots;
 }
 
-function OrgNodeCard({ node, level = 0 }: { node: OrgNode & { children: OrgNode[] }; level?: number }) {
+type TreeNode = OrgNode & { children: TreeNode[] };
+
+function OrgNodeCard({ node, level = 0 }: { node: TreeNode; level?: number }) {
+  const [open, setOpen] = useState(true);
+  const hasChildren = node.children.length > 0;
   const isRoot = level === 0;
+
+  // Отступ на каждый уровень
+  const indent = level * 32;
+
   return (
-    <div className="flex flex-col items-center">
-      <div
-        className={`relative rounded-2xl text-center transition-all ${
-          isRoot
-            ? "bg-gradient-to-br from-[#1a0a6e] to-[#2d0060] text-white px-8 py-5 shadow-xl"
-            : "bg-white border border-black/8 text-black px-5 py-4 shadow-sm hover:shadow-md"
-        }`}
-        style={{ minWidth: isRoot ? 220 : 160, maxWidth: isRoot ? 280 : 200 }}
-      >
-        {isRoot && (
-          <div className="w-12 h-12 rounded-full bg-white/15 flex items-center justify-center mx-auto mb-3">
-            <Icon name="User" size={22} className="text-white" />
+    <div style={{ marginLeft: indent }}>
+      {/* Карточка */}
+      <div className="relative mb-2">
+        {/* Вертикальная линия слева (для не-рутовых) */}
+        {level > 0 && (
+          <div
+            className="absolute left-[-20px] top-[50%] w-4 border-t border-dashed border-black/20"
+            style={{ top: "50%" }}
+          />
+        )}
+
+        <div
+          className={`flex items-center gap-3 rounded-2xl px-5 py-4 border transition-all ${
+            isRoot
+              ? "bg-white border-[#1a0a6e]/20 shadow-sm"
+              : level === 1
+              ? "bg-[#f5f5fb] border-black/8 shadow-sm"
+              : "bg-[#f9f9fc] border-black/6"
+          }`}
+        >
+          {/* Кнопка развернуть/свернуть */}
+          {hasChildren ? (
+            <button
+              onClick={() => setOpen(o => !o)}
+              className="w-6 h-6 rounded-full border-2 border-[#2ec4a0] flex items-center justify-center shrink-0 hover:bg-[#2ec4a0]/10 transition-colors"
+            >
+              <Icon name={open ? "Minus" : "Plus"} size={12} className="text-[#2ec4a0]" />
+            </button>
+          ) : (
+            <div className="w-6 h-6 flex items-center justify-center shrink-0">
+              <div className="w-2 h-2 rounded-full bg-black/20" />
+            </div>
+          )}
+
+          <div className="flex-1 min-w-0">
+            <div className={`font-bold leading-snug ${isRoot ? "text-[#0e1a4a] text-[15px]" : level === 1 ? "text-[#0e1a4a] text-[14px]" : "text-[#0e1a4a] text-[13px]"}`}>
+              {node.title}
+            </div>
+            {node.subtitle && (
+              <div className="text-[12px] text-black/40 mt-0.5">{node.subtitle}</div>
+            )}
           </div>
-        )}
-        <div className={`font-display font-black leading-tight mb-1 ${isRoot ? "text-white text-base" : "text-black text-sm"}`}>
-          {node.title}
         </div>
-        <div className={`text-xs font-medium ${isRoot ? "text-white/65" : "text-black/45"}`}>{node.subtitle}</div>
-        {node.description && !isRoot && (
-          <div className="text-[11px] text-black/35 mt-1.5 leading-relaxed">{node.description}</div>
-        )}
       </div>
 
-      {node.children.length > 0 && (
-        <>
-          <div className="w-px h-6 bg-black/15" />
-          <div className="flex gap-0 relative">
-            {node.children.length > 1 && (
-              <div
-                className="absolute top-0 left-0 right-0 h-px bg-black/15"
-                style={{ top: 0 }}
-              />
-            )}
-            {node.children.map((child, i) => (
-              <div key={child.id} className="flex flex-col items-center px-3">
-                {node.children.length > 1 && <div className="w-px h-6 bg-black/15" />}
-                <OrgNodeCard node={child as OrgNode & { children: OrgNode[] }} level={level + 1} />
-              </div>
-            ))}
-          </div>
-        </>
+      {/* Дочерние элементы */}
+      {hasChildren && open && (
+        <div className="relative ml-3 pl-5 border-l border-dashed border-black/15">
+          {node.children.map(child => (
+            <OrgNodeCard key={child.id} node={child} level={level + 1} />
+          ))}
+        </div>
       )}
     </div>
   );
@@ -209,12 +228,10 @@ export default function About() {
                 <Icon name="Loader" size={24} className="animate-spin" />
               </div>
             ) : (
-              <div className="overflow-x-auto pb-4">
-                <div className="flex justify-center" style={{ minWidth: 600 }}>
-                  {tree.map((root) => (
-                    <OrgNodeCard key={root.id} node={root} level={0} />
-                  ))}
-                </div>
+              <div className="max-w-2xl">
+                {tree.map((root) => (
+                  <OrgNodeCard key={root.id} node={root as TreeNode} level={0} />
+                ))}
               </div>
             )}
           </div>
