@@ -32,7 +32,9 @@ export default function CalendarPage() {
 
   const [shareModal, setShareModal] = useState(false);
   const [shareToken, setShareToken] = useState("");
+  const [shareRole, setShareRole] = useState<"viewer" | "editor">("viewer");
   const [shareCopied, setShareCopied] = useState(false);
+  const [shareLoading, setShareLoading] = useState(false);
   const [pdfModal,  setPdfModal]  = useState(false);
   const [pdfPeriod, setPdfPeriod] = useState<"month" | "week">("month");
 
@@ -66,14 +68,18 @@ export default function CalendarPage() {
   };
 
   const createShare = async () => {
-    const { token } = await mApi.shareCreate();
-    setShareToken(token);
+    setShareLoading(true);
+    try {
+      const { token } = await mApi.shareCreate(shareRole);
+      setShareToken(token);
+    } finally { setShareLoading(false); }
   };
   const copyShare = () => {
     navigator.clipboard.writeText(`${window.location.origin}/meroshkins/share?token=${shareToken}`);
     setShareCopied(true);
     setTimeout(() => setShareCopied(false), 2000);
   };
+  const resetShare = () => { setShareModal(false); setShareToken(""); setShareRole("viewer"); setShareCopied(false); };
 
   const days     = daysInMonth(year, month);
   const startWd  = firstWeekday(year, month);
@@ -301,23 +307,55 @@ export default function CalendarPage() {
 
       {/* ── SHARE MODAL ── */}
       {shareModal && (
-        <Modal onClose={() => { setShareModal(false); setShareToken(""); }}>
-          <h3 className="text-[17px] font-bold text-black tracking-[-0.3px] mb-1">Поделиться</h3>
-          <p className="text-[13px] text-black/40 mb-5">Получатель увидит только просмотр</p>
+        <Modal onClose={resetShare}>
+          <h3 className="text-[17px] font-bold text-black tracking-[-0.3px] mb-1">Поделиться календарём</h3>
+          <p className="text-[13px] text-black/40 mb-4">Создайте ссылку — любой с ней откроет ваш календарь</p>
+
           {!shareToken ? (
-            <button onClick={createShare}
-              className="w-full py-3 rounded-xl bg-[#7c3aed] text-white text-[13px] font-semibold hover:bg-[#6d28d9] transition-colors">
-              Создать ссылку
-            </button>
+            <>
+              {/* Выбор режима */}
+              <div className="grid grid-cols-2 gap-2 mb-5">
+                {([
+                  { value: "viewer", icon: "Eye",    label: "Просмотр",      desc: "Только читать" },
+                  { value: "editor", icon: "Pencil", label: "Редактирование", desc: "Добавлять и изменять" },
+                ] as const).map(opt => (
+                  <button key={opt.value} onClick={() => setShareRole(opt.value)}
+                    className={`flex flex-col items-center gap-1.5 py-4 rounded-2xl border-2 transition-all ${
+                      shareRole === opt.value
+                        ? "border-[#7c3aed] bg-[#7c3aed]/5 text-[#7c3aed]"
+                        : "border-black/8 text-black/40 hover:border-black/20"
+                    }`}>
+                    <Icon name={opt.icon} size={20} />
+                    <span className="text-[13px] font-semibold">{opt.label}</span>
+                    <span className="text-[11px] opacity-60">{opt.desc}</span>
+                  </button>
+                ))}
+              </div>
+              <button onClick={createShare} disabled={shareLoading}
+                className="w-full py-3 rounded-xl bg-[#7c3aed] text-white text-[13px] font-semibold hover:bg-[#6d28d9] transition-colors flex items-center justify-center gap-2 disabled:opacity-60">
+                {shareLoading && <Icon name="Loader" size={14} className="animate-spin" />}
+                Создать ссылку
+              </button>
+            </>
           ) : (
-            <div className="space-y-2">
-              <div className="bg-black/4 rounded-xl px-3 py-2.5 text-[11px] text-black/50 break-all leading-relaxed">
+            <div className="space-y-3">
+              <div className={`flex items-center gap-1.5 text-[11px] font-semibold px-2 py-1 rounded-lg w-fit ${
+                shareRole === "editor" ? "bg-amber-50 text-amber-600" : "bg-[#7c3aed]/8 text-[#7c3aed]"
+              }`}>
+                <Icon name={shareRole === "editor" ? "Pencil" : "Eye"} size={11} />
+                {shareRole === "editor" ? "Редактирование" : "Только просмотр"}
+              </div>
+              <div className="bg-black/4 rounded-xl px-3 py-2.5 text-[11px] text-black/50 break-all leading-relaxed font-mono">
                 {window.location.origin}/meroshkins/share?token={shareToken}
               </div>
               <button onClick={copyShare}
-                className="w-full py-3 rounded-xl bg-[#7c3aed] text-white text-[13px] font-semibold hover:bg-[#6d28d9] flex items-center justify-center gap-2">
+                className="w-full py-3 rounded-xl bg-[#7c3aed] text-white text-[13px] font-semibold hover:bg-[#6d28d9] flex items-center justify-center gap-2 transition-colors">
                 <Icon name={shareCopied ? "Check" : "Copy"} size={14} />
-                {shareCopied ? "Скопировано!" : "Скопировать"}
+                {shareCopied ? "Скопировано!" : "Скопировать ссылку"}
+              </button>
+              <button onClick={() => { setShareToken(""); setShareRole("viewer"); }}
+                className="w-full py-2 text-[12px] text-black/35 hover:text-black/60 transition-colors">
+                Создать другую ссылку
               </button>
             </div>
           )}

@@ -65,15 +65,15 @@ def handler(event: dict, context) -> dict:
             cid, owner_id, invite_email, status = row
             return resp(200, {'invite_id': cid, 'owner_id': owner_id, 'invite_email': invite_email, 'status': status, 'token': token})
 
-        # PUBLIC: share view
+        # PUBLIC: share view (readonly или editor)
         if action == 'share-view' and method == 'GET':
             token = qs.get('token', '')
             if not token: return resp(400, {'error': 'token required'})
             with conn.cursor() as cur:
-                cur.execute(f"SELECT user_id, date_from, date_to FROM m_event_shares WHERE token = {esc(token)} LIMIT 1")
+                cur.execute(f"SELECT user_id, date_from, date_to, role FROM m_event_shares WHERE token = {esc(token)} LIMIT 1")
                 share = cur.fetchone()
             if not share: return resp(404, {'error': 'Ссылка недействительна'})
-            uid_owner, df, dt = share
+            uid_owner, df, dt, share_role = share
             where = f"e.user_id = {uid_owner} AND e.status != 'deleted'"
             if df: where += f" AND e.starts_at::date >= '{df}'"
             if dt: where += f" AND e.starts_at::date <= '{dt}'"
@@ -85,7 +85,55 @@ def handler(event: dict, context) -> dict:
                     f"WHERE {where} ORDER BY e.starts_at"
                 )
                 rows = cur.fetchall()
-            return resp(200, {'events': [_ev_full(r) for r in rows], 'readonly': True})
+            # Получаем залы и площадки владельца (для редактора)
+            venues = []
+            rooms = []
+            if share_role == 'editor':
+                with conn.cursor() as cur:
+                    cur.execute(f"SELECT id,name,address FROM m_venues WHERE user_id={uid_owner} AND is_active=TRUE ORDER BY name")
+                    venues = [{'id': r[0], 'name': r[1], 'address': r[2]} for r in cur.fetchall()]
+                with conn.cursor() as cur:
+                    cur.execute(f"SELECT id,name,venue_id FROM m_rooms WHERE user_id={uid_owner} AND is_active=TRUE ORDER BY name")
+                    rooms = [{'id': r[0], 'name': r[1], 'venue_id': r[2]} for r in cur.fetchall()]
+            return resp(200, {
+                'events': [_ev_full(r) for r in rows],
+                'role': share_role,
+                'readonly': share_role != 'editor',
+                'owner_id': uid_owner,
+                'venues': venues,
+                'rooms': rooms,
+            })
+
+        # PUBLIC: join по ссылке-редактору — автоматически добавляет коллаборатора
+        if action == 'share-join' and method == 'POST':
+            share_token = qs.get('token', '')
+            if not share_token: return resp(400, {'error': 'token required'})
+            # Проверяем ссылку
+            with conn.cursor() as cur:
+                cur.execute(f"SELECT user_id, role FROM m_event_shares WHERE token = {esc(share_token)} LIMIT 1")
+                share = cur.fetchone()
+            if not share: return resp(404, {'error': 'Ссылка недействительна'})
+            uid_owner, share_role = share
+            if share_role != 'editor': return resp(403, {'error': 'Ссылка только для просмотра'})
+            # Получаем текущего пользователя
+            user = get_user(conn, event)
+            if not user: return resp(401, {'error': 'Необходима авторизация'})
+            uid = user['id']
+            if uid == uid_owner: return resp(200, {'ok': True, 'already_owner': True})
+            # Проверяем дубль
+            with conn.cursor() as cur:
+                cur.execute(f"SELECT id, status FROM m_collaborators WHERE owner_id={uid_owner} AND collaborator_id={uid} AND status != 'revoked' LIMIT 1")
+                dup = cur.fetchone()
+            if dup: return resp(200, {'ok': True, 'already': True})
+            # Добавляем сразу как accepted
+            invite_token = secrets.token_urlsafe(24)
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"INSERT INTO m_collaborators (owner_id, collaborator_id, invite_token, invite_email, role, status, accepted_at) "
+                    f"VALUES ({uid_owner}, {uid}, {esc(invite_token)}, {esc(user['email'])}, 'editor', 'accepted', NOW()) RETURNING id"
+                )
+            conn.commit()
+            return resp(200, {'ok': True, 'owner_id': uid_owner})
 
         user = get_user(conn, event)
         if not user: return resp(403, {'error': 'Необходима авторизация'})
@@ -281,12 +329,31 @@ def handler(event: dict, context) -> dict:
             return resp(200, {'ok': True})
 
         if action == 'share-create' and method == 'POST':
-            token = secrets.token_urlsafe(24)
+            share_token = secrets.token_urlsafe(24)
             df = body.get('date_from'); dt = body.get('date_to')
+            role = body.get('role', 'viewer')
+            if role not in ('viewer', 'editor'): role = 'viewer'
             with conn.cursor() as cur:
-                cur.execute(f"INSERT INTO m_event_shares (user_id,token,date_from,date_to) VALUES ({uid},{esc(token)},{esc(df) if df else 'NULL'},{esc(dt) if dt else 'NULL'}) RETURNING id")
+                cur.execute(
+                    f"INSERT INTO m_event_shares (user_id,token,date_from,date_to,role) "
+                    f"VALUES ({uid},{esc(share_token)},{esc(df) if df else 'NULL'},{esc(dt) if dt else 'NULL'},{esc(role)}) RETURNING id"
+                )
             conn.commit()
-            return resp(200, {'token': token})
+            return resp(200, {'token': share_token, 'role': role})
+
+        if action == 'share-delete' and method == 'POST':
+            share_token = body.get('token', '')
+            if not share_token: return resp(400, {'error': 'token обязателен'})
+            with conn.cursor() as cur:
+                cur.execute(f"DELETE FROM m_event_shares WHERE token={esc(share_token)} AND user_id={uid}")
+            conn.commit()
+            return resp(200, {'ok': True})
+
+        if action == 'share-list' and method == 'GET':
+            with conn.cursor() as cur:
+                cur.execute(f"SELECT token, role, date_from, date_to, created_at FROM m_event_shares WHERE user_id={uid} ORDER BY created_at DESC")
+                rows = cur.fetchall()
+            return resp(200, {'shares': [{'token': r[0], 'role': r[1], 'date_from': str(r[2]) if r[2] else None, 'date_to': str(r[3]) if r[3] else None, 'created_at': str(r[4])} for r in rows]})
 
         return resp(404, {'error': 'Не найдено'})
     finally:

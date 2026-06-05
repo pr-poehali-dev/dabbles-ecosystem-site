@@ -1,32 +1,52 @@
 import { useEffect, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import Icon from "@/components/ui/icon";
-import { MEvent, EVENT_TYPES, daysInMonth, firstWeekday, formatTime, mApi } from "@/lib/meroshkins";
+import { MEvent, MRoom, MVenue, EVENT_TYPES, daysInMonth, firstWeekday, formatTime, mApi } from "@/lib/meroshkins";
 import { request } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
+import EventModal from "@/pages/meroshkins/EventModal";
 
 const MONTHS = ["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
 const WEEKDAYS = ["Пн","Вт","Ср","Чт","Пт","Сб","Вс"];
 
+interface ShareData {
+  events: MEvent[];
+  role: string;
+  readonly: boolean;
+  owner_id: number;
+  venues: MVenue[];
+  rooms: MRoom[];
+}
+
 export default function MeroshkinsShare() {
   const [params] = useSearchParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const token = params.get("token") || "";
-  const [events, setEvents] = useState<MEvent[]>([]);
+
+  const [data, setData] = useState<ShareData | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [joining, setJoining] = useState(false);
+  const [joined, setJoined] = useState(false);
   const [selected, setSelected] = useState<MEvent | null>(null);
+  const [modalEvent, setModalEvent] = useState<MEvent | null | undefined>(undefined);
+  const [newDate, setNewDate] = useState("");
 
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
 
-  useEffect(() => {
+  const loadShare = () => {
     if (!token) { setError("Ссылка недействительна"); setLoading(false); return; }
-    request<{ events: MEvent[]; readonly: boolean }>("meroshkins", {
+    request<ShareData>("meroshkins", {
       query: { action: "share-view", token }, auth: false,
-    }).then(d => setEvents(d.events.filter(e => e.status !== "deleted")))
+    }).then(d => setData({ ...d, events: d.events.filter(e => e.status !== "deleted") }))
       .catch(() => setError("Ссылка недействительна или истекла"))
       .finally(() => setLoading(false));
-  }, [token]);
+  };
+
+  useEffect(() => { loadShare(); }, [token]);
 
   const days = daysInMonth(year, month);
   const startWd = firstWeekday(year, month);
@@ -37,12 +57,26 @@ export default function MeroshkinsShare() {
 
   const eventsOn = (d: number) => {
     const prefix = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-    return events.filter(e => e.starts_at.startsWith(prefix));
+    return (data?.events || []).filter(e => e.starts_at.startsWith(prefix));
+  };
+
+  const handleJoin = async () => {
+    if (!user) {
+      navigate(`/id/auth?client_id=meroshkins&redirect_uri=${encodeURIComponent(window.location.pathname + window.location.search)}`);
+      return;
+    }
+    setJoining(true);
+    try {
+      await mApi.shareJoin(token);
+      setJoined(true);
+    } catch {
+      setError("Не удалось присоединиться");
+    } finally { setJoining(false); }
   };
 
   if (loading) return (
     <div className="min-h-screen bg-[#f5f3ff] flex items-center justify-center">
-      <Icon name="Loader" size={28} className="animate-spin text-[#7c3aed]/50" />
+      <div className="w-6 h-6 border-2 border-[#7c3aed]/25 border-t-[#7c3aed] rounded-full animate-spin" />
     </div>
   );
 
@@ -57,6 +91,8 @@ export default function MeroshkinsShare() {
     </div>
   );
 
+  const isEditor = data?.role === "editor";
+
   return (
     <div className="min-h-screen bg-[#f5f3ff] font-body">
       <nav className="h-[60px] bg-white border-b border-black/8 flex items-center px-6 gap-3">
@@ -66,11 +102,40 @@ export default function MeroshkinsShare() {
         <span className="font-display font-black text-black text-sm">
           Даббл.<span className="text-[#7c3aed]">Мерошкинс</span>
         </span>
-        <div className="ml-auto flex items-center gap-2 text-xs text-black/40 bg-[#f5f3ff] px-3 py-1.5 rounded-full">
-          <Icon name="Eye" size={13} />
-          Только просмотр
+        <div className={`ml-auto flex items-center gap-2 text-xs px-3 py-1.5 rounded-full ${
+          isEditor ? "bg-amber-50 text-amber-600" : "bg-[#f5f3ff] text-black/40"
+        }`}>
+          <Icon name={isEditor ? "Pencil" : "Eye"} size={13} />
+          {isEditor ? "Редактирование" : "Только просмотр"}
         </div>
       </nav>
+
+      {/* Баннер для редактора — добавить в свой аккаунт */}
+      {isEditor && !joined && (
+        <div className="bg-amber-50 border-b border-amber-100 px-6 py-3 flex items-center gap-3">
+          <Icon name="Users" size={16} className="text-amber-500 shrink-0" />
+          <p className="text-[13px] text-amber-700 flex-1">
+            {user
+              ? "Хочешь редактировать этот календарь в своём аккаунте?"
+              : "Войдите в аккаунт, чтобы редактировать этот календарь"}
+          </p>
+          <button onClick={handleJoin} disabled={joining}
+            className="shrink-0 px-4 py-1.5 rounded-full bg-amber-500 text-white text-[12px] font-semibold hover:bg-amber-600 transition-colors flex items-center gap-1.5 disabled:opacity-60">
+            {joining && <Icon name="Loader" size={12} className="animate-spin" />}
+            {user ? "Присоединиться" : "Войти"}
+          </button>
+        </div>
+      )}
+      {isEditor && joined && (
+        <div className="bg-green-50 border-b border-green-100 px-6 py-3 flex items-center gap-3">
+          <Icon name="CheckCircle" size={16} className="text-green-500 shrink-0" />
+          <p className="text-[13px] text-green-700 flex-1">Готово! Календарь добавлен в ваш аккаунт</p>
+          <button onClick={() => navigate("/meroshkins")}
+            className="shrink-0 px-4 py-1.5 rounded-full bg-green-500 text-white text-[12px] font-semibold hover:bg-green-600 transition-colors">
+            Открыть
+          </button>
+        </div>
+      )}
 
       <div className="max-w-5xl mx-auto px-4 md:px-6 py-8">
         {/* Nav */}
@@ -84,6 +149,19 @@ export default function MeroshkinsShare() {
             className="p-2 rounded-xl bg-white border border-black/8 hover:bg-black/5 text-black/50">
             <Icon name="ChevronRight" size={16} />
           </button>
+          {isEditor && (
+            <button
+              onClick={() => {
+                const d = today;
+                setNewDate(`${year}-${String(month+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`);
+                setModalEvent(null);
+              }}
+              className="ml-auto flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#7c3aed] text-white text-[13px] font-semibold hover:bg-[#6d28d9] transition-colors shadow-sm"
+            >
+              <Icon name="Plus" size={14} />
+              Добавить
+            </button>
+          )}
         </div>
 
         <div className="grid grid-cols-7 mb-1">
@@ -94,7 +172,15 @@ export default function MeroshkinsShare() {
             const isToday = d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
             const dayEvents = d ? eventsOn(d) : [];
             return (
-              <div key={i} className={`min-h-[80px] rounded-2xl p-2 ${d ? "bg-white border border-black/5" : ""}`}>
+              <div key={i}
+                className={`min-h-[80px] rounded-2xl p-2 ${d ? "bg-white border border-black/5" : ""} ${isEditor && d ? "cursor-pointer hover:border-[#7c3aed]/30 transition-colors" : ""}`}
+                onClick={() => {
+                  if (isEditor && d) {
+                    setNewDate(`${year}-${String(month+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`);
+                    setModalEvent(null);
+                  }
+                }}
+              >
                 {d && (
                   <>
                     <div className={`text-xs font-bold mb-1.5 w-6 h-6 flex items-center justify-center rounded-full ${isToday ? "bg-[#7c3aed] text-white" : "text-black/50"}`}>{d}</div>
@@ -102,7 +188,7 @@ export default function MeroshkinsShare() {
                       <div key={ev.id}
                         className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md truncate text-white cursor-pointer hover:opacity-80 mb-0.5"
                         style={{ background: ev.color }}
-                        onClick={() => setSelected(ev)}>
+                        onClick={e => { e.stopPropagation(); if (isEditor) setModalEvent(ev); else setSelected(ev); }}>
                         {formatTime(ev.starts_at)} {ev.title}
                       </div>
                     ))}
@@ -115,7 +201,7 @@ export default function MeroshkinsShare() {
         </div>
       </div>
 
-      {/* Event detail (readonly) */}
+      {/* Просмотр события (readonly) */}
       {selected && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setSelected(null)}>
           <div className="bg-white rounded-3xl p-8 w-full max-w-md" onClick={e => e.stopPropagation()}>
@@ -133,6 +219,17 @@ export default function MeroshkinsShare() {
             <button onClick={() => setSelected(null)} className="mt-6 w-full py-2.5 rounded-xl bg-black/5 text-black/60 font-semibold text-sm">Закрыть</button>
           </div>
         </div>
+      )}
+
+      {/* Редактирование события (editor mode) */}
+      {isEditor && modalEvent !== undefined && (
+        <EventModal
+          event={modalEvent}
+          defaultDate={newDate}
+          rooms={(data?.rooms || []) as MRoom[]}
+          onClose={() => setModalEvent(undefined)}
+          onSaved={() => { setModalEvent(undefined); loadShare(); }}
+        />
       )}
     </div>
   );

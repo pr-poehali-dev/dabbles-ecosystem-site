@@ -88,8 +88,17 @@ export const mApi = {
   updateVenue: (data: Partial<MVenue> & { id: number }) =>
     request<{ ok: boolean }>("meroshkins", { method: "PUT", query: { action: "venues" }, body: data }),
 
-  shareCreate: (date_from?: string, date_to?: string) =>
-    request<{ token: string }>("meroshkins", { method: "POST", query: { action: "share-create" }, body: { date_from, date_to } }),
+  shareCreate: (role: "viewer" | "editor", date_from?: string, date_to?: string) =>
+    request<{ token: string; role: string }>("meroshkins", { method: "POST", query: { action: "share-create" }, body: { role, date_from, date_to } }),
+
+  shareDelete: (token: string) =>
+    request<{ ok: boolean }>("meroshkins", { method: "POST", query: { action: "share-delete" }, body: { token } }),
+
+  shareList: () =>
+    request<{ shares: { token: string; role: string; date_from: string | null; date_to: string | null; created_at: string }[] }>("meroshkins", { query: { action: "share-list" } }),
+
+  shareJoin: (token: string) =>
+    request<{ ok: boolean; owner_id?: number; already?: boolean; already_owner?: boolean }>("meroshkins", { method: "POST", query: { action: "share-join", token } }),
 
   collaborators: () =>
     request<{ collaborators: { id: number; invite_email: string; role: string; status: string; created_at: string; full_name: string | null; email: string | null }[] }>("meroshkins", { query: { action: "collaborators" } }),
