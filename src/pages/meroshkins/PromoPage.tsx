@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import Icon from "@/components/ui/icon";
+import CookieBanner from "@/components/CookieBanner";
 
 const FEATURES = [
   {
@@ -214,16 +215,29 @@ export default function PromoPage() {
         </div>
       </section>
 
+      <CookieBanner />
+
       {/* FOOTER */}
-      <footer className="py-10 px-6 border-t border-black/8 text-center">
-        <div className="flex items-center justify-center gap-2 mb-3">
+      <footer className="py-10 px-6 border-t border-black/8">
+        <div className="max-w-5xl mx-auto flex flex-col items-center gap-5">
           <Link to="/">
-            <img src="/dabbl-logo.svg" alt="Даббл" className="h-5 opacity-40 hover:opacity-70 transition-opacity" onError={e => { (e.target as HTMLImageElement).style.display = "none"; }} />
+            <img
+              src="https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/bucket/8489822e-aa5c-49c6-a97a-5134c5f5b338.png"
+              alt="Даббл Крауд"
+              className="h-8 w-auto opacity-50 hover:opacity-80 transition-opacity"
+            />
           </Link>
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+            <Link to="/privacy" className="text-[12px] text-black/35 hover:text-black/60 transition-colors">Политика конфиденциальности</Link>
+            <span className="text-black/15 text-[12px]">·</span>
+            <Link to="/legal" className="text-[12px] text-black/35 hover:text-black/60 transition-colors">Реквизиты и юридическая информация</Link>
+            <span className="text-black/15 text-[12px]">·</span>
+            <a href="mailto:info@dabbl.ru" className="text-[12px] text-black/35 hover:text-black/60 transition-colors">info@dabbl.ru</a>
+          </div>
+          <p className="text-black/20 text-[11px] text-center">
+            © 2026 ООО «Даббл Рус». Сервис Мерошкинс входит в экосистему Даббл Крауд.
+          </p>
         </div>
-        <p className="text-black/30 text-[13px]">
-          Проект входит в экосистему корпорации «Даббл» — 2026
-        </p>
       </footer>
     </div>
   );
