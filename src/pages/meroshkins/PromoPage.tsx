@@ -1,7 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import Icon from "@/components/ui/icon";
-import { redirectToYandex } from "@/lib/yandexAuth";
 
 const FEATURES = [
   {
@@ -95,27 +94,7 @@ export default function PromoPage() {
             Узнать больше
           </a>
         </div>
-        {!user && (
-          <div className="flex items-center justify-center gap-3 flex-wrap">
-            <span className="text-[13px] text-black/30">Войти через:</span>
-            <button
-              onClick={() => navigate("/id/auth?client_id=meroshkins&redirect_uri=/meroshkins")}
-              className="flex items-center gap-2 px-4 py-2 rounded-full border border-black/12 bg-white hover:bg-black/3 transition-colors text-[13px] font-medium text-black/70 shadow-sm"
-            >
-              <div className="w-4 h-4 rounded-sm bg-gradient-to-br from-[#FD4160] to-[#0077FF] flex items-center justify-center">
-                <Icon name="LayoutGrid" size={9} className="text-white" />
-              </div>
-              Даббл ID
-            </button>
-            <button
-              onClick={() => redirectToYandex()}
-              className="flex items-center gap-2 px-4 py-2 rounded-full border border-black/12 bg-white hover:bg-[#ffebe8] transition-colors text-[13px] font-medium text-black/70 shadow-sm"
-            >
-              <YandexIcon />
-              Яндекс ID
-            </button>
-          </div>
-        )}
+
       </section>
 
       {/* PREVIEW MOCKUP */}
