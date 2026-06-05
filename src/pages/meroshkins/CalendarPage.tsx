@@ -194,7 +194,7 @@ export default function CalendarPage() {
               return (
                 <div
                   key={i}
-                  className={`min-h-[80px] md:min-h-[100px] p-1.5 md:p-2 cursor-pointer transition-colors group ${
+                  className={`min-h-[70px] md:min-h-[120px] p-1.5 md:p-2 cursor-pointer transition-colors group ${
                     d ? (isWeekend ? "bg-black/[0.01] hover:bg-[#f5f3ff]/60" : "hover:bg-[#f5f3ff]/40") : "bg-black/[0.015]"
                   }`}
                   onClick={() => {
@@ -216,17 +216,34 @@ export default function CalendarPage() {
                         {dayEvents.slice(0, 3).map(ev => (
                           <div
                             key={ev.id}
-                            className="text-[10px] md:text-[11px] font-medium px-1.5 py-0.5 rounded-md truncate text-white cursor-pointer hover:opacity-90 transition-opacity"
-                            style={{ background: ev.color }}
+                            className="rounded-[6px] cursor-pointer hover:opacity-90 transition-opacity overflow-hidden"
+                            style={{ background: ev.color + "18", borderLeft: `3px solid ${ev.color}` }}
                             onClick={e => { e.stopPropagation(); setModalEvent(ev); }}
                             onMouseEnter={e => setTooltip({ event: ev, x: e.clientX, y: e.clientY })}
                             onMouseLeave={() => setTooltip(null)}
                           >
-                            <span className="hidden md:inline">{formatTime(ev.starts_at)} </span>{ev.title}
+                            {/* Мобиль — только цветная точка */}
+                            <div className="flex items-center gap-1 px-1 py-0.5 md:hidden">
+                              <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: ev.color }} />
+                              <span className="text-[10px] font-semibold truncate" style={{ color: ev.color }}>{ev.title}</span>
+                            </div>
+                            {/* Десктоп — полная карточка */}
+                            <div className="hidden md:block px-1.5 py-1">
+                              <div className="text-[10px] font-bold mb-0.5 opacity-70" style={{ color: ev.color }}>
+                                {formatTime(ev.starts_at)}
+                                {ev.ends_at && <span className="font-normal opacity-70"> — {formatTime(ev.ends_at)}</span>}
+                              </div>
+                              <div className="text-[11px] font-semibold text-black/80 leading-tight line-clamp-1">{ev.title}</div>
+                              {ev.room_name && (
+                                <div className="text-[10px] text-black/35 truncate mt-0.5 flex items-center gap-0.5">
+                                  <span>📍</span>{ev.room_name}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         ))}
                         {dayEvents.length > 3 && (
-                          <div className="text-[10px] text-black/30 pl-1.5">+{dayEvents.length - 3}</div>
+                          <div className="text-[10px] text-black/30 pl-1.5 font-medium">+{dayEvents.length - 3} ещё</div>
                         )}
                       </div>
                     </>
