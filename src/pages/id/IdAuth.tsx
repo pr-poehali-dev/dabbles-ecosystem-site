@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { useAuth } from "@/lib/auth";
 import { request } from "@/lib/api";
+import { redirectToYandex } from "@/lib/yandexAuth";
 
 type ClientInfo = { name: string; description: string; logo_url: string; is_internal: boolean };
 
@@ -164,6 +165,26 @@ export default function IdAuth() {
                   Нет учётной записи? Попросите администратора прислать приглашение.
                 </p>
               </form>
+
+              {clientId === "meroshkins" && (
+                <>
+                  <div className="flex items-center gap-3 my-5">
+                    <div className="flex-1 h-px bg-black/8" />
+                    <span className="text-[11px] text-black/30 font-medium">или</span>
+                    <div className="flex-1 h-px bg-black/8" />
+                  </div>
+                  <button
+                    onClick={() => redirectToYandex()}
+                    className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl border border-black/10 bg-white hover:bg-[#fff5f3] transition-colors text-[14px] font-semibold text-black/70"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                      <circle cx="12" cy="12" r="12" fill="#FC3F1D"/>
+                      <path d="M13.4 7.2H12.3C11.1 7.2 10.4 7.8 10.4 8.9C10.4 10.1 10.9 10.7 11.9 11.4L13 12.1L10.3 16.8H8.5L11 12.4C9.7 11.5 9 10.5 9 8.9C9 7 10.2 5.8 12.2 5.8H15V16.8H13.4V7.2Z" fill="white"/>
+                    </svg>
+                    Войти через Яндекс ID
+                  </button>
+                </>
+              )}
             </>
           )}
 

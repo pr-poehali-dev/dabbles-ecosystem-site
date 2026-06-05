@@ -1,0 +1,12 @@
+{
+  "tests": [
+    {
+      "name": "Get Yandex auth URL",
+      "method": "GET",
+      "path": "/?action=url&redirect_uri=https://example.com/callback",
+      "expectedStatus": 200,
+      "expectedBody": {"url": "string"},
+      "bodyMatcher": "partial"
+    }
+  ]
+}

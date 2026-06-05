@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import Icon from "@/components/ui/icon";
+import { redirectToYandex } from "@/lib/yandexAuth";
 
 const FEATURES = [
   {
@@ -107,12 +108,10 @@ export default function PromoPage() {
               Даббл ID
             </button>
             <button
-              onClick={() => navigate("/id/auth?client_id=meroshkins&redirect_uri=/meroshkins")}
-              className="flex items-center gap-2 px-4 py-2 rounded-full border border-black/12 bg-white hover:bg-black/3 transition-colors text-[13px] font-medium text-black/70 shadow-sm"
+              onClick={() => redirectToYandex()}
+              className="flex items-center gap-2 px-4 py-2 rounded-full border border-black/12 bg-white hover:bg-[#ffebe8] transition-colors text-[13px] font-medium text-black/70 shadow-sm"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path d="M12.87 12.44H14.5L17.13 19H14.97L14.46 17.47H10.96L10.43 19H8.32L10.97 12.44H12.87ZM11.54 15.96H13.87L12.71 12.98L11.54 15.96ZM12 5C8.13 5 5 8.13 5 12C5 15.87 8.13 19 12 19C12.17 19 12.34 18.99 12.5 18.98V12.44H10.5V10.5H14.5V17.85C16.56 16.97 18 14.64 18 12C18 8.13 14.87 5 12 5Z" fill="#FF0000"/>
-              </svg>
+              <YandexIcon />
               Яндекс ID
             </button>
           </div>
@@ -251,5 +250,14 @@ export default function PromoPage() {
         </p>
       </footer>
     </div>
+  );
+}
+
+function YandexIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="12" cy="12" r="12" fill="#FC3F1D"/>
+      <path d="M13.4 7.2H12.3C11.1 7.2 10.4 7.8 10.4 8.9C10.4 10.1 10.9 10.7 11.9 11.4L13 12.1L10.3 16.8H8.5L11 12.4C9.7 11.5 9 10.5 9 8.9C9 7 10.2 5.8 12.2 5.8H15V16.8H13.4V7.2Z" fill="white"/>
+    </svg>
   );
 }
