@@ -5,6 +5,7 @@ import { MEvent, MRoom, MVenue, EVENT_TYPES, daysInMonth, firstWeekday, formatTi
 import { request } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import EventModal from "@/pages/meroshkins/EventModal";
+import MeroshkinsFooter from "@/components/MeroshkinsFooter";
 
 const MONTHS = ["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
 const WEEKDAYS = ["Пн","Вт","Ср","Чт","Пт","Сб","Вс"];
@@ -226,6 +227,8 @@ export default function MeroshkinsShare() {
           onSaved={() => { setModalEvent(undefined); loadShare(); }}
         />
       )}
+
+      <MeroshkinsFooter />
     </div>
   );
 }

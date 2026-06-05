@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { useAuth } from "@/lib/auth";
+import MeroshkinsFooter from "@/components/MeroshkinsFooter";
 import CalendarPage from "./meroshkins/CalendarPage";
 import VenuesPage from "./meroshkins/VenuesPage";
 import CollabPage from "./meroshkins/CollabPage";
@@ -196,23 +197,7 @@ export default function Meroshkins() {
             {tab === "collab"   && <CollabPage />}
           </div>
 
-          {/* ── FOOTER ── */}
-          <footer className="border-t border-black/6 mt-8 py-6 px-4 md:px-6">
-            <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
-              <Link to="/" className="flex items-center gap-2 opacity-40 hover:opacity-70 transition-opacity">
-                <div className="w-5 h-5 rounded-md bg-gradient-to-br from-[#FD4160] to-[#0077FF] flex items-center justify-center">
-                  <Icon name="LayoutGrid" size={10} className="text-white" />
-                </div>
-                <span className="text-[12px] font-semibold text-black">Даббл</span>
-              </Link>
-              <p className="text-[11px] text-black/30 text-center">
-                Проект входит в экосистему корпорации «Даббл» — 2026
-              </p>
-              <Link to="/meroshkins/promo" className="text-[11px] text-black/30 hover:text-black/60 transition-colors">
-                О сервисе
-              </Link>
-            </div>
-          </footer>
+          <MeroshkinsFooter />
         </main>
       </div>
     </div>
