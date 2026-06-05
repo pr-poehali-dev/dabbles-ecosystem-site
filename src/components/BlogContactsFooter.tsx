@@ -42,10 +42,58 @@ const FOOTER_LINKS = [
     title: "Документы",
     links: [
       { label: "Политика конфиденциальности", to: "/privacy" },
-      { label: "Реквизиты организации", to: "/legal" },
     ],
   },
 ];
+
+type FooterLink = { label: string; to?: string | null; href?: string; external?: string };
+type FooterCol = { title: string; links: FooterLink[] };
+
+function FooterAccordion({ col, scrollTo }: { col: FooterCol; scrollTo: (href: string) => void }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="border-b border-white/8 md:border-none">
+      {/* Заголовок — кликабельный только на мобиле */}
+      <button
+        className="w-full flex items-center justify-between py-3.5 md:py-0 md:cursor-default"
+        onClick={() => setOpen(o => !o)}
+      >
+        <span className="text-white/30 text-xs font-bold uppercase tracking-widest md:mb-4 block">
+          {col.title}
+        </span>
+        <Icon
+          name="ChevronDown"
+          size={14}
+          className={`text-white/30 transition-transform md:hidden ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {/* Список — всегда виден на десктопе, раскрывается на мобиле */}
+      <ul className={`space-y-2.5 overflow-hidden transition-all duration-200 md:block pb-3.5 md:pb-0 ${open ? "block" : "hidden"}`}>
+        {col.links.map((l) => (
+          <li key={l.label}>
+            {l.to ? (
+              <Link to={l.to} className="text-white/55 hover:text-white text-sm transition-colors">
+                {l.label}
+              </Link>
+            ) : l.external ? (
+              <a href={l.external} target="_blank" rel="noreferrer" className="text-white/55 hover:text-white text-sm transition-colors flex items-center gap-1">
+                {l.label} <Icon name="ExternalLink" size={11} className="opacity-50" />
+              </a>
+            ) : l.href ? (
+              <button onClick={() => scrollTo(l.href as string)} className="text-white/55 hover:text-white text-sm transition-colors">
+                {l.label}
+              </button>
+            ) : (
+              <span className="text-white/25 text-sm">{l.label} <span className="text-[10px]">(скоро)</span></span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export default function BlogContactsFooter({
   activeForm,
@@ -265,30 +313,7 @@ export default function BlogContactsFooter({
 
             {/* LINKS */}
             {FOOTER_LINKS.map((col) => (
-              <div key={col.title}>
-                <div className="text-white/30 text-xs font-bold uppercase tracking-widest mb-4">{col.title}</div>
-                <ul className="space-y-2.5">
-                  {col.links.map((l) => (
-                    <li key={l.label}>
-                      {"to" in l && l.to ? (
-                        <Link to={l.to} className="text-white/55 hover:text-white text-sm transition-colors">
-                          {l.label}
-                        </Link>
-                      ) : "external" in l && l.external ? (
-                        <a href={l.external} target="_blank" rel="noreferrer" className="text-white/55 hover:text-white text-sm transition-colors flex items-center gap-1">
-                          {l.label} <Icon name="ExternalLink" size={11} className="opacity-50" />
-                        </a>
-                      ) : "href" in l && l.href ? (
-                        <button onClick={() => scrollTo(l.href as string)} className="text-white/55 hover:text-white text-sm transition-colors">
-                          {l.label}
-                        </button>
-                      ) : (
-                        <span className="text-white/25 text-sm">{l.label} <span className="text-[10px]">(скоро)</span></span>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              <FooterAccordion key={col.title} col={col} scrollTo={scrollTo} />
             ))}
           </div>
         </div>
@@ -298,10 +323,9 @@ export default function BlogContactsFooter({
 
         {/* BOTTOM */}
         <div className="max-w-7xl mx-auto px-6 md:px-12 py-6 flex flex-col md:flex-row items-center justify-between gap-3">
-          <p className="text-white/25 text-xs">© 2025 ООО «ДАББЛ РУС» · ОГРН 1258900000050 · ИНН 8905069677</p>
+          <p className="text-white/25 text-xs">© 2026 ООО «ДАББЛ РУС» · ОГРН 1258900000050 · ИНН 8905069677</p>
           <div className="flex gap-5">
             <Link to="/privacy" className="text-white/25 hover:text-white/50 text-xs transition-colors">Политика конфиденциальности</Link>
-            <Link to="/legal" className="text-white/25 hover:text-white/50 text-xs transition-colors">Реквизиты</Link>
           </div>
         </div>
       </footer>
