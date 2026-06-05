@@ -4,7 +4,7 @@ import {
   MEvent, MRoom, MVenue, mApi, EVENT_TYPES, EVENT_STATUSES,
   daysInMonth, firstWeekday, formatTime, isoDate,
 } from "@/lib/meroshkins";
-import { exportEventsPdf } from "@/lib/exportPdf";
+import { exportEventsExcel } from "@/lib/exportExcel";
 import EventModal from "./EventModal";
 
 type ViewMode = "month" | "week" | "day";
@@ -36,7 +36,7 @@ export default function CalendarPage() {
   const [shareCopied, setShareCopied] = useState(false);
   const [shareLoading, setShareLoading] = useState(false);
   const [pdfModal,  setPdfModal]  = useState(false);
-  const [pdfPeriod, setPdfPeriod] = useState<"month" | "week">("month");
+  const [pdfPeriod, setPdfPeriod] = useState<"month" | "week" | "all">("month");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -151,9 +151,9 @@ export default function CalendarPage() {
 
         <div className="ml-auto flex items-center gap-1.5">
           <button onClick={() => setPdfModal(true)}
-            className="p-2 rounded-xl bg-white border border-black/8 shadow-sm text-black/40 hover:text-black transition-colors"
-            title="Экспорт PDF">
-            <Icon name="FileDown" size={16} />
+            className="p-2 rounded-xl bg-white border border-black/8 shadow-sm text-black/40 hover:text-green-600 transition-colors"
+            title="Выгрузка в Excel">
+            <Icon name="Sheet" size={16} />
           </button>
           <button onClick={() => setShareModal(true)}
             className="p-2 rounded-xl bg-white border border-black/8 shadow-sm text-black/40 hover:text-black transition-colors"
@@ -288,35 +288,54 @@ export default function CalendarPage() {
         </div>
       )}
 
-      {/* ── PDF MODAL ── */}
+      {/* ── EXCEL MODAL ── */}
       {pdfModal && (
         <Modal onClose={() => setPdfModal(false)}>
-          <h3 className="text-[17px] font-bold text-black tracking-[-0.3px] mb-1">Экспорт в PDF</h3>
-          <p className="text-[13px] text-black/40 mb-5">Выберите период</p>
-          <div className="grid grid-cols-2 gap-2 mb-5">
-            {(["month","week"] as const).map(p => (
-              <button key={p} onClick={() => setPdfPeriod(p)}
-                className={`py-3 rounded-xl text-[13px] font-semibold border-2 transition-all ${
-                  pdfPeriod === p ? "border-[#7c3aed] bg-[#7c3aed]/5 text-[#7c3aed]" : "border-black/8 text-black/45"
+          <div className="flex items-center gap-2.5 mb-1">
+            <div className="w-8 h-8 rounded-xl bg-green-50 flex items-center justify-center shrink-0">
+              <Icon name="Sheet" size={16} className="text-green-600" />
+            </div>
+            <h3 className="text-[17px] font-bold text-black tracking-[-0.3px]">Выгрузка в Excel</h3>
+          </div>
+          <p className="text-[13px] text-black/40 mb-5">Выберите период для выгрузки</p>
+
+          <div className="grid grid-cols-3 gap-2 mb-5">
+            {([
+              { value: "month", icon: "Calendar",     label: MONTHS[month], sub: String(year) },
+              { value: "week",  icon: "CalendarDays", label: "Эта неделя",  sub: "7 дней" },
+              { value: "all",   icon: "LayoutList",   label: "Все",          sub: "за все время" },
+            ] as const).map(p => (
+              <button key={p.value} onClick={() => setPdfPeriod(p.value as typeof pdfPeriod)}
+                className={`flex flex-col items-center gap-1 py-3.5 rounded-xl border-2 transition-all ${
+                  pdfPeriod === p.value ? "border-[#7c3aed] bg-[#7c3aed]/5 text-[#7c3aed]" : "border-black/8 text-black/45 hover:border-black/20"
                 }`}>
-                <Icon name={p === "month" ? "Calendar" : "CalendarDays"} size={15} className="mx-auto mb-1" />
-                {p === "month" ? `${MONTHS[month]} ${year}` : "Эта неделя"}
+                <Icon name={p.icon} size={16} className="mb-0.5" />
+                <span className="text-[12px] font-semibold">{p.label}</span>
+                <span className="text-[10px] opacity-60">{p.sub}</span>
               </button>
             ))}
           </div>
+
+          <div className="bg-black/3 rounded-xl px-3 py-2 mb-4 flex items-start gap-2">
+            <Icon name="Info" size={13} className="text-black/30 mt-0.5 shrink-0" />
+            <p className="text-[11px] text-black/40 leading-relaxed">
+              Файл содержит два листа: список мероприятий со всеми полями и сводную таблицу по типам
+            </p>
+          </div>
+
           <div className="flex gap-2">
             <button onClick={() => setPdfModal(false)} className="flex-1 py-2.5 rounded-xl bg-black/5 text-black/55 text-[13px] font-semibold">Отмена</button>
             <button
               onClick={() => {
                 const ws = new Date(today);
                 ws.setDate(ws.getDate() - (ws.getDay() === 0 ? 6 : ws.getDay() - 1));
-                ws.setHours(0,0,0,0);
-                exportEventsPdf(events, year, month, pdfPeriod, ws);
+                ws.setHours(0, 0, 0, 0);
+                exportEventsExcel(events, year, month, pdfPeriod as "month" | "week" | "all", ws);
                 setPdfModal(false);
               }}
-              className="flex-1 py-2.5 rounded-xl bg-[#7c3aed] text-white text-[13px] font-semibold hover:bg-[#6d28d9] flex items-center justify-center gap-1.5"
+              className="flex-1 py-2.5 rounded-xl bg-green-600 text-white text-[13px] font-semibold hover:bg-green-700 flex items-center justify-center gap-1.5 transition-colors"
             >
-              <Icon name="Download" size={14} /> Скачать
+              <Icon name="Download" size={14} /> Скачать .xlsx
             </button>
           </div>
         </Modal>
