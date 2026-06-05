@@ -70,10 +70,7 @@ export default function PromoPage() {
 
       {/* HERO */}
       <section className="pt-[100px] pb-20 px-6 text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#7c3aed]/10 mb-6">
-          <div className="w-1.5 h-1.5 rounded-full bg-[#7c3aed]" />
-          <span className="text-[#7c3aed] text-[12px] font-semibold tracking-wide uppercase">Даббл · Мерошкинс</span>
-        </div>
+
 
         <h1 className="text-[42px] md:text-[72px] font-black text-black leading-[1.05] tracking-[-2px] mb-6 max-w-4xl mx-auto">
           Управляйте мероприятиями<br />
