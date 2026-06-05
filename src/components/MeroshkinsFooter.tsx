@@ -12,12 +12,8 @@ export default function MeroshkinsFooter() {
           />
         </Link>
         <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
-          <Link to="/privacy" className="text-[12px] text-black/35 hover:text-black/60 transition-colors">
+          <Link to="/privacy?from=meroshkins" className="text-[12px] text-black/35 hover:text-black/60 transition-colors">
             Политика конфиденциальности
-          </Link>
-          <span className="text-black/15 text-[12px]">·</span>
-          <Link to="/legal" className="text-[12px] text-black/35 hover:text-black/60 transition-colors">
-            Реквизиты
           </Link>
           <span className="text-black/15 text-[12px]">·</span>
           <Link to="/meroshkins/promo" className="text-[12px] text-black/35 hover:text-black/60 transition-colors">

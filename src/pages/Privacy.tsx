@@ -1,13 +1,18 @@
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 
 export default function Privacy() {
+  const [params] = useSearchParams();
+  const fromMeroshkins = params.get("from") === "meroshkins";
+  const backTo = fromMeroshkins ? "/meroshkins/promo" : "/";
+  const backLabel = fromMeroshkins ? "Вернуться в Мерошкинс" : "На главную";
+
   return (
     <div className="min-h-screen bg-white font-body">
       <nav className="fixed top-0 left-0 right-0 z-50 h-[68px] bg-white border-b border-black/8 flex items-center px-6 md:px-10">
-        <Link to="/" className="flex items-center gap-2 text-black/50 hover:text-black transition-colors text-sm font-medium">
+        <Link to={backTo} className="flex items-center gap-2 text-black/50 hover:text-black transition-colors text-sm font-medium">
           <Icon name="ArrowLeft" size={16} />
-          На главную
+          {backLabel}
         </Link>
       </nav>
       <div className="pt-[68px] max-w-3xl mx-auto px-6 py-14">
