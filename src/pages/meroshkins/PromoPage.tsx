@@ -57,11 +57,8 @@ export default function PromoPage() {
       {/* NAV */}
       <nav className="fixed top-0 left-0 right-0 z-50 h-[52px] flex items-center px-6 md:px-12"
         style={{ background: "rgba(255,255,255,0.85)", backdropFilter: "saturate(180%) blur(20px)", borderBottom: "0.5px solid rgba(0,0,0,0.1)" }}>
-        <Link to="/" className="flex items-center gap-2">
-          <div className="w-6 h-6 rounded-md bg-gradient-to-br from-[#7c3aed] to-[#4f46e5] flex items-center justify-center">
-            <Icon name="CalendarDays" size={13} className="text-white" />
-          </div>
-          <span className="text-[13px] font-semibold text-black/80">Мерошкинс</span>
+        <Link to="/">
+          <img src="https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/bucket/459fbb05-4d8d-4609-851d-04611bbbaadc.png" alt="Мерошкинс" className="h-6 w-auto" />
         </Link>
         <div className="flex-1" />
         <button onClick={handleOpen} className="px-4 py-1.5 rounded-full bg-[#7c3aed] text-white text-[13px] font-semibold hover:bg-[#6d28d9] transition-colors">

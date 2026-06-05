@@ -43,8 +43,8 @@ export default function InvitePage() {
       style={{ fontFamily: "-apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif" }}>
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#7c3aed] to-[#4f46e5] flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[#7c3aed]/25">
-            <Icon name="CalendarDays" size={28} className="text-white" />
+          <div className="flex justify-center mb-4">
+            <img src="https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/bucket/459fbb05-4d8d-4609-851d-04611bbbaadc.png" alt="Мерошкинс" className="h-10 w-auto" />
           </div>
           <div className="text-[13px] text-black/40 font-medium">Даббл · Мерошкинс</div>
         </div>

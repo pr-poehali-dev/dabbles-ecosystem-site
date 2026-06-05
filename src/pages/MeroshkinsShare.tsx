@@ -96,12 +96,7 @@ export default function MeroshkinsShare() {
   return (
     <div className="min-h-screen bg-[#f5f3ff] font-body">
       <nav className="h-[60px] bg-white border-b border-black/8 flex items-center px-6 gap-3">
-        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#7c3aed] to-[#4f46e5] flex items-center justify-center">
-          <Icon name="CalendarDays" size={14} className="text-white" />
-        </div>
-        <span className="font-display font-black text-black text-sm">
-          Даббл.<span className="text-[#7c3aed]">Мерошкинс</span>
-        </span>
+        <img src="https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/bucket/459fbb05-4d8d-4609-851d-04611bbbaadc.png" alt="Мерошкинс" className="h-7 w-auto" />
         <div className={`ml-auto flex items-center gap-2 text-xs px-3 py-1.5 rounded-full ${
           isEditor ? "bg-amber-50 text-amber-600" : "bg-[#f5f3ff] text-black/40"
         }`}>

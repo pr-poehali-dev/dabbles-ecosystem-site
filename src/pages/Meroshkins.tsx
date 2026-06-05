@@ -69,13 +69,8 @@ export default function Meroshkins() {
         </button>
 
         {/* Logo */}
-        <Link to="/meroshkins/promo" className="flex items-center gap-2 shrink-0">
-          <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-[#7c3aed] to-[#4f46e5] flex items-center justify-center shadow-sm">
-            <Icon name="CalendarDays" size={13} className="text-white" />
-          </div>
-          <span className="text-[14px] font-semibold text-black hidden sm:block tracking-[-0.2px]">
-            Мерошкинс
-          </span>
+        <Link to="/meroshkins/promo" className="flex items-center shrink-0">
+          <img src="https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/bucket/459fbb05-4d8d-4609-851d-04611bbbaadc.png" alt="Мерошкинс" className="h-6 w-auto" />
         </Link>
 
         {/* Desktop tab pills */}
