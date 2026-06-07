@@ -140,7 +140,7 @@ export default function BlogContactsFooter({
   return (
     <>
       {/* CONTACTS */}
-      <section id="contacts" className="bg-white py-14 px-6 md:px-10">
+      <section id="contacts" className="bg-[#f0f0f5] py-14 px-6 md:px-10 pb-20">
         <div className="max-w-3xl mx-auto">
           <FadeIn className="text-center mb-10">
             <h2 className="font-display text-3xl md:text-4xl font-black text-black mb-3">Напишите нам</h2>
@@ -166,7 +166,7 @@ export default function BlogContactsFooter({
           </FadeIn>
 
           <FadeIn delay={160}>
-            <div className="bg-[#f5f5f7] rounded-3xl p-8 md:p-10">
+            <div className="bg-white rounded-3xl p-8 md:p-10 shadow-sm">
               {submitted ? (
                 <div className="flex flex-col items-center justify-center py-14 text-center gap-4">
                   <div className="w-14 h-14 rounded-full bg-[#FD4160] flex items-center justify-center mb-2">
@@ -281,7 +281,7 @@ export default function BlogContactsFooter({
       </section>
 
       {/* FOOTER */}
-      <footer className="bg-[#0a0535] text-white">
+      <footer className="bg-[#0a0535] text-white rounded-t-[32px] -mt-4 relative z-10">
         {/* TOP */}
         <div className="max-w-7xl mx-auto px-6 md:px-12 pt-14 pb-10">
           <div className="grid grid-cols-1 md:grid-cols-5 gap-10">
@@ -319,7 +319,7 @@ export default function BlogContactsFooter({
         </div>
 
         {/* DIVIDER */}
-        <div className="border-t border-white/8" />
+        <div className="mx-6 md:mx-12 border-t border-white/10" />
 
         {/* BOTTOM */}
         <div className="max-w-7xl mx-auto px-6 md:px-12 py-6 flex flex-col md:flex-row items-center justify-between gap-3">

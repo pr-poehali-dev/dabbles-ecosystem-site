@@ -39,7 +39,7 @@ export default function Index() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-black font-body overflow-x-hidden">
+    <div className="min-h-screen bg-[#f0f0f5] text-black font-body overflow-x-hidden">
       <Navbar
         activeNav={activeNav}
         menuOpen={menuOpen}

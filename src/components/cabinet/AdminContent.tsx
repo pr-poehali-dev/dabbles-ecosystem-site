@@ -3,7 +3,6 @@ import Icon from "@/components/ui/icon";
 import { request } from "@/lib/api";
 
 type Kind = "hero" | "news" | "blog";
-
 type Item = Record<string, unknown> & { id?: number };
 
 const TITLES: Record<Kind, { h1: string; sub: string; addLabel: string }> = {
@@ -13,36 +12,36 @@ const TITLES: Record<Kind, { h1: string; sub: string; addLabel: string }> = {
 };
 
 const NEW_DEFAULTS: Record<Kind, Item> = {
-  hero: {
-    title: "Новый слайд",
-    subtitle: "",
-    image_url: "",
-    bg_gradient: "linear-gradient(135deg,#0a0535 0%,#1a0a6e 45%,#2d0060 100%)",
-    accent_color: "#FD4160",
-    sort_order: 99,
-    is_active: true,
-  },
-  news: {
-    title: "Новая карточка",
-    tag: "Новости",
-    tag_icon: "Sparkles",
-    image_url: "",
-    image_position: "top",
-    bg_color: "#FFFFFF",
-    is_light: false,
-    sort_order: 99,
-    is_active: true,
-  },
-  blog: {
-    title: "Новая статья",
-    excerpt: "Краткое описание",
-    body: "",
-    tag: "Новости",
-    color: "from-[#FD4160] to-[#0077FF]",
-    is_published: true,
-    sort_order: 99,
-  },
+  hero: { title: "Новый слайд", subtitle: "", image_url: "", bg_gradient: "linear-gradient(135deg,#0a0535 0%,#1a0a6e 45%,#2d0060 100%)", accent_color: "#FD4160", sort_order: 99, is_active: true },
+  news: { title: "Новая карточка", tag: "Новости", tag_icon: "Sparkles", image_url: "", image_position: "top", bg_color: "#FFFFFF", is_light: false, sort_order: 99, is_active: true },
+  blog: { title: "Новая статья", excerpt: "Краткое описание", body: "", tag: "Новости", color: "from-[#FD4160] to-[#0077FF]", is_published: true, sort_order: 99 },
 };
+
+// Готовые градиенты для обложки
+const PRESET_GRADIENTS = [
+  { label: "Фиолетовая ночь", value: "linear-gradient(135deg,#0a0535 0%,#1a0a6e 45%,#2d0060 100%)" },
+  { label: "Синий океан", value: "linear-gradient(135deg,#001a3a 0%,#003080 45%,#0a1a50 100%)" },
+  { label: "Тёмная роза", value: "linear-gradient(135deg,#1a0010 0%,#4a0020 45%,#2a0040 100%)" },
+  { label: "Зелёный лес", value: "linear-gradient(135deg,#002010 0%,#004a20 45%,#003015 100%)" },
+  { label: "Закат", value: "linear-gradient(135deg,#3a0a00 0%,#8a2000 45%,#5a1000 100%)" },
+  { label: "Золото", value: "linear-gradient(135deg,#1a1000 0%,#4a3000 45%,#2a1a00 100%)" },
+  { label: "Арктика", value: "linear-gradient(135deg,#001525 0%,#003050 45%,#002040 100%)" },
+  { label: "Пурпур", value: "linear-gradient(135deg,#200040 0%,#500090 45%,#300060 100%)" },
+  { label: "Уголь", value: "linear-gradient(135deg,#0a0a0a 0%,#1a1a2e 45%,#0f0f1a 100%)" },
+  { label: "Рассвет", value: "linear-gradient(135deg,#1a0a20 0%,#4a1060 45%,#200a30 100%)" },
+];
+
+// Готовые цвета акцент-кнопки
+const PRESET_ACCENTS = [
+  { label: "Красный", value: "#FD4160" },
+  { label: "Синий", value: "#0077FF" },
+  { label: "Зелёный", value: "#C1F089" },
+  { label: "Белый", value: "#FFFFFF" },
+  { label: "Фиолетовый", value: "#7c3aed" },
+  { label: "Жёлтый", value: "#FFD600" },
+  { label: "Оранжевый", value: "#FF6B2B" },
+  { label: "Розовый", value: "#FF4FD8" },
+];
 
 export default function AdminContent({ kind }: { kind: Kind }) {
   const [items, setItems] = useState<Item[]>([]);
@@ -85,10 +84,8 @@ export default function AdminContent({ kind }: { kind: Kind }) {
           <h1 className="font-display text-3xl font-black text-black mb-1">{t.h1}</h1>
           <p className="text-black/50">{t.sub}</p>
         </div>
-        <button
-          onClick={() => setEditing({ ...NEW_DEFAULTS[kind] })}
-          className="px-5 py-2.5 rounded-xl bg-[#FD4160] text-white font-semibold text-sm hover:bg-[#e0324f] flex items-center gap-2"
-        >
+        <button onClick={() => setEditing({ ...NEW_DEFAULTS[kind] })}
+          className="px-5 py-2.5 rounded-xl bg-[#FD4160] text-white font-semibold text-sm hover:bg-[#e0324f] flex items-center gap-2">
           <Icon name="Plus" size={16} /> {t.addLabel}
         </button>
       </div>
@@ -98,29 +95,29 @@ export default function AdminContent({ kind }: { kind: Kind }) {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {items.map((it) => (
-            <div key={String(it.id)} className="bg-white rounded-2xl overflow-hidden">
-              {Boolean(it.image_url) && (
+            <div key={String(it.id)} className="bg-white rounded-2xl overflow-hidden border border-black/6">
+              {kind === "hero" && (
+                <div className="h-24 relative" style={{ background: String(it.bg_gradient || "#eee") }}>
+                  {it.image_url && <img src={String(it.image_url)} alt="" className="w-full h-full object-cover opacity-40 absolute inset-0" />}
+                  <div className="absolute bottom-2 left-3">
+                    <span className="inline-block w-5 h-5 rounded-full border-2 border-white/50" style={{ background: String(it.accent_color || "#FD4160") }} />
+                  </div>
+                </div>
+              )}
+              {Boolean(it.image_url) && kind !== "hero" && (
                 <div className="h-32 bg-black/5 overflow-hidden">
                   <img src={String(it.image_url)} alt="" className="w-full h-full object-cover" />
                 </div>
               )}
               <div className="p-4">
-                <div className="text-[11px] uppercase tracking-wider text-black/40 font-semibold mb-1">
-                  {String(it.tag || "")}
-                </div>
+                <div className="text-[11px] uppercase tracking-wider text-black/40 font-semibold mb-1">{String(it.tag || "")}</div>
                 <h3 className="font-medium text-black text-sm mb-2 line-clamp-2">{String(it.title)}</h3>
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setEditing(it)}
-                    className="flex-1 py-1.5 rounded-lg bg-black/5 hover:bg-black/10 text-black/70 text-xs font-semibold"
-                  >
+                  <button onClick={() => setEditing(it)}
+                    className="flex-1 py-1.5 rounded-lg bg-black/5 hover:bg-black/10 text-black/70 text-xs font-semibold">
                     Редактировать
                   </button>
-                  <button
-                    onClick={() => remove(it)}
-                    className="p-2 rounded-lg hover:bg-red-50 text-red-500"
-                    title="Скрыть"
-                  >
+                  <button onClick={() => remove(it)} className="p-2 rounded-lg hover:bg-red-50 text-red-500" title="Скрыть">
                     <Icon name="Trash2" size={14} />
                   </button>
                 </div>
@@ -140,9 +137,42 @@ export default function AdminContent({ kind }: { kind: Kind }) {
   );
 }
 
-function Modal({
-  item, kind, onChange, onSave, onClose,
-}: {
+function GradientPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div>
+      <label className="text-xs text-black/40 font-semibold block mb-2">Фон обложки</label>
+      <div className="grid grid-cols-5 gap-2 mb-2">
+        {PRESET_GRADIENTS.map(g => (
+          <button key={g.value} title={g.label} onClick={() => onChange(g.value)}
+            className={`h-10 rounded-xl transition-all ${value === g.value ? "ring-2 ring-[#1a0a6e] ring-offset-2 scale-105" : "hover:scale-105"}`}
+            style={{ background: g.value }} />
+        ))}
+      </div>
+      <div className="text-[11px] text-black/35 mt-1 truncate">{value}</div>
+    </div>
+  );
+}
+
+function AccentPicker({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div>
+      <label className="text-xs text-black/40 font-semibold block mb-2">Цвет кнопки</label>
+      <div className="flex flex-wrap gap-2">
+        {PRESET_ACCENTS.map(a => (
+          <button key={a.value} title={a.label} onClick={() => onChange(a.value)}
+            className={`w-8 h-8 rounded-xl border-2 transition-all ${value === a.value ? "border-[#1a0a6e] scale-110" : "border-transparent hover:scale-105"}`}
+            style={{ background: a.value }} />
+        ))}
+      </div>
+      <div className="flex items-center gap-2 mt-2">
+        <div className="w-6 h-6 rounded-lg border border-black/10" style={{ background: value }} />
+        <span className="text-[11px] text-black/40 font-mono">{value}</span>
+      </div>
+    </div>
+  );
+}
+
+function Modal({ item, kind, onChange, onSave, onClose }: {
   item: Item; kind: Kind; onChange: (i: Item) => void; onSave: () => void; onClose: () => void;
 }) {
   const set = (k: string, v: unknown) => onChange({ ...item, [k]: v });
@@ -150,17 +180,15 @@ function Modal({
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-3xl p-7 w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-        <h2 className="font-display text-xl font-black text-black mb-5">
-          {item.id ? "Редактирование" : "Создание"}
-        </h2>
-        <div className="space-y-3">
+        <h2 className="font-display text-xl font-black text-black mb-5">{item.id ? "Редактирование" : "Создание"}</h2>
+        <div className="space-y-4">
           <Field label="Заголовок" value={String(item.title || "")} onChange={(v) => set("title", v)} multiline />
           {kind === "hero" && (
             <>
               <Field label="Подзаголовок" value={String(item.subtitle || "")} onChange={(v) => set("subtitle", v)} multiline />
               <Field label="Картинка (URL)" value={String(item.image_url || "")} onChange={(v) => set("image_url", v)} />
-              <Field label="Фон-градиент" value={String(item.bg_gradient || "")} onChange={(v) => set("bg_gradient", v)} />
-              <Field label="Цвет кнопки (HEX)" value={String(item.accent_color || "")} onChange={(v) => set("accent_color", v)} />
+              <GradientPicker value={String(item.bg_gradient || "")} onChange={(v) => set("bg_gradient", v)} />
+              <AccentPicker value={String(item.accent_color || "#FD4160")} onChange={(v) => set("accent_color", v)} />
             </>
           )}
           {kind === "news" && (
@@ -199,35 +227,21 @@ function Modal({
 function Field({ label, value, onChange, multiline, rows }: { label: string; value: string; onChange: (v: string) => void; multiline?: boolean; rows?: number }) {
   return (
     <div>
-      <label className="text-xs text-black/50 mb-1.5 block">{label}</label>
-      {multiline ? (
-        <textarea
-          rows={rows || 2}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full px-4 py-2.5 rounded-xl border border-black/10 focus:border-black/30 outline-none text-black resize-none"
-        />
-      ) : (
-        <input
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="w-full px-4 py-2.5 rounded-xl border border-black/10 focus:border-black/30 outline-none text-black"
-        />
-      )}
+      <label className="text-xs text-black/40 font-semibold block mb-1.5">{label}</label>
+      {multiline
+        ? <textarea value={value} onChange={(e) => onChange(e.target.value)} rows={rows ?? 2} className="w-full px-3 py-2 rounded-xl bg-black/4 border border-black/8 text-black text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#1a0a6e]/20" />
+        : <input value={value} onChange={(e) => onChange(e.target.value)} className="w-full px-3 py-2 rounded-xl bg-black/4 border border-black/8 text-black text-sm focus:outline-none focus:ring-2 focus:ring-[#1a0a6e]/20" />
+      }
     </div>
   );
 }
 
-function Select({ label, value, options, onChange }: { label: string; value: string; options: { v: string; l: string }[]; onChange: (v: string) => void }) {
+function Select({ label, value, options, onChange }: { label: string; value: string; options: Array<{ v: string; l: string }>; onChange: (v: string) => void }) {
   return (
     <div>
-      <label className="text-xs text-black/50 mb-1.5 block">{label}</label>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="w-full px-4 py-2.5 rounded-xl border border-black/10 outline-none text-black"
-      >
-        {options.map((o) => <option key={o.v} value={o.v}>{o.l}</option>)}
+      <label className="text-xs text-black/40 font-semibold block mb-1.5">{label}</label>
+      <select value={value} onChange={(e) => onChange(e.target.value)} className="w-full px-3 py-2 rounded-xl bg-black/4 border border-black/8 text-black text-sm focus:outline-none">
+        {options.map(o => <option key={o.v} value={o.v}>{o.l}</option>)}
       </select>
     </div>
   );
@@ -236,8 +250,11 @@ function Select({ label, value, options, onChange }: { label: string; value: str
 function Check({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => void }) {
   return (
     <label className="flex items-center gap-2 cursor-pointer">
-      <input type="checkbox" checked={value} onChange={(e) => onChange(e.target.checked)} className="w-4 h-4" />
-      <span className="text-sm text-black/70">{label}</span>
+      <div onClick={() => onChange(!value)}
+        className={`w-10 h-6 rounded-full transition-colors ${value ? "bg-[#1a0a6e]" : "bg-black/15"} relative`}>
+        <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all ${value ? "left-5" : "left-1"}`} />
+      </div>
+      <span className="text-sm text-black/70 font-medium">{label}</span>
     </label>
   );
 }

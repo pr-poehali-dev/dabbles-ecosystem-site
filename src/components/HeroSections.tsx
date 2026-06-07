@@ -142,7 +142,7 @@ export default function HeroSections({ scrollTo, setActiveForm }: HeroSectionsPr
     <>
       {/* ═══ HERO SLIDER ═══ */}
       {/* Обёртка: задаёт отступ-перекрытие на следующий блок */}
-      <div className="relative z-10" style={{ paddingTop: "68px", marginBottom: "-48px" }}>
+      <div className="relative z-10" style={{ paddingTop: "68px" }}>
         <section
           id="hero"
           className="relative mx-3 md:mx-5"
@@ -227,43 +227,8 @@ export default function HeroSections({ scrollTo, setActiveForm }: HeroSectionsPr
               </button>
             </div>
 
-            {/* TAGS PILLS — вынесены за пределы section, чтобы не обрезались */}
           </div>
         </section>
-
-        {/* TAGS PILLS — снаружи section, поверх следующего блока */}
-        <div
-          className="flex gap-2.5 px-8 md:px-10 pt-4 overflow-x-auto"
-          style={{ scrollbarWidth: "none" }}
-        >
-          {HERO_TAGS.map((tag, i) => (
-            <button
-              key={i}
-              onClick={() => {
-                if (!tag.href) return scrollTo("#products");
-                if (tag.href.startsWith("http")) window.open(tag.href, "_blank");
-                else navigate(tag.href);
-              }}
-              className="flex items-center gap-2 shrink-0 pl-1.5 pr-4 py-1.5 rounded-full text-sm font-semibold transition-transform hover:scale-105"
-              style={{
-                background: "rgba(30,20,60,0.75)",
-                backdropFilter: "blur(12px)",
-                color: "#fff",
-                border: "1px solid rgba(255,255,255,0.15)",
-              }}
-            >
-              <span
-                className="w-6 h-6 rounded-full shrink-0 overflow-hidden"
-                style={{ background: tag.bg }}
-              >
-                {tag.thumbBg && (
-                  <img src={tag.thumbBg} alt="" className="w-full h-full object-cover" />
-                )}
-              </span>
-              {tag.label}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* ═══ НАШИ СЕРВИСЫ ═══ */}
@@ -304,7 +269,7 @@ export default function HeroSections({ scrollTo, setActiveForm }: HeroSectionsPr
       </section>
 
       {/* ═══ О КОМПАНИИ + ИНИЦИАТИВЫ ═══ */}
-      <section id="about" className="bg-white px-6 md:px-10 py-14">
+      <section id="about" className="bg-white px-6 md:px-10 py-14 rounded-[32px] mx-3 md:mx-5 my-4">
         <div className="max-w-7xl mx-auto">
           <FadeIn className="mb-10 flex flex-col md:flex-row md:items-end gap-4 justify-between">
             <div>
