@@ -23,6 +23,7 @@ export default function Director() {
   const [socials, setSocials] = useState<Social[]>([]);
   const [tab, setTab] = useState<Tab>("activity");
   const [bioIdx, setBioIdx] = useState(0);
+  const [activeNews, setActiveNews] = useState<NewsItem | null>(null);
   const bioScroll = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -111,8 +112,8 @@ export default function Director() {
                 ) : (
                   <div className="grid md:grid-cols-2 gap-5">
                     {news.map(item => (
-                      <a key={item.id} href={item.link_url || "#"} target={item.link_url ? "_blank" : undefined} rel="noreferrer"
-                        className="group block rounded-xl overflow-hidden border border-black/6 hover:shadow-md transition-all">
+                      <button key={item.id} onClick={() => setActiveNews(item)}
+                        className="group text-left block rounded-xl overflow-hidden border border-black/6 hover:shadow-md transition-all">
                         {item.image_url && (
                           <div className="aspect-[16/9] overflow-hidden bg-black/5">
                             <img src={item.image_url} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
@@ -124,7 +125,7 @@ export default function Director() {
                           {item.body && <p className="text-black/55 text-sm leading-relaxed mb-2 line-clamp-3">{item.body}</p>}
                           <div className="text-black/40 text-xs">{item.date_label}</div>
                         </div>
-                      </a>
+                      </button>
                     ))}
                   </div>
                 )}
