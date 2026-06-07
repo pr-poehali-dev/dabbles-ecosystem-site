@@ -91,4 +91,19 @@ def handler(event: dict, context) -> dict:
             conn.close()
         return resp(200, {'ok': True, 'id': new_id})
 
+    if action == 'director' and method == 'GET':
+        conn = db()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("SELECT full_name, position, description, quote, quote_source, email, photo_url FROM director_info LIMIT 1")
+                row = cur.fetchone()
+                info = {'full_name': row[0], 'position': row[1], 'description': row[2], 'quote': row[3], 'quote_source': row[4], 'email': row[5], 'photo_url': row[6]} if row else {}
+                cur.execute("SELECT id, year_label, title, body, sort_order FROM director_bio ORDER BY sort_order ASC, id ASC")
+                bio = [{'id': r[0], 'year_label': r[1], 'title': r[2], 'body': r[3], 'sort_order': r[4]} for r in cur.fetchall()]
+                cur.execute("SELECT id, url, caption, sort_order FROM director_photos ORDER BY sort_order ASC, id ASC")
+                photos = [{'id': r[0], 'url': r[1], 'caption': r[2], 'sort_order': r[3]} for r in cur.fetchall()]
+        finally:
+            conn.close()
+        return resp(200, {'info': info, 'bio': bio, 'photos': photos})
+
     return resp(404, {'error': 'Не найдено'})

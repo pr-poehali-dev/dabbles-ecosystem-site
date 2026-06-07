@@ -205,6 +205,83 @@ def handler(event, context):
             conn.commit()
             return resp(200, {'ok': True})
 
+        # === DIRECTOR INFO ===
+        if action == 'director-info-update' and method == 'PUT':
+            data = json.loads(event.get('body') or '{}')
+            fields = []
+            for k in ['full_name', 'position', 'description', 'quote', 'quote_source', 'email', 'photo_url']:
+                if k in data:
+                    fields.append(f"{k} = {esc(data[k])}")
+            if not fields:
+                return resp(400, {'error': 'Нет полей'})
+            fields.append("updated_at = NOW()")
+            with conn.cursor() as cur:
+                cur.execute(f"UPDATE director_info SET {', '.join(fields)}")
+            conn.commit()
+            return resp(200, {'ok': True})
+
+        # === DIRECTOR BIO ===
+        if action == 'director-bio-create' and method == 'POST':
+            data = json.loads(event.get('body') or '{}')
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"INSERT INTO director_bio (year_label, title, body, sort_order) "
+                    f"VALUES ({esc(data.get('year_label') or '')}, {esc(data.get('title') or '')}, "
+                    f"{esc(data.get('body') or '')}, {esc(int(data.get('sort_order') or 0))}) RETURNING id"
+                )
+                new_id = cur.fetchone()[0]
+            conn.commit()
+            return resp(200, {'id': new_id})
+
+        if action == 'director-bio-update' and method == 'PUT':
+            data = json.loads(event.get('body') or '{}')
+            bid = int(data.get('id') or 0)
+            if not bid:
+                return resp(400, {'error': 'id обязателен'})
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"UPDATE director_bio SET year_label={esc(data.get('year_label') or '')}, "
+                    f"title={esc(data.get('title') or '')}, body={esc(data.get('body') or '')}, "
+                    f"sort_order={esc(int(data.get('sort_order') or 0))} WHERE id={bid}"
+                )
+            conn.commit()
+            return resp(200, {'ok': True})
+
+        if action == 'director-bio-delete' and method == 'DELETE':
+            data = json.loads(event.get('body') or '{}')
+            bid = int(data.get('id') or 0)
+            if not bid:
+                return resp(400, {'error': 'id обязателен'})
+            with conn.cursor() as cur:
+                cur.execute(f"DELETE FROM director_bio WHERE id={bid}")
+            conn.commit()
+            return resp(200, {'ok': True})
+
+        # === DIRECTOR PHOTOS ===
+        if action == 'director-photo-add' and method == 'POST':
+            data = json.loads(event.get('body') or '{}')
+            url = (data.get('url') or '').strip()
+            if not url:
+                return resp(400, {'error': 'url обязателен'})
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"INSERT INTO director_photos (url, caption, sort_order) "
+                    f"VALUES ({esc(url)}, {esc(data.get('caption') or '')}, {esc(int(data.get('sort_order') or 0))}) RETURNING id"
+                )
+                new_id = cur.fetchone()[0]
+            conn.commit()
+            return resp(200, {'id': new_id})
+
+        if action == 'director-photo-delete' and method == 'DELETE':
+            data = json.loads(event.get('body') or '{}')
+            pid = int(data.get('id') or 0)
+            if not pid:
+                return resp(400, {'error': 'id обязателен'})
+            with conn.cursor() as cur:
+                cur.execute(f"DELETE FROM director_photos WHERE id={pid}")
+            conn.commit()
+            return resp(200, {'ok': True})
+
         if action == 'invite-create' and method == 'POST':
             data = json.loads(event.get('body') or '{}')
             email = (data.get('email') or '').strip().lower()

@@ -5,7 +5,7 @@
       "method": "GET",
       "path": "/?action=org",
       "expectedStatus": 200,
-      "expectedBody": {"nodes": []},
+      "expectedBody": {"nodes": "array"},
       "bodyMatcher": "keys_exist"
     },
     {
@@ -16,6 +16,14 @@
       "expectedStatus": 400,
       "expectedBody": {"error": "Имя и email обязательны"},
       "bodyMatcher": "partial"
+    }
+    ,{
+      "name": "Получить данные директора",
+      "method": "GET",
+      "path": "/?action=director",
+      "expectedStatus": 200,
+      "expectedBody": {"info": {}, "bio": [], "photos": []},
+      "bodyMatcher": "keys_exist"
     }
   ]
 }
