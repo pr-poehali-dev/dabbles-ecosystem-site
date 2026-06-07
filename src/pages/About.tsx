@@ -199,14 +199,23 @@ export default function About() {
               <p className="text-black/70 text-lg md:text-xl leading-relaxed mb-6 md:mb-8 italic">
                 Когда мы основывали «Даббл», перед нами стоял один вопрос: почему современный человек вынужден тратить силы на рутину вместо того, чтобы создавать? Мы решили дать ответ делом. Сегодня наша экосистема — это не просто набор продуктов. Это философия: технологии должны служить человеку, а не наоборот. Мы строим будущее, в котором каждый инструмент понимает тебя с первого шага. И это только начало.
               </p>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#1a0a6e] to-[#FD4160] flex items-center justify-center shrink-0">
-                  <span className="text-white font-display font-black text-lg">СС</span>
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#1a0a6e] to-[#FD4160] flex items-center justify-center shrink-0">
+                    <span className="text-white font-display font-black text-lg">СС</span>
+                  </div>
+                  <div>
+                    <div className="font-display font-black text-black">Сергей Серебренников</div>
+                    <div className="text-black/40 text-sm">Генеральный директор, корпорация экосистемных проектов «Даббл»</div>
+                  </div>
                 </div>
-                <div>
-                  <div className="font-display font-black text-black">Сергей Серебренников</div>
-                  <div className="text-black/40 text-sm">Генеральный директор, корпорация экосистемных проектов «Даббл»</div>
-                </div>
+                <Link
+                  to="/director"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-black/12 text-black/50 hover:text-black hover:border-black/25 text-sm font-medium transition-colors"
+                >
+                  Страница директора
+                  <Icon name="ArrowRight" size={14} />
+                </Link>
               </div>
             </div>
           </div>
