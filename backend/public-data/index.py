@@ -102,8 +102,8 @@ def handler(event: dict, context) -> dict:
                 bio = [{'id': r[0], 'year_label': r[1], 'title': r[2], 'body': r[3], 'sort_order': r[4]} for r in cur.fetchall()]
                 cur.execute("SELECT id, url, caption, sort_order FROM director_photos ORDER BY sort_order ASC, id ASC")
                 photos = [{'id': r[0], 'url': r[1], 'caption': r[2], 'sort_order': r[3]} for r in cur.fetchall()]
-                cur.execute("SELECT id, title, category, date_label, image_url, link_url, sort_order FROM director_news ORDER BY sort_order ASC, id DESC")
-                news = [{'id': r[0], 'title': r[1], 'category': r[2], 'date_label': r[3], 'image_url': r[4], 'link_url': r[5], 'sort_order': r[6]} for r in cur.fetchall()]
+                cur.execute("SELECT id, title, category, date_label, image_url, link_url, sort_order, body FROM director_news ORDER BY sort_order ASC, id DESC")
+                news = [{'id': r[0], 'title': r[1], 'category': r[2], 'date_label': r[3], 'image_url': r[4], 'link_url': r[5], 'sort_order': r[6], 'body': r[7]} for r in cur.fetchall()]
                 cur.execute("SELECT id, platform, label, url, sort_order FROM director_socials ORDER BY sort_order ASC, id ASC")
                 socials = [{'id': r[0], 'platform': r[1], 'label': r[2], 'url': r[3], 'sort_order': r[4]} for r in cur.fetchall()]
         finally:

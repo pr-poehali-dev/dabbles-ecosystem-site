@@ -1,0 +1,1 @@
+ALTER TABLE director_news ADD COLUMN body TEXT NOT NULL DEFAULT '';

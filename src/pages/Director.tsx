@@ -6,7 +6,7 @@ import { request } from "@/lib/api";
 type Info = { full_name: string; position: string; description: string; quote: string; quote_source: string; email: string; photo_url: string };
 type BioItem = { id: number; year_label: string; title: string; body: string; sort_order: number };
 type Photo = { id: number; url: string; caption: string; sort_order: number };
-type NewsItem = { id: number; title: string; category: string; date_label: string; image_url: string; link_url: string; sort_order: number };
+type NewsItem = { id: number; title: string; category: string; date_label: string; image_url: string; link_url: string; body: string; sort_order: number };
 type Social = { id: number; platform: string; label: string; url: string; sort_order: number };
 
 type Tab = "activity" | "bio" | "photos";
@@ -121,6 +121,7 @@ export default function Director() {
                         <div className="p-4">
                           {item.category && <div className="text-[#1a0a6e] text-xs font-bold uppercase tracking-wide mb-2">{item.category}</div>}
                           <h3 className="font-bold text-black text-[15px] leading-snug mb-2 group-hover:text-[#1a0a6e] transition-colors">{item.title}</h3>
+                          {item.body && <p className="text-black/55 text-sm leading-relaxed mb-2 line-clamp-3">{item.body}</p>}
                           <div className="text-black/40 text-xs">{item.date_label}</div>
                         </div>
                       </a>

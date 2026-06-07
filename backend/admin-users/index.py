@@ -287,10 +287,11 @@ def handler(event, context):
             data = json.loads(event.get('body') or '{}')
             with conn.cursor() as cur:
                 cur.execute(
-                    f"INSERT INTO director_news (title, category, date_label, image_url, link_url, sort_order) "
+                    f"INSERT INTO director_news (title, category, date_label, image_url, link_url, body, sort_order) "
                     f"VALUES ({esc(data.get('title') or '')}, {esc(data.get('category') or '')}, "
                     f"{esc(data.get('date_label') or '')}, {esc(data.get('image_url') or '')}, "
-                    f"{esc(data.get('link_url') or '')}, {esc(int(data.get('sort_order') or 0))}) RETURNING id"
+                    f"{esc(data.get('link_url') or '')}, {esc(data.get('body') or '')}, "
+                    f"{esc(int(data.get('sort_order') or 0))}) RETURNING id"
                 )
                 new_id = cur.fetchone()[0]
             conn.commit()
@@ -306,6 +307,7 @@ def handler(event, context):
                     f"UPDATE director_news SET title={esc(data.get('title') or '')}, "
                     f"category={esc(data.get('category') or '')}, date_label={esc(data.get('date_label') or '')}, "
                     f"image_url={esc(data.get('image_url') or '')}, link_url={esc(data.get('link_url') or '')}, "
+                    f"body={esc(data.get('body') or '')}, "
                     f"sort_order={esc(int(data.get('sort_order') or 0))} WHERE id={nid}"
                 )
             conn.commit()

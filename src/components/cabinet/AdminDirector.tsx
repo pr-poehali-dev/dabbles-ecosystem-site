@@ -8,7 +8,7 @@ type Info = {
 };
 type BioItem = { id: number; year_label: string; title: string; body: string; sort_order: number };
 type Photo = { id: number; url: string; caption: string; sort_order: number };
-type NewsItem = { id: number; title: string; category: string; date_label: string; image_url: string; link_url: string; sort_order: number };
+type NewsItem = { id: number; title: string; category: string; date_label: string; image_url: string; link_url: string; body: string; sort_order: number };
 type Social = { id: number; platform: string; label: string; url: string; sort_order: number };
 
 type Tab = "info" | "bio" | "photos" | "news" | "socials";
@@ -32,7 +32,7 @@ function Field({ label, value, onChange, multiline, placeholder }: {
 }
 
 const emptyBio = { year_label: "", title: "", body: "", sort_order: 0 };
-const emptyNews = { title: "", category: "", date_label: "", image_url: "", link_url: "", sort_order: 0 };
+const emptyNews = { title: "", category: "", date_label: "", image_url: "", link_url: "", body: "", sort_order: 0 };
 
 export default function AdminDirector() {
   const [infoForm, setInfoForm] = useState<Info>({ full_name: "", position: "", description: "", quote: "", quote_source: "", email: "", photo_url: "" });
@@ -298,7 +298,7 @@ export default function AdminDirector() {
                   <div className="font-semibold text-black text-sm line-clamp-1">{item.title}</div>
                   <div className="text-black/40 text-xs mt-0.5">{item.category} · {item.date_label}</div>
                 </div>
-                <button onClick={() => { setNewsModal(item); setNewsForm({ title: item.title, category: item.category, date_label: item.date_label, image_url: item.image_url, link_url: item.link_url, sort_order: item.sort_order }); }}
+                <button onClick={() => { setNewsModal(item); setNewsForm({ title: item.title, category: item.category, date_label: item.date_label, image_url: item.image_url, link_url: item.link_url, body: item.body || "", sort_order: item.sort_order }); }}
                   className="p-1.5 rounded-lg hover:bg-black/8 text-black/40 hover:text-black transition-colors shrink-0">
                   <Icon name="Pencil" size={14} />
                 </button>
@@ -370,6 +370,7 @@ export default function AdminDirector() {
                 <input ref={newsImgRef} type="file" accept="image/*" className="hidden" onChange={handleNewsImg} />
               </div>
             </div>
+            <Field label="Описание (краткий текст новости)" value={newsForm.body} onChange={v => setNewsForm(f => ({ ...f, body: v }))} multiline />
             <Field label="Ссылка на новость (URL)" value={newsForm.link_url} onChange={v => setNewsForm(f => ({ ...f, link_url: v }))} placeholder="https://..." />
             <Field label="Порядок" value={String(newsForm.sort_order)} onChange={v => setNewsForm(f => ({ ...f, sort_order: Number(v) || 0 }))} />
             <div className="flex gap-2 pt-1">
