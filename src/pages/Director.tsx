@@ -228,6 +228,46 @@ export default function Director() {
 
         </div>
       </div>
+
+      {/* МОДАЛКА НОВОСТИ */}
+      {activeNews && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm"
+          onClick={() => setActiveNews(null)}>
+          <div className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl"
+            onClick={e => e.stopPropagation()}>
+            {activeNews.image_url && (
+              <div className="aspect-[16/9] overflow-hidden bg-black/5">
+                <img src={activeNews.image_url} alt={activeNews.title} className="w-full h-full object-cover" />
+              </div>
+            )}
+            <div className="p-7">
+              {activeNews.category && (
+                <div className="text-[#1a0a6e] text-xs font-bold uppercase tracking-wide mb-3">{activeNews.category}</div>
+              )}
+              <h2 className="font-display text-xl font-black text-black leading-snug mb-3">{activeNews.title}</h2>
+              {activeNews.body && (
+                <p className="text-black/65 text-sm leading-relaxed mb-5">{activeNews.body}</p>
+              )}
+              <div className="flex items-center justify-between">
+                <div className="text-black/35 text-xs">{activeNews.date_label}</div>
+                <div className="flex gap-2">
+                  {activeNews.link_url && (
+                    <a href={activeNews.link_url} target="_blank" rel="noreferrer"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#1a0a6e] text-white text-sm font-semibold hover:bg-[#0a0535] transition-colors">
+                      Читать полностью
+                      <Icon name="ExternalLink" size={14} />
+                    </a>
+                  )}
+                  <button onClick={() => setActiveNews(null)}
+                    className="px-4 py-2 rounded-xl bg-black/6 text-black text-sm font-semibold hover:bg-black/10 transition-colors">
+                    Закрыть
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
