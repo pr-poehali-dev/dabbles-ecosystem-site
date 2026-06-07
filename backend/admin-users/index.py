@@ -282,6 +282,82 @@ def handler(event, context):
             conn.commit()
             return resp(200, {'ok': True})
 
+        # === DIRECTOR NEWS ===
+        if action == 'director-news-create' and method == 'POST':
+            data = json.loads(event.get('body') or '{}')
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"INSERT INTO director_news (title, category, date_label, image_url, link_url, sort_order) "
+                    f"VALUES ({esc(data.get('title') or '')}, {esc(data.get('category') or '')}, "
+                    f"{esc(data.get('date_label') or '')}, {esc(data.get('image_url') or '')}, "
+                    f"{esc(data.get('link_url') or '')}, {esc(int(data.get('sort_order') or 0))}) RETURNING id"
+                )
+                new_id = cur.fetchone()[0]
+            conn.commit()
+            return resp(200, {'id': new_id})
+
+        if action == 'director-news-update' and method == 'PUT':
+            data = json.loads(event.get('body') or '{}')
+            nid = int(data.get('id') or 0)
+            if not nid:
+                return resp(400, {'error': 'id обязателен'})
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"UPDATE director_news SET title={esc(data.get('title') or '')}, "
+                    f"category={esc(data.get('category') or '')}, date_label={esc(data.get('date_label') or '')}, "
+                    f"image_url={esc(data.get('image_url') or '')}, link_url={esc(data.get('link_url') or '')}, "
+                    f"sort_order={esc(int(data.get('sort_order') or 0))} WHERE id={nid}"
+                )
+            conn.commit()
+            return resp(200, {'ok': True})
+
+        if action == 'director-news-delete' and method == 'DELETE':
+            data = json.loads(event.get('body') or '{}')
+            nid = int(data.get('id') or 0)
+            if not nid:
+                return resp(400, {'error': 'id обязателен'})
+            with conn.cursor() as cur:
+                cur.execute(f"DELETE FROM director_news WHERE id={nid}")
+            conn.commit()
+            return resp(200, {'ok': True})
+
+        # === DIRECTOR SOCIALS ===
+        if action == 'director-social-update' and method == 'PUT':
+            data = json.loads(event.get('body') or '{}')
+            sid = int(data.get('id') or 0)
+            if not sid:
+                return resp(400, {'error': 'id обязателен'})
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"UPDATE director_socials SET platform={esc(data.get('platform') or '')}, "
+                    f"label={esc(data.get('label') or '')}, url={esc(data.get('url') or '')}, "
+                    f"sort_order={esc(int(data.get('sort_order') or 0))} WHERE id={sid}"
+                )
+            conn.commit()
+            return resp(200, {'ok': True})
+
+        if action == 'director-social-create' and method == 'POST':
+            data = json.loads(event.get('body') or '{}')
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"INSERT INTO director_socials (platform, label, url, sort_order) "
+                    f"VALUES ({esc(data.get('platform') or '')}, {esc(data.get('label') or '')}, "
+                    f"{esc(data.get('url') or '')}, {esc(int(data.get('sort_order') or 0))}) RETURNING id"
+                )
+                new_id = cur.fetchone()[0]
+            conn.commit()
+            return resp(200, {'id': new_id})
+
+        if action == 'director-social-delete' and method == 'DELETE':
+            data = json.loads(event.get('body') or '{}')
+            sid = int(data.get('id') or 0)
+            if not sid:
+                return resp(400, {'error': 'id обязателен'})
+            with conn.cursor() as cur:
+                cur.execute(f"DELETE FROM director_socials WHERE id={sid}")
+            conn.commit()
+            return resp(200, {'ok': True})
+
         if action == 'invite-create' and method == 'POST':
             data = json.loads(event.get('body') or '{}')
             email = (data.get('email') or '').strip().lower()

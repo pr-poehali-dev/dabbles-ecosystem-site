@@ -1,5 +1,8 @@
+import base64
 import json
 import os
+import uuid
+import boto3
 import psycopg2
 
 CORS = {
@@ -67,6 +70,14 @@ def row_dict(cur, row):
     cols = [c.name for c in cur.description]
     return {col: val for col, val in zip(cols, row)}
 
+def s3_client():
+    return boto3.client(
+        's3',
+        endpoint_url='https://bucket.poehali.dev',
+        aws_access_key_id=os.environ['AWS_ACCESS_KEY_ID'],
+        aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
+    )
+
 def handler(event, context):
     """Контент сайта: hero-слайды, карточки 'Что нового', статьи блога. GET публично, мутации только админ."""
     method = event.get('httpMethod', 'GET')
@@ -74,6 +85,32 @@ def handler(event, context):
         return {'statusCode': 200, 'headers': CORS, 'isBase64Encoded': False, 'body': ''}
 
     qs = event.get('queryStringParameters') or {}
+    action = qs.get('action', '')
+
+    # === UPLOAD (S3) ===
+    if action == 'upload' and method == 'POST':
+        conn = db()
+        try:
+            headers = event.get('headers') or {}
+            token = headers.get('X-Auth-Token') or headers.get('x-auth-token') or ''
+            admin = get_admin(conn, token)
+            if not admin:
+                return resp(403, {'error': 'Только для админа'})
+        finally:
+            conn.close()
+        data = json.loads(event.get('body') or '{}')
+        file_b64 = data.get('file') or ''
+        ext = (data.get('ext') or 'jpg').lower().strip('.')
+        folder = (data.get('folder') or 'uploads').strip('/')
+        content_types = {'jpg': 'image/jpeg', 'jpeg': 'image/jpeg', 'png': 'image/png', 'gif': 'image/gif', 'webp': 'image/webp'}
+        ct = content_types.get(ext, 'image/jpeg')
+        file_bytes = base64.b64decode(file_b64)
+        key = f"{folder}/{uuid.uuid4()}.{ext}"
+        s3 = s3_client()
+        s3.put_object(Bucket='files', Key=key, Body=file_bytes, ContentType=ct)
+        cdn_url = f"https://cdn.poehali.dev/projects/{os.environ['AWS_ACCESS_KEY_ID']}/bucket/{key}"
+        return resp(200, {'url': cdn_url, 'key': key})
+
     kind = qs.get('kind', '')
     if kind not in SCHEMAS:
         return resp(400, {'error': 'kind должен быть hero, news или blog'})
