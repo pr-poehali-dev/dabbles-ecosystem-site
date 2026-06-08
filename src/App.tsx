@@ -19,6 +19,7 @@ import YandexCallback from "./pages/meroshkins/YandexCallback";
 import IdAuth from "./pages/id/IdAuth";
 import IdProfile from "./pages/id/IdProfile";
 import IdInvite from "./pages/id/IdInvite";
+import KP from "./pages/KP";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "@/lib/auth";
 
@@ -44,6 +45,7 @@ const App = () => (
             <Route path="/meroshkins/share" element={<MeroshkinsShare />} />
             <Route path="/meroshkins/invite" element={<MeroshkinsInvite />} />
             <Route path="/meroshkins/yandex-callback" element={<YandexCallback />} />
+            <Route path="/kp" element={<KP />} />
             <Route path="/vibe" element={<Vibe />} />
             <Route path="/id" element={<IdAuth />} />
             <Route path="/id/auth" element={<IdAuth />} />

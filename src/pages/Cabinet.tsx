@@ -12,9 +12,10 @@ import AdminContent from "@/components/cabinet/AdminContent";
 import AdminOAuth from "@/components/cabinet/AdminOAuth";
 import AdminOrgChart from "@/components/cabinet/AdminOrgChart";
 import AdminDirector from "@/components/cabinet/AdminDirector";
+import AdminKP from "@/components/cabinet/AdminKP";
 import ChangePasswordModal from "@/components/cabinet/ChangePasswordModal";
 
-type Section = "profile" | "tasks" | "documents" | "crm" | "admin-users" | "admin-oauth" | "admin-org" | "admin-hero" | "admin-news" | "admin-blog" | "admin-director";
+type Section = "profile" | "tasks" | "documents" | "crm" | "admin-users" | "admin-oauth" | "admin-org" | "admin-hero" | "admin-news" | "admin-blog" | "admin-director" | "admin-kp";
 
 export default function Cabinet() {
   const { user, loading, logout } = useAuth();
@@ -58,6 +59,7 @@ export default function Cabinet() {
     { key: "admin-news", label: "Что нового", icon: "LayoutGrid" },
     { key: "admin-blog", label: "Блог", icon: "FileEdit" },
     { key: "admin-director", label: "Директор", icon: "User" },
+    { key: "admin-kp", label: "КП — Шаблон", icon: "FileDown" },
   ];
 
   return (
@@ -142,6 +144,7 @@ export default function Cabinet() {
         {section === "admin-news" && isAdmin && <AdminContent kind="news" />}
         {section === "admin-blog" && isAdmin && <AdminContent kind="blog" />}
         {section === "admin-director" && isAdmin && <AdminDirector />}
+        {section === "admin-kp" && isAdmin && <AdminKP />}
       </main>
 
       {mustChange && (
