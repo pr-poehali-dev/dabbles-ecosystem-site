@@ -13,6 +13,14 @@
       "expectedStatus": 404,
       "expectedBody": {"error": "string"},
       "bodyMatcher": "partial"
+    },
+    {
+      "name": "Список стоп-слов",
+      "method": "GET",
+      "path": "/?action=stopwords",
+      "expectedStatus": 200,
+      "expectedBody": {"words": []},
+      "bodyMatcher": "partial"
     }
   ]
 }

@@ -263,8 +263,10 @@ export default function KP() {
               }
             </button>
 
-            <p className="text-center text-black/30 text-xs pb-4">
-              Документ будет сформирован на основе вашего корпоративного шаблона
+            <p className="text-center text-black/30 text-xs pb-4 leading-relaxed px-2">
+              Нажимая кнопку, вы даёте согласие на обработку персональных данных, соглашаетесь с{" "}
+              <a href="/privacy" target="_blank" className="underline hover:text-black/50 transition-colors">правилами сервиса</a>
+              {" "}и подтверждаете, что ознакомлены с требованиями и основными видами экономической деятельности нашей компании.
             </p>
           </form>
         )}
