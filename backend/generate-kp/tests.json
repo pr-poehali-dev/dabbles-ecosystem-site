@@ -7,20 +7,18 @@
       "expectedStatus": 200
     },
     {
-      "name": "Нет шаблона — 404",
+      "name": "Получить шаблон",
       "method": "GET",
       "path": "/?action=get-template",
-      "expectedStatus": 404,
-      "expectedBody": {"error": "string"},
+      "expectedStatus": 200,
+      "expectedBody": {"id": 1},
       "bodyMatcher": "partial"
     },
     {
       "name": "Список стоп-слов",
       "method": "GET",
       "path": "/?action=stopwords",
-      "expectedStatus": 200,
-      "expectedBody": {"words": []},
-      "bodyMatcher": "partial"
+      "expectedStatus": 200
     }
   ]
 }

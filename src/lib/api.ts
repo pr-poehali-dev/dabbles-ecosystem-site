@@ -33,7 +33,9 @@ export async function request<T = unknown>(
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error((data as { error?: string }).error || `Ошибка ${res.status}`);
+    const err = new Error((data as { error?: string }).error || `Ошибка ${res.status}`) as Error & { status: number };
+    err.status = res.status;
+    throw err;
   }
   return data as T;
 }
