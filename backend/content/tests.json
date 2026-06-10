@@ -23,6 +23,12 @@
       "method": "GET",
       "path": "/?kind=news",
       "expectedStatus": 200
+    },
+    {
+      "name": "Home cards list returns 200",
+      "method": "GET",
+      "path": "/?kind=home",
+      "expectedStatus": 200
     }
   ]
 }

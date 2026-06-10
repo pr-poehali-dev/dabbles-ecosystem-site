@@ -33,8 +33,16 @@ function OrgNodeCard({ node, level = 0 }: { node: TreeNode; level?: number }) {
   const hasChildren = node.children.length > 0;
   const isRoot = level === 0;
 
-  // Отступ на каждый уровень
-  const indent = level * 32;
+  // Отступ на каждый уровень (меньше на мобиле, больше на десктопе)
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+  const indent = level * (isMobile ? 14 : 32);
 
   return (
     <div style={{ marginLeft: indent }}>
@@ -49,7 +57,7 @@ function OrgNodeCard({ node, level = 0 }: { node: TreeNode; level?: number }) {
         )}
 
         <div
-          className={`flex items-center gap-3 rounded-2xl px-5 py-4 border transition-all ${
+          className={`flex items-center gap-2.5 md:gap-3 rounded-2xl px-3.5 py-3 md:px-5 md:py-4 border transition-all ${
             isRoot
               ? "bg-white border-[#1a0a6e]/20 shadow-sm"
               : level === 1
@@ -84,7 +92,7 @@ function OrgNodeCard({ node, level = 0 }: { node: TreeNode; level?: number }) {
 
       {/* Дочерние элементы */}
       {hasChildren && open && (
-        <div className="relative ml-3 pl-5 border-l border-dashed border-black/15">
+        <div className="relative ml-1.5 pl-3 md:ml-3 md:pl-5 border-l border-dashed border-black/15">
           {node.children.map(child => (
             <OrgNodeCard key={child.id} node={child} level={level + 1} />
           ))}
@@ -128,7 +136,7 @@ export default function About() {
 
       <div className="pt-[68px]">
         {/* HERO */}
-        <section className="bg-gradient-to-br from-[#0a0535] via-[#1a0a6e] to-[#2d0060] px-6 md:px-16 py-20 md:py-28">
+        <section className="bg-gradient-to-br from-[#0a0535] via-[#1a0a6e] to-[#2d0060] px-5 md:px-16 py-14 md:py-28">
           <div className="max-w-4xl mx-auto">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 text-white/70 text-xs font-semibold mb-6">
               <Icon name="Building2" size={13} />
@@ -144,7 +152,7 @@ export default function About() {
         </section>
 
         {/* МИССИЯ */}
-        <section className="bg-white px-6 md:px-16 py-16 md:py-20">
+        <section className="bg-white px-5 md:px-16 py-12 md:py-20">
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center gap-2 text-[#1a0a6e] text-sm font-bold mb-4">
               <Icon name="Target" size={16} />
@@ -184,13 +192,13 @@ export default function About() {
         </section>
 
         {/* СЛОВО ДИРЕКТОРА */}
-        <section className="bg-[#f5f5f7] px-6 md:px-16 py-16 md:py-20">
+        <section className="bg-[#f5f5f7] px-5 md:px-16 py-12 md:py-20">
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center gap-2 text-[#1a0a6e] text-sm font-bold mb-8">
               <Icon name="MessageSquareQuote" size={16} />
               Слово директора
             </div>
-            <div className="bg-white rounded-3xl p-8 md:p-12 relative overflow-hidden">
+            <div className="bg-white rounded-3xl p-6 md:p-12 relative overflow-hidden">
               <div
                 className="absolute top-0 left-0 w-1.5 h-full rounded-l-3xl"
                 style={{ background: "linear-gradient(to bottom, #FD4160, #1a0a6e)" }}
@@ -222,13 +230,13 @@ export default function About() {
         </section>
 
         {/* ОРГ-СХЕМА */}
-        <section className="bg-white px-6 md:px-16 py-16 md:py-20">
+        <section className="bg-white px-5 md:px-16 py-12 md:py-20">
           <div className="max-w-6xl mx-auto">
             <div className="flex items-center gap-2 text-[#1a0a6e] text-sm font-bold mb-4">
               <Icon name="Network" size={16} />
               Структура компании
             </div>
-            <h2 className="font-display text-3xl md:text-4xl font-black text-black mb-12">
+            <h2 className="font-display text-3xl md:text-4xl font-black text-black mb-8 md:mb-12">
               Команда «Даббл»
             </h2>
 
@@ -247,7 +255,7 @@ export default function About() {
         </section>
 
         {/* CTA */}
-        <section className="bg-[#0a0535] px-6 md:px-16 py-16">
+        <section className="bg-[#0a0535] px-5 md:px-16 py-12 md:py-16">
           <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div>
               <h2 className="font-display text-2xl md:text-3xl font-black text-white mb-2">Стань участником наших проектов</h2>
@@ -255,7 +263,7 @@ export default function About() {
             </div>
             <Link
               to="/#products"
-              className="shrink-0 px-7 py-3.5 rounded-2xl bg-[#FD4160] text-white font-semibold hover:bg-[#e0324f] transition-colors"
+              className="shrink-0 w-full md:w-auto text-center px-7 py-3.5 rounded-2xl bg-[#FD4160] text-white font-semibold hover:bg-[#e0324f] transition-colors"
             >
               Наши сервисы
             </Link>

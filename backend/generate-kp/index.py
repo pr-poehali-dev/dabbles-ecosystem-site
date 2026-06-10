@@ -266,7 +266,10 @@ def handler(event, context):
 
         doc_obj = Document(io.BytesIO(template_bytes))
         blocks = extract_docx_blocks(doc_obj, replacements)
-        pdf_bytes = build_kp_pdf(blocks, items, total)
+        pdf_bytes = build_kp_pdf(blocks, items, total,
+                                 organization=organization,
+                                 director_name=director_name,
+                                 doc_number=doc_number)
 
         safe_org = organization[:30].replace('/', '-').replace('"', '')
         result_key = f'kp-results/{uuid.uuid4()}/KP_{safe_org}.pdf'

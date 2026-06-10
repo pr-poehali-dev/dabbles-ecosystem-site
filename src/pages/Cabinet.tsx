@@ -9,13 +9,14 @@ import DocumentsSection from "@/components/cabinet/DocumentsSection";
 import CrmSection from "@/components/cabinet/CrmSection";
 import AdminUsers from "@/components/cabinet/AdminUsers";
 import AdminContent from "@/components/cabinet/AdminContent";
+import AdminHome from "@/components/cabinet/AdminHome";
 import AdminOAuth from "@/components/cabinet/AdminOAuth";
 import AdminOrgChart from "@/components/cabinet/AdminOrgChart";
 import AdminDirector from "@/components/cabinet/AdminDirector";
 import AdminKP from "@/components/cabinet/AdminKP";
 import ChangePasswordModal from "@/components/cabinet/ChangePasswordModal";
 
-type Section = "profile" | "tasks" | "documents" | "crm" | "admin-users" | "admin-oauth" | "admin-org" | "admin-hero" | "admin-news" | "admin-blog" | "admin-director" | "admin-kp";
+type Section = "profile" | "tasks" | "documents" | "crm" | "admin-users" | "admin-oauth" | "admin-org" | "admin-home" | "admin-hero" | "admin-news" | "admin-blog" | "admin-director" | "admin-kp";
 
 export default function Cabinet() {
   const { user, loading, logout } = useAuth();
@@ -55,8 +56,7 @@ export default function Cabinet() {
     { key: "admin-users", label: "Сотрудники", icon: "UserPlus" },
     { key: "admin-oauth", label: "OAuth-приложения", icon: "KeyRound" },
     { key: "admin-org", label: "Структура компании", icon: "Network" },
-    { key: "admin-hero", label: "Обложка", icon: "Image" },
-    { key: "admin-news", label: "Что нового", icon: "LayoutGrid" },
+    { key: "admin-home", label: "Главная страница", icon: "Home" },
     { key: "admin-blog", label: "Блог", icon: "FileEdit" },
     { key: "admin-director", label: "Директор", icon: "User" },
     { key: "admin-kp", label: "КП — Шаблон", icon: "FileDown" },
@@ -140,8 +140,7 @@ export default function Cabinet() {
         {section === "admin-users" && isAdmin && <AdminUsers />}
         {section === "admin-oauth" && isAdmin && <AdminOAuth />}
         {section === "admin-org" && isAdmin && <AdminOrgChart />}
-        {section === "admin-hero" && isAdmin && <AdminContent kind="hero" />}
-        {section === "admin-news" && isAdmin && <AdminContent kind="news" />}
+        {section === "admin-home" && isAdmin && <AdminHome />}
         {section === "admin-blog" && isAdmin && <AdminContent kind="blog" />}
         {section === "admin-director" && isAdmin && <AdminDirector />}
         {section === "admin-kp" && isAdmin && <AdminKP />}

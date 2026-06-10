@@ -15,7 +15,7 @@ export default function Privacy() {
           {backLabel}
         </Link>
       </nav>
-      <div className="pt-[68px] max-w-3xl mx-auto px-6 py-14">
+      <div className="pt-[68px] max-w-3xl mx-auto px-5 md:px-6 py-10 md:py-14">
         <h1 className="font-display text-3xl md:text-4xl font-black text-black mb-2">Политика конфиденциальности</h1>
         <p className="text-black/40 text-sm mb-10">Последнее обновление: 15 января 2025 г.</p>
 
@@ -29,7 +29,7 @@ export default function Privacy() {
 
           <section>
             <h2 className="font-display text-xl font-bold text-black mb-3">2. Оператор персональных данных</h2>
-            <div className="bg-[#f5f5f7] rounded-2xl p-6 text-sm space-y-1.5">
+            <div className="bg-[#f5f5f7] rounded-2xl p-5 md:p-6 text-sm space-y-1.5">
               <div><span className="text-black/45">Наименование:</span> <strong className="text-black">ООО «ДАББЛ РУС»</strong></div>
               <div><span className="text-black/45">ОГРН:</span> 1258900000050</div>
               <div><span className="text-black/45">ИНН:</span> 8905069677</div>

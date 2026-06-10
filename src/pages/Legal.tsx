@@ -25,7 +25,7 @@ export default function Legal() {
           {backLabel}
         </Link>
       </nav>
-      <div className="pt-[68px] max-w-3xl mx-auto px-6 py-14">
+      <div className="pt-[68px] max-w-3xl mx-auto px-5 md:px-6 py-10 md:py-14">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#f0f0f5] text-black/50 text-xs font-semibold mb-4">
           <Icon name="Building2" size={13} />
           Юридическая информация
@@ -36,7 +36,7 @@ export default function Legal() {
           {DETAILS.map((row, i) => (
             <div
               key={i}
-              className={`flex flex-col sm:flex-row gap-1 sm:gap-6 px-7 py-5 ${i < DETAILS.length - 1 ? "border-b border-black/6" : ""}`}
+              className={`flex flex-col sm:flex-row gap-1 sm:gap-6 px-5 py-4 md:px-7 md:py-5 ${i < DETAILS.length - 1 ? "border-b border-black/6" : ""}`}
             >
               <div className="text-black/40 text-sm font-medium sm:w-48 shrink-0">{row.label}</div>
               <div className="text-black font-semibold text-sm">{row.value}</div>
@@ -44,7 +44,7 @@ export default function Legal() {
           ))}
         </div>
 
-        <div className="bg-[#1a0a6e]/5 border border-[#1a0a6e]/15 rounded-2xl p-6 text-sm text-black/60 leading-relaxed">
+        <div className="bg-[#1a0a6e]/5 border border-[#1a0a6e]/15 rounded-2xl p-5 md:p-6 text-sm text-black/60 leading-relaxed">
           <div className="flex items-start gap-3">
             <Icon name="Info" size={16} className="text-[#1a0a6e] mt-0.5 shrink-0" />
             <p>

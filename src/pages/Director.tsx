@@ -69,7 +69,7 @@ export default function Director() {
       <div className="pt-[60px]">
         {/* ШАПКА */}
         <div className="bg-white border-b border-black/8">
-          <div className="max-w-5xl mx-auto px-6 md:px-10 py-5">
+          <div className="max-w-5xl mx-auto px-5 md:px-10 py-5">
             {info ? (
               <div className="flex flex-col md:flex-row md:items-center gap-5">
                 <div className="shrink-0">
@@ -99,13 +99,13 @@ export default function Director() {
           </div>
         </div>
 
-        <div className="max-w-5xl mx-auto px-6 md:px-10 py-6 space-y-5">
+        <div className="max-w-5xl mx-auto px-5 md:px-10 py-6 space-y-5">
 
           {/* === ДЕЯТЕЛЬНОСТЬ === */}
           {tab === "activity" && (
             <>
               {/* Новости */}
-              <div className="bg-white rounded-2xl p-7">
+              <div className="bg-white rounded-2xl p-5 md:p-7">
                 <h2 className="font-display text-xl font-black text-black mb-6">Новости</h2>
                 {news.length === 0 ? (
                   <p className="text-black/35 text-sm">Новости не добавлены</p>
@@ -132,7 +132,7 @@ export default function Director() {
               </div>
 
               {/* Соцсети */}
-              <div className="bg-white rounded-2xl p-7">
+              <div className="bg-white rounded-2xl p-5 md:p-7">
                 <div className="flex items-center justify-between mb-5">
                   <h2 className="font-display text-xl font-black text-black">Социальные сети</h2>
                   {socials.filter(s => s.url).length > 0 && (
@@ -156,7 +156,7 @@ export default function Director() {
 
               {/* Цитата */}
               {info?.quote && (
-                <div className="bg-white rounded-2xl p-7 md:p-10 relative overflow-hidden">
+                <div className="bg-white rounded-2xl p-5 md:p-10 relative overflow-hidden">
                   <div className="absolute top-0 left-0 w-1 h-full bg-[#1a0a6e] rounded-l-2xl" />
                   <div className="text-5xl font-display text-[#1a0a6e]/8 leading-none mb-3 select-none">"</div>
                   <p className="text-black/75 text-lg md:text-xl leading-relaxed italic font-display font-medium mb-6">{info.quote}</p>
@@ -173,7 +173,7 @@ export default function Director() {
 
           {/* === БИОГРАФИЯ === */}
           {tab === "bio" && (
-            <div className="bg-white rounded-2xl p-7 md:p-10">
+            <div className="bg-white rounded-2xl p-5 md:p-10">
               <div className="flex items-center justify-between mb-8">
                 <h2 className="font-display text-2xl font-black text-black">Биография</h2>
                 <div className="flex gap-2">
@@ -210,7 +210,7 @@ export default function Director() {
 
           {/* === ФОТОГРАФИИ === */}
           {tab === "photos" && (
-            <div className="bg-white rounded-2xl p-7 md:p-10">
+            <div className="bg-white rounded-2xl p-5 md:p-10">
               <h2 className="font-display text-2xl font-black text-black mb-6">Фотографии</h2>
               {photos.length === 0 ? (
                 <p className="text-black/35 text-sm">Фотографии не добавлены</p>
@@ -240,7 +240,7 @@ export default function Director() {
                 <img src={activeNews.image_url} alt={activeNews.title} className="w-full h-full object-cover" />
               </div>
             )}
-            <div className="p-7">
+            <div className="p-5 md:p-7">
               {activeNews.category && (
                 <div className="text-[#1a0a6e] text-xs font-bold uppercase tracking-wide mb-3">{activeNews.category}</div>
               )}

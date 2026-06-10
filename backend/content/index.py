@@ -64,6 +64,12 @@ SCHEMAS = {
         'bools': ['is_published'],
         'ints': ['sort_order'],
     },
+    'home': {
+        'table': 'home_cards',
+        'fields': ['card_type', 'title', 'subtitle', 'icon', 'image_url', 'gradient', 'href', 'is_light', 'is_feature', 'sort_order', 'is_active'],
+        'bools': ['is_light', 'is_feature', 'is_active'],
+        'ints': ['sort_order'],
+    },
 }
 
 def row_dict(cur, row):
