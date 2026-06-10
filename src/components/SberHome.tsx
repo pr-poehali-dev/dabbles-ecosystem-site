@@ -26,14 +26,6 @@ type HomeCard = {
 };
 
 // ── Fallback-данные (если бэкенд недоступен) ──
-const FB_QUICK: HomeCard[] = [
-  { id: 1, card_type: "quick", title: "ИИ-ассистент\nДаббл", subtitle: "", icon: "Sparkles", image_url: "", gradient: "from-[#0077FF] to-[#56CCF2]", href: "", is_light: false, is_feature: false, sort_order: 1 },
-  { id: 2, card_type: "quick", title: "Трекер задач\nдля команд", subtitle: "", icon: "CheckSquare", image_url: "", gradient: "from-[#FD4160] to-[#0077FF]", href: "", is_light: false, is_feature: false, sort_order: 2 },
-  { id: 3, card_type: "quick", title: "Формус —\nонлайн-формы", subtitle: "", icon: "FileText", image_url: "", gradient: "from-[#0077FF] to-[#C1F089]", href: "https://forms-dubble.ru", is_light: false, is_feature: false, sort_order: 3 },
-  { id: 4, card_type: "quick", title: "Компас —\nпутешествия", subtitle: "", icon: "Compass", image_url: "", gradient: "from-[#1a0a6e] to-[#7c3aed]", href: "https://даббл-компас.рф", is_light: false, is_feature: false, sort_order: 4 },
-  { id: 5, card_type: "quick", title: "Мерошкинс —\nсобытия", subtitle: "", icon: "CalendarDays", image_url: "", gradient: "from-[#7c3aed] to-[#4f46e5]", href: "/meroshkins", is_light: false, is_feature: false, sort_order: 5 },
-  { id: 6, card_type: "quick", title: "Коммерческие\nпредложения", subtitle: "", icon: "FileSignature", image_url: "", gradient: "from-[#1a0a6e] to-[#0077FF]", href: "/kp", is_light: false, is_feature: false, sort_order: 6 },
-];
 const FB_FINANCE: HomeCard[] = [
   { id: 11, card_type: "finance", title: "Управление задачами\nи проектами", subtitle: "", icon: "", image_url: IMG.piggy, gradient: "", href: "", is_light: false, is_feature: false, sort_order: 1 },
   { id: 12, card_type: "finance", title: "Конструктор форм\nс дизайном на выбор", subtitle: "", icon: "", image_url: IMG.sticker, gradient: "", href: "https://forms-dubble.ru", is_light: false, is_feature: false, sort_order: 2 },
@@ -68,7 +60,6 @@ export default function SberHome() {
     return list.length ? list : fb;
   };
 
-  const quickIcons = byType("quick", FB_QUICK);
   const banner = allCards.find((c) => c.card_type === "banner") || FB_BANNER;
   const cards = tab === "finance" ? byType("finance", FB_FINANCE) : byType("life", FB_LIFE);
   const bannerLines = banner.title.split("\n");
@@ -109,27 +100,6 @@ export default function SberHome() {
             <div className="absolute right-12 bottom-16 w-20 h-20 rounded-full bg-gradient-to-br from-[#FD4160] to-[#FF8A5B] blur-sm opacity-45" />
           </div>
         </section>
-      </FadeIn>
-
-      {/* ═══ РЯД КРУГЛЫХ ИКОНОК ═══ */}
-      <FadeIn delay={100}>
-        <div className="mt-6 flex gap-3 md:gap-5 overflow-x-auto pb-3 scrollbar-hide" style={{ scrollbarWidth: "none" }}>
-          {quickIcons.map((q) => (
-            <button
-              key={q.id}
-              onClick={() => go(q.href, navigate)}
-              className="shrink-0 flex flex-col items-center gap-2.5 group"
-              style={{ width: 96 }}
-            >
-              <div className={`w-[72px] h-[72px] rounded-full bg-gradient-to-br ${q.gradient || "from-[#1a0a6e] to-[#0077FF]"} flex items-center justify-center shadow-md group-hover:scale-105 transition-transform`}>
-                <Icon name={q.icon || "Sparkles"} size={30} className="text-white" />
-              </div>
-              <span className="text-[12px] text-black/70 font-medium text-center leading-tight whitespace-pre-line">
-                {q.title}
-              </span>
-            </button>
-          ))}
-        </div>
       </FadeIn>
 
       {/* ═══ ТАБЫ + СЕТКА КАРТОЧЕК ═══ */}
