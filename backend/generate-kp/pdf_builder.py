@@ -9,6 +9,10 @@ from datetime import datetime
 from fpdf import FPDF
 
 FONT_CANDIDATES = [
+    # DroidSansFallback — полная поддержка Unicode включая ₽
+    ('/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf',
+     '/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf'),
+    # DejaVu — хорошая кириллица, нет ₽ в некоторых версиях
     ('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
      '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'),
     ('/usr/share/fonts/dejavu/DejaVuSans.ttf',
@@ -35,12 +39,22 @@ GREY = (120, 120, 130)
 DARK = (20, 20, 25)
 
 
+# Шрифты с полной поддержкой ₽ (Unicode \u20bd)
+RUBLE_FONTS = {
+    'DroidSansFallbackFull.ttf',
+    'NotoSans-Regular.ttf',
+    'NotoSans-Bold.ttf',
+}
+
 def _resolve_fonts():
+    """Возвращает (reg_path, bold_path, has_ruble)."""
     for reg, bold in LOCAL_FONTS + FONT_CANDIDATES:
         if os.path.exists(reg):
             bold_path = bold if os.path.exists(bold) else reg
-            return reg, bold_path
-    return None, None
+            fname = os.path.basename(reg)
+            has_ruble = fname in RUBLE_FONTS
+            return reg, bold_path, has_ruble
+    return None, None, False
 
 
 def format_money(val):
@@ -52,9 +66,10 @@ def format_money(val):
 
 
 class KPDoc(FPDF):
-    def __init__(self, has_cyrillic, doc_number):
+    def __init__(self, has_cyrillic, has_ruble, doc_number):
         super().__init__(format='A4', unit='mm')
         self.has_cyrillic = has_cyrillic
+        self.has_ruble = has_ruble
         self.doc_number = doc_number
         self.set_auto_page_break(auto=True, margin=22)
         self.set_margins(16, 16, 16)
@@ -76,16 +91,19 @@ class KPDoc(FPDF):
                   align='C')
 
     def _t(self, s):
+        s = str(s)
+        if not self.has_ruble:
+            s = s.replace('\u20bd', 'руб.').replace('₽', 'руб.')
         if self.has_cyrillic:
             return s
-        return str(s).encode('latin-1', 'replace').decode('latin-1')
+        return s.encode('latin-1', 'replace').decode('latin-1')
 
 
 def build_kp_pdf(blocks, items, total, organization='', director_name='', doc_number=''):
-    reg_path, bold_path = _resolve_fonts()
+    reg_path, bold_path, has_ruble = _resolve_fonts()
     has_cyrillic = reg_path is not None
 
-    pdf = KPDoc(has_cyrillic, doc_number or '—')
+    pdf = KPDoc(has_cyrillic=has_cyrillic, has_ruble=has_ruble, doc_number=doc_number or '—')
     if has_cyrillic:
         pdf.add_font('Body', '', reg_path, uni=True)
         pdf.add_font('Body', 'B', bold_path, uni=True)
@@ -173,7 +191,7 @@ def build_kp_pdf(blocks, items, total, organization='', director_name='', doc_nu
         col_w = [11, 78, 19, 17, 27, 27]
         scale = content_w / sum(col_w)
         col_w = [w * scale for w in col_w]
-        headers = ['№', 'Наименование услуги', 'Ед.изм.', 'Кол-во', 'Цена, ₽', 'Сумма, ₽']
+        headers = ['№', 'Наименование услуги', 'Ед.изм.', 'Кол-во', 'Цена, руб.', 'Сумма, руб.']
         head_h = 9
 
         # Заголовок
@@ -248,7 +266,7 @@ def build_kp_pdf(blocks, items, total, organization='', director_name='', doc_nu
         pdf.set_text_color(255, 255, 255)
         pdf.cell(box_w * 0.4, 5, t('ИТОГО:'), align='L')
         pdf.f(True, 12)
-        pdf.cell(box_w * 0.55 - 5, 5, t(format_money(total) + ' ₽'), align='R')
+        pdf.cell(box_w * 0.55 - 5, 5, t(format_money(total) + ' \u20bd'), align='R')
         pdf.set_xy(x0, y0 + 17)
         pdf.f(False, 8)
         pdf.set_text_color(*GREY)
