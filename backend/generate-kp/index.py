@@ -1,4 +1,4 @@
-# v4
+# v5 — CloudConvert
 import json
 import os
 import io
@@ -9,6 +9,8 @@ import psycopg2
 import boto3
 from docx import Document
 from pdf_builder import build_kp_pdf
+from docx_filler import fill_docx
+from cloudconvert import docx_to_pdf
 
 CORS = {
     'Access-Control-Allow-Origin': '*',
@@ -264,12 +266,25 @@ def handler(event, context):
             'НОМ': doc_number,
         }
 
-        doc_obj = Document(io.BytesIO(template_bytes))
-        blocks = extract_docx_blocks(doc_obj, replacements)
-        pdf_bytes = build_kp_pdf(blocks, items, total,
-                                 organization=organization,
-                                 director_name=director_name,
-                                 doc_number=doc_number)
+        # 1) Заполняем .docx шаблон данными + таблицей позиций
+        filled_docx = fill_docx(template_bytes, replacements, items, total)
+
+        # 2) Конвертируем в PDF через CloudConvert (качество 1-в-1).
+        #    При сбое — fallback на встроенный генератор fpdf2.
+        pdf_engine = 'cloudconvert'
+        try:
+            pdf_bytes = docx_to_pdf(filled_docx, filename=f'KP_{doc_number}.docx')
+            if not pdf_bytes or len(pdf_bytes) < 500:
+                raise RuntimeError('CloudConvert: пустой результат')
+        except Exception as e:
+            pdf_engine = 'fallback'
+            print(f'CloudConvert недоступен, fallback: {e}')
+            doc_obj = Document(io.BytesIO(template_bytes))
+            blocks = extract_docx_blocks(doc_obj, replacements)
+            pdf_bytes = build_kp_pdf(blocks, items, total,
+                                     organization=organization,
+                                     director_name=director_name,
+                                     doc_number=doc_number)
 
         safe_org = organization[:30].replace('/', '-').replace('"', '')
         result_key = f'kp-results/{uuid.uuid4()}/KP_{safe_org}.pdf'
@@ -288,7 +303,7 @@ def handler(event, context):
             )
         conn.commit()
         conn.close()
-        return resp(200, {'ok': True, 'download_url': result_url, 'doc_number': doc_number})
+        return resp(200, {'ok': True, 'download_url': result_url, 'doc_number': doc_number, 'engine': pdf_engine})
 
     conn.close()
     return resp(404, {'error': 'Неизвестное действие'})
