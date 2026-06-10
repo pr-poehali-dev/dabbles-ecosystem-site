@@ -21,7 +21,7 @@ export default function MeroshkinsFooter() {
           </Link>
         </div>
         <p className="text-[11px] text-black/20 text-center">
-          © 2026 ООО «Даббл Рус». Сервис Мерошкинс входит в экосистему Даббл Крауд.
+          Проект входит в экосистему корпорации «Даббл» — 2026
         </p>
       </div>
     </footer>

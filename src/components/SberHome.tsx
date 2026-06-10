@@ -12,12 +12,12 @@ const IMG = {
 
 // Ряд круглых иконок-сервисов под главным баннером
 const QUICK_ICONS = [
-  { label: "ИИ-ассистент\nДаббл", icon: "Sparkles", grad: "from-[#2D9CDB] to-[#56CCF2]", href: "" },
-  { label: "Трекер задач\nдля команд", icon: "CheckSquare", grad: "from-[#21A038] to-[#6FCF97]", href: "" },
-  { label: "Формус —\nонлайн-формы", icon: "FileText", grad: "from-[#0077FF] to-[#56CCF2]", href: "https://forms-dubble.ru" },
+  { label: "ИИ-ассистент\nДаббл", icon: "Sparkles", grad: "from-[#0077FF] to-[#56CCF2]", href: "" },
+  { label: "Трекер задач\nдля команд", icon: "CheckSquare", grad: "from-[#FD4160] to-[#0077FF]", href: "" },
+  { label: "Формус —\nонлайн-формы", icon: "FileText", grad: "from-[#0077FF] to-[#C1F089]", href: "https://forms-dubble.ru" },
   { label: "Компас —\nпутешествия", icon: "Compass", grad: "from-[#1a0a6e] to-[#7c3aed]", href: "https://даббл-компас.рф" },
   { label: "Мерошкинс —\nсобытия", icon: "CalendarDays", grad: "from-[#7c3aed] to-[#4f46e5]", href: "/meroshkins" },
-  { label: "Коммерческие\nпредложения", icon: "FileSignature", grad: "from-[#21A038] to-[#00BFA5]", href: "/kp" },
+  { label: "Коммерческие\nпредложения", icon: "FileSignature", grad: "from-[#1a0a6e] to-[#0077FF]", href: "/kp" },
   { label: "Карьера\nв Даббл", icon: "Briefcase", grad: "from-[#222] to-[#444]", href: "" },
   { label: "О компании", icon: "Building2", grad: "from-[#FD4160] to-[#FF8A5B]", href: "/about" },
 ];
@@ -89,7 +89,7 @@ export default function SberHome() {
       <FadeIn>
         <section
           className="relative rounded-[28px] overflow-hidden p-7 md:p-12"
-          style={{ background: "linear-gradient(120deg, #e8f7ec 0%, #d4f0dc 50%, #c8f0d0 100%)", minHeight: 420 }}
+          style={{ background: "linear-gradient(120deg, #eef4ff 0%, #e4ecff 45%, #f2f8e6 100%)", minHeight: 420 }}
         >
           <div className="relative z-10 max-w-md">
             <div className="inline-block bg-white rounded-3xl px-6 py-5 md:px-8 md:py-7 shadow-sm">
@@ -101,7 +101,7 @@ export default function SberHome() {
               </p>
               <Link
                 to="/about"
-                className="inline-flex items-center gap-1.5 text-[#21A038] font-bold text-lg hover:gap-2.5 transition-all"
+                className="inline-flex items-center gap-1.5 text-[#0077FF] font-bold text-lg hover:gap-2.5 transition-all"
               >
                 Подробнее <Icon name="ChevronRight" size={20} />
               </Link>
@@ -111,8 +111,8 @@ export default function SberHome() {
           {/* Декоративная картинка справа */}
           <div className="absolute right-0 top-0 bottom-0 w-1/2 hidden md:block">
             <img src={IMG.gift} alt="" className="absolute right-8 top-1/2 -translate-y-1/2 w-72 h-72 object-contain drop-shadow-2xl" />
-            <div className="absolute right-48 top-16 w-24 h-24 rounded-full bg-gradient-to-br from-[#56CCF2] to-[#2D9CDB] blur-sm opacity-60" />
-            <div className="absolute right-12 bottom-16 w-20 h-20 rounded-full bg-gradient-to-br from-[#21A038] to-[#6FCF97] blur-sm opacity-50" />
+            <div className="absolute right-48 top-16 w-24 h-24 rounded-full bg-gradient-to-br from-[#56CCF2] to-[#0077FF] blur-sm opacity-50" />
+            <div className="absolute right-12 bottom-16 w-20 h-20 rounded-full bg-gradient-to-br from-[#FD4160] to-[#FF8A5B] blur-sm opacity-45" />
           </div>
         </section>
       </FadeIn>
@@ -187,16 +187,16 @@ type CardShape = {
 };
 
 function SberCard({ card, onClick }: { card: CardShape; onClick: () => void }) {
-  // Фичевая зелёная карточка
+  // Фичевая брендовая карточка
   if (card.feature) {
     return (
       <button
         onClick={onClick}
         className="w-full text-left rounded-[24px] overflow-hidden group relative h-full min-h-[300px] flex items-end p-7 transition-transform hover:-translate-y-1"
-        style={{ background: "linear-gradient(135deg, #6FCF97 0%, #21A038 55%, #1a8f30 100%)" }}
+        style={{ background: "linear-gradient(135deg, #0077FF 0%, #1a0a6e 60%, #2d0060 100%)" }}
       >
         <div className="absolute top-7 right-7 w-20 h-20 rounded-2xl bg-white/90 flex items-center justify-center rotate-6 group-hover:rotate-0 transition-transform shadow-lg">
-          <Icon name="CircleCheckBig" size={40} className="text-[#21A038]" />
+          <Icon name="Sparkles" size={40} className="text-[#0077FF]" />
         </div>
         <h3 className="relative z-10 font-display text-2xl font-black text-white leading-tight whitespace-pre-line">
           {card.title}
@@ -250,7 +250,7 @@ function WidgetsSection() {
         <div className="flex flex-col items-center">
           <div
             className="w-full max-w-sm rounded-[28px] p-8 text-center relative overflow-hidden"
-            style={{ background: "linear-gradient(160deg, #1a8f30 0%, #0d6b22 100%)", minHeight: 300 }}
+            style={{ background: "linear-gradient(160deg, #1a0a6e 0%, #0a0535 100%)", minHeight: 300 }}
           >
             <div className="text-white/70 text-sm mb-2">К 31 декабря накопите</div>
             <div className="font-display text-4xl md:text-5xl font-black text-white mb-6">1 109 726 ₽</div>
@@ -268,7 +268,7 @@ function WidgetsSection() {
         <div className="flex flex-col items-center">
           <div
             className="w-full max-w-sm rounded-[28px] p-7 relative overflow-hidden"
-            style={{ background: "linear-gradient(160deg, #d4f0dc 0%, #a8e6b8 100%)", minHeight: 300 }}
+            style={{ background: "linear-gradient(160deg, #dce8ff 0%, #b8d4ff 100%)", minHeight: 300 }}
           >
             <div className="bg-white rounded-2xl p-5 shadow-lg">
               <div className="flex items-center gap-2 mb-4">
@@ -306,8 +306,8 @@ function WidgetsSection() {
               <div className="absolute top-6 right-6 w-14 h-14 rounded-full bg-black flex items-center justify-center shadow-lg">
                 <Icon name="MapPin" size={24} className="text-white" />
               </div>
-              <div className="absolute bottom-8 left-8 w-11 h-11 rounded-full bg-[#21A038] flex items-center justify-center shadow-lg">
-                <Icon name="CircleCheckBig" size={22} className="text-white" />
+              <div className="absolute bottom-8 left-8 w-11 h-11 rounded-full bg-[#0077FF] flex items-center justify-center shadow-lg">
+                <Icon name="MapPin" size={22} className="text-white" />
               </div>
             </div>
           </div>
@@ -320,7 +320,7 @@ function WidgetsSection() {
         <div className="flex flex-col items-center">
           <div
             className="w-full max-w-sm rounded-[28px] p-7 relative overflow-hidden flex items-center justify-center"
-            style={{ background: "linear-gradient(160deg, #2a4a30 0%, #1a3320 100%)", minHeight: 300 }}
+            style={{ background: "linear-gradient(160deg, #2d0060 0%, #1a0a3a 100%)", minHeight: 300 }}
           >
             <div className="bg-white rounded-3xl px-8 py-7 shadow-2xl">
               <div className="text-black/50 text-sm mb-4 text-center">Сейчас в офисе</div>

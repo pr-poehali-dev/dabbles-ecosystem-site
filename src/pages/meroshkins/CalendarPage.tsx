@@ -103,9 +103,10 @@ export default function CalendarPage() {
           </button>
           <button
             onClick={() => { setYear(today.getFullYear()); setMonth(today.getMonth()); }}
-            className="px-3 py-1.5 text-[13px] font-semibold text-black min-w-[140px] text-center hover:bg-black/3 rounded-[10px] transition-colors"
+            className="px-2 md:px-3 py-1.5 text-[13px] font-semibold text-black min-w-[110px] md:min-w-[140px] text-center hover:bg-black/3 rounded-[10px] transition-colors"
           >
-            {MONTHS[month]} {year}
+            <span className="md:hidden">{MONTHS[month].slice(0,3)} {year}</span>
+            <span className="hidden md:inline">{MONTHS[month]} {year}</span>
           </button>
           <button onClick={nextMonth} className="p-2 rounded-[10px] hover:bg-black/5 text-black/40 transition-colors">
             <Icon name="ChevronRight" size={15} />
@@ -136,11 +137,11 @@ export default function CalendarPage() {
         </div>
 
         {/* Filters */}
-        <select value={fType}   onChange={e => setFType(e.target.value)}   className="sel-apple">
+        <select value={fType}   onChange={e => setFType(e.target.value)}   className="sel-apple hidden sm:block">
           <option value="">Все типы</option>
           {Object.entries(EVENT_TYPES).map(([k,v]) => <option key={k} value={k}>{v.label}</option>)}
         </select>
-        <select value={fStatus} onChange={e => setFStatus(e.target.value)} className="sel-apple">
+        <select value={fStatus} onChange={e => setFStatus(e.target.value)} className="sel-apple hidden sm:block">
           <option value="">Все статусы</option>
           {Object.entries(EVENT_STATUSES).map(([k,v]) => <option key={k} value={k}>{v.label}</option>)}
         </select>
@@ -194,7 +195,7 @@ export default function CalendarPage() {
               return (
                 <div
                   key={i}
-                  className={`min-h-[70px] md:min-h-[120px] p-1.5 md:p-2 cursor-pointer transition-colors group ${
+                  className={`min-h-[88px] md:min-h-[120px] p-1 md:p-2 cursor-pointer transition-colors group ${
                     d ? (isWeekend ? "bg-black/[0.01] hover:bg-[#f5f3ff]/60" : "hover:bg-[#f5f3ff]/40") : "bg-black/[0.015]"
                   }`}
                   onClick={() => {
@@ -222,10 +223,14 @@ export default function CalendarPage() {
                             onMouseEnter={e => setTooltip({ event: ev, x: e.clientX, y: e.clientY })}
                             onMouseLeave={() => setTooltip(null)}
                           >
-                            {/* Мобиль — только цветная точка */}
-                            <div className="flex items-center gap-1 px-1 py-0.5 md:hidden">
-                              <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: ev.color }} />
-                              <span className="text-[10px] font-semibold truncate" style={{ color: ev.color }}>{ev.title}</span>
+                            {/* Мобиль — компактная плашка с читаемым заголовком */}
+                            <div className="md:hidden px-1 py-0.5">
+                              <span
+                                className="text-[10px] font-semibold leading-tight line-clamp-2 break-words"
+                                style={{ color: ev.color }}
+                              >
+                                {ev.title}
+                              </span>
                             </div>
                             {/* Десктоп — полная карточка */}
                             <div className="hidden md:block px-1.5 py-1">

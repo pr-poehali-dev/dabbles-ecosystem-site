@@ -57,23 +57,25 @@ export default function Navbar({ menuOpen, scrollTo, setMenuOpen, audience = "Д
       {/* ОСНОВНАЯ ШАПКА — белая пилюля */}
       <div className="sticky top-0 z-50 px-3 md:px-5 pt-2 pb-2 bg-[#f0f0f5]/80 backdrop-blur-md">
         <nav className="bg-white rounded-[26px] shadow-[0_4px_20px_rgba(0,0,0,0.05)] h-[64px] flex items-center px-3 md:px-4 gap-2 md:gap-3">
-          {/* LOGO 185 */}
-          <button onClick={() => scrollTo("#hero")} className="shrink-0 flex items-center gap-2 pl-1">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#21A038] to-[#00BFA5] flex items-center justify-center">
-              <Icon name="CircleCheckBig" size={22} className="text-white" />
-            </div>
-            <span className="hidden sm:block font-display text-2xl font-black text-black tracking-tight">185</span>
+          {/* LOGO Даббл */}
+          <button onClick={() => scrollTo("#hero")} className="shrink-0 flex items-center pl-2">
+            <img
+              src="https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/bucket/279bdee6-7783-4862-83f9-25bd24811276.png"
+              alt="Даббл"
+              className="h-8 w-auto object-contain"
+              style={{ filter: "invert(1)" }}
+            />
           </button>
 
           {/* МЕНЮ-кнопка */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="hidden md:flex items-center gap-2.5 pl-2 pr-1 shrink-0"
+            className="hidden md:flex items-center gap-2.5 pl-3 pr-1 shrink-0"
           >
             <div className="relative w-6 h-6 flex flex-col justify-center gap-[5px]">
               <span className="block h-[2.5px] w-6 bg-black rounded-full" />
               <span className="block h-[2.5px] w-6 bg-black rounded-full" />
-              <span className="absolute -top-0.5 right-0 w-1.5 h-1.5 rounded-full bg-[#21A038]" />
+              <span className="absolute -top-0.5 right-0 w-1.5 h-1.5 rounded-full bg-[#FD4160]" />
             </div>
             <span className="text-[15px] font-semibold text-black">Меню</span>
           </button>
@@ -115,11 +117,11 @@ export default function Navbar({ menuOpen, scrollTo, setMenuOpen, audience = "Д
               </button>
             )}
 
-            {/* СБЕРБАНК ОНЛАЙН → Кабинет/Войти (зелёная) */}
+            {/* Кабинет/Войти */}
             <Link
               to={user ? "/cabinet" : "/login"}
               className="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-2xl text-white text-[15px] font-semibold transition-all hover:opacity-90"
-              style={{ background: "linear-gradient(120deg, #21A038 0%, #00BFA5 100%)" }}
+              style={{ background: "linear-gradient(120deg, #1a0a6e 0%, #0077FF 100%)" }}
             >
               {user ? "Кабинет" : "Личный кабинет"}
             </Link>
@@ -128,7 +130,7 @@ export default function Navbar({ menuOpen, scrollTo, setMenuOpen, audience = "Д
             <div className="relative">
               <button
                 onClick={() => setGridOpen(!gridOpen)}
-                className="w-11 h-11 rounded-2xl border-2 border-[#21A038]/30 flex items-center justify-center hover:bg-black/3 transition-colors text-black/60"
+                className="w-11 h-11 rounded-2xl border-2 border-[#0077FF]/30 flex items-center justify-center hover:bg-black/3 transition-colors text-black/60"
                 title="Сервисы"
               >
                 <Icon name="User" size={20} />
@@ -188,7 +190,7 @@ export default function Navbar({ menuOpen, scrollTo, setMenuOpen, audience = "Д
                 key={s}
                 onClick={() => { setAudience?.(s); setMenuOpen(false); }}
                 className={`text-left px-4 py-3 text-lg rounded-xl transition-colors ${
-                  audience === s ? "bg-[#21A038]/10 text-[#21A038] font-semibold" : "text-black/60"
+                  audience === s ? "bg-[#0077FF]/10 text-[#0077FF] font-semibold" : "text-black/60"
                 }`}
               >
                 {s}
@@ -197,7 +199,7 @@ export default function Navbar({ menuOpen, scrollTo, setMenuOpen, audience = "Д
             <Link
               to={user ? "/cabinet" : "/login"}
               className="mt-4 flex items-center justify-center gap-2 px-4 py-3.5 rounded-2xl text-white text-lg font-semibold"
-              style={{ background: "linear-gradient(120deg, #21A038 0%, #00BFA5 100%)" }}
+              style={{ background: "linear-gradient(120deg, #1a0a6e 0%, #0077FF 100%)" }}
             >
               {user ? "Личный кабинет" : "Войти"}
             </Link>
