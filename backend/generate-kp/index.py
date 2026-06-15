@@ -227,33 +227,39 @@ def handler(event, context):
 
         total = sum(float(it.get('total', 0) or 0) for it in items)
 
-        # Формируем таблицу позиций как массив объектов (секция Documentero)
-        table_rows = []
+        # Формируем HTML-таблицу позиций для подстановки в метку {ТАБЛИЦА_ПОЗИЦИЙ}
+        rows_html = ''
         for idx, it in enumerate(items, 1):
             qty = it.get('qty', 1)
             price = it.get('price', 0)
             it_total = it.get('total', float(qty) * float(price))
-            table_rows.append({
-                'num':   str(idx),
-                'name':  it.get('name', ''),
-                'unit':  it.get('unit', 'шт.'),
-                'qty':   str(qty),
-                'price': format_money(price),
-                'total': format_money(it_total),
-            })
+            rows_html += (
+                f'<tr>'
+                f'<td>{idx}</td>'
+                f'<td>{it.get("name", "")}</td>'
+                f'<td>{it.get("unit", "шт.")}</td>'
+                f'<td>{qty}</td>'
+                f'<td>{format_money(price)}</td>'
+                f'<td>{format_money(it_total)}</td>'
+                f'</tr>'
+            )
 
-        # Данные для Documentero.
-        # Секция с таблицей — ключ "items", поля: num, name, unit, qty, price, total.
-        # В шаблоне строка таблицы должна содержать: {#items.num}, {#items.name} и т.д.
+        table_html = (
+            '<table>'
+            '<tr><th>№</th><th>Наименование услуги</th><th>Ед.изм.</th><th>Кол-во</th><th>Цена, руб.</th><th>Сумма, руб.</th></tr>'
+            + rows_html +
+            f'<tr><td></td><td></td><td></td><td></td><th>ИТОГО:</th><th>{format_money(total)} руб.</th></tr>'
+            '</table>'
+        )
+
         doc_data = {
             'ОРГАНИЗАЦИЯ': organization,
             'ФИО_руководителя': director_name,
             'ДАТА': datetime.now().strftime('%d.%m.%Y'),
             'НОМЕР_ДОКУМЕНТА': doc_number,
             'ИТОГО': format_money(total) + ' руб.',
-            'items': table_rows,
+            'ТАБЛИЦА_ПОЗИЦИЙ': table_html,
         }
-        print(f'Documentero payload keys: {list(doc_data.keys())}, rows: {len(table_rows)}, first row: {table_rows[0] if table_rows else None}')
 
         try:
             pdf_url = call_documentero(doc_data)
