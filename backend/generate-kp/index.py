@@ -234,23 +234,26 @@ def handler(event, context):
             price = it.get('price', 0)
             it_total = it.get('total', float(qty) * float(price))
             table_rows.append({
-                'НОМ': str(idx),
-                'НАИМЕНОВАНИЕ': it.get('name', ''),
-                'ЕД': it.get('unit', 'шт.'),
-                'КОЛ': str(qty),
-                'ЦЕНА': format_money(price),
-                'СУММА': format_money(it_total),
+                'num':   str(idx),
+                'name':  it.get('name', ''),
+                'unit':  it.get('unit', 'шт.'),
+                'qty':   str(qty),
+                'price': format_money(price),
+                'total': format_money(it_total),
             })
 
-        # Данные для Documentero
+        # Данные для Documentero.
+        # Секция с таблицей — ключ "items", поля: num, name, unit, qty, price, total.
+        # В шаблоне строка таблицы должна содержать: {#items.num}, {#items.name} и т.д.
         doc_data = {
             'ОРГАНИЗАЦИЯ': organization,
             'ФИО_руководителя': director_name,
             'ДАТА': datetime.now().strftime('%d.%m.%Y'),
             'НОМЕР_ДОКУМЕНТА': doc_number,
             'ИТОГО': format_money(total) + ' руб.',
-            'ТАБЛИЦА_ПОЗИЦИЙ': table_rows,
+            'items': table_rows,
         }
+        print(f'Documentero payload keys: {list(doc_data.keys())}, rows: {len(table_rows)}, first row: {table_rows[0] if table_rows else None}')
 
         try:
             pdf_url = call_documentero(doc_data)
