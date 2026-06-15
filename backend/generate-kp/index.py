@@ -227,30 +227,20 @@ def handler(event, context):
 
         total = sum(float(it.get('total', 0) or 0) for it in items)
 
-        # Формируем HTML-таблицу позиций для подстановки в метку {ТАБЛИЦА_ПОЗИЦИЙ}
-        rows_html = ''
+        # Формируем массив позиций для секции {#items} в шаблоне Documentero
+        table_rows = []
         for idx, it in enumerate(items, 1):
             qty = it.get('qty', 1)
             price = it.get('price', 0)
             it_total = it.get('total', float(qty) * float(price))
-            rows_html += (
-                f'<tr>'
-                f'<td>{idx}</td>'
-                f'<td>{it.get("name", "")}</td>'
-                f'<td>{it.get("unit", "шт.")}</td>'
-                f'<td>{qty}</td>'
-                f'<td>{format_money(price)}</td>'
-                f'<td>{format_money(it_total)}</td>'
-                f'</tr>'
-            )
-
-        table_html = (
-            '<table>'
-            '<tr><th>№</th><th>Наименование услуги</th><th>Ед.изм.</th><th>Кол-во</th><th>Цена, руб.</th><th>Сумма, руб.</th></tr>'
-            + rows_html +
-            f'<tr><td></td><td></td><td></td><td></td><th>ИТОГО:</th><th>{format_money(total)} руб.</th></tr>'
-            '</table>'
-        )
+            table_rows.append({
+                'num':   str(idx),
+                'name':  it.get('name', ''),
+                'unit':  it.get('unit', 'шт.'),
+                'qty':   str(qty),
+                'price': format_money(price),
+                'total': format_money(it_total),
+            })
 
         doc_data = {
             'ОРГАНИЗАЦИЯ': organization,
@@ -258,7 +248,7 @@ def handler(event, context):
             'ДАТА': datetime.now().strftime('%d.%m.%Y'),
             'НОМЕР_ДОКУМЕНТА': doc_number,
             'ИТОГО': format_money(total) + ' руб.',
-            'ТАБЛИЦА_ПОЗИЦИЙ': table_html,
+            'items': table_rows,
         }
 
         try:
