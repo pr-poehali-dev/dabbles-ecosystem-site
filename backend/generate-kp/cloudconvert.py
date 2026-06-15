@@ -9,7 +9,7 @@ import base64
 import urllib.request
 import urllib.error
 
-API_BASE = 'https://api.cloudconvert.com/v2'
+API_BASE = 'https://app.documentero.com/api'
 
 
 def _post(path, payload, token):
