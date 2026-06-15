@@ -199,20 +199,42 @@ export default function MeroshkinsShare() {
 
       {/* Просмотр события (readonly) */}
       {selected && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setSelected(null)}>
-          <div className="bg-white rounded-3xl p-8 w-full max-w-md" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-3 h-3 rounded-full" style={{ background: selected.color }} />
-              <div className="text-xs font-bold text-black/40">{EVENT_TYPES[selected.event_type]?.label}</div>
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center sm:p-4" onClick={() => setSelected(null)}>
+          <div
+            className="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-md flex flex-col max-h-[90dvh] sm:max-h-[85vh]"
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Шапка с крестиком — всегда видна */}
+            <div className="flex items-start gap-3 p-5 sm:p-6 pb-3 shrink-0 border-b border-black/5">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-3 h-3 rounded-full shrink-0" style={{ background: selected.color }} />
+                  <div className="text-xs font-bold text-black/40">{EVENT_TYPES[selected.event_type]?.label}</div>
+                </div>
+                <h2 className="font-display font-black text-xl sm:text-2xl text-black leading-tight break-words">{selected.title}</h2>
+              </div>
+              <button
+                onClick={() => setSelected(null)}
+                className="p-2 -mr-1 rounded-xl hover:bg-black/5 text-black/30 hover:text-black/60 transition-colors shrink-0"
+              >
+                <Icon name="X" size={20} />
+              </button>
             </div>
-            <h2 className="font-display font-black text-2xl text-black mb-3">{selected.title}</h2>
-            <div className="text-black/50 text-sm space-y-1 mb-4">
-              <div className="flex items-center gap-2"><Icon name="Clock" size={14} />{formatTime(selected.starts_at)} — {formatTime(selected.ends_at)}</div>
-              {selected.room_name && <div className="flex items-center gap-2"><Icon name="MapPin" size={14} />{selected.venue_name}, {selected.room_name}</div>}
-              {selected.responsible && <div className="flex items-center gap-2"><Icon name="User" size={14} />{selected.responsible}</div>}
+
+            {/* Прокручиваемое тело */}
+            <div className="overflow-y-auto px-5 sm:px-6 py-4 flex-1">
+              <div className="text-black/50 text-sm space-y-1.5 mb-4">
+                <div className="flex items-center gap-2"><Icon name="Clock" size={14} />{formatTime(selected.starts_at)} — {formatTime(selected.ends_at)}</div>
+                {selected.room_name && <div className="flex items-center gap-2"><Icon name="MapPin" size={14} />{selected.venue_name}, {selected.room_name}</div>}
+                {selected.responsible && <div className="flex items-center gap-2"><Icon name="User" size={14} />{selected.responsible}</div>}
+              </div>
+              {selected.description && <p className="text-black/60 text-sm leading-relaxed whitespace-pre-wrap break-words">{selected.description}</p>}
             </div>
-            {selected.description && <p className="text-black/60 text-sm leading-relaxed">{selected.description}</p>}
-            <button onClick={() => setSelected(null)} className="mt-6 w-full py-2.5 rounded-xl bg-black/5 text-black/60 font-semibold text-sm">Закрыть</button>
+
+            {/* Закреплённая кнопка закрытия */}
+            <div className="p-4 sm:p-5 pt-3 shrink-0 border-t border-black/5">
+              <button onClick={() => setSelected(null)} className="w-full py-3 rounded-xl bg-black/5 text-black/60 font-semibold text-sm hover:bg-black/10 transition-colors">Закрыть</button>
+            </div>
           </div>
         </div>
       )}

@@ -1,5 +1,6 @@
 import { Link, useSearchParams } from "react-router-dom";
 import Icon from "@/components/ui/icon";
+import NoticeBanner from "@/components/NoticeBanner";
 
 const DETAILS = [
   { label: "Полное наименование", value: "Общество с ограниченной ответственностью «ДАББЛ РУС»" },
@@ -30,7 +31,9 @@ export default function Legal() {
           <Icon name="Building2" size={13} />
           Юридическая информация
         </div>
-        <h1 className="font-display text-3xl md:text-4xl font-black text-black mb-10">Реквизиты организации</h1>
+        <h1 className="font-display text-3xl md:text-4xl font-black text-black mb-6">Реквизиты организации</h1>
+
+        <NoticeBanner className="mb-8" />
 
         <div className="bg-[#f5f5f7] rounded-3xl overflow-hidden mb-8">
           {DETAILS.map((row, i) => (

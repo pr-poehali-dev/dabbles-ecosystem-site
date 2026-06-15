@@ -33,7 +33,6 @@ const FOOTER_LINKS = [
     title: "Сервисы",
     links: [
       { label: "Даббл.Трекер", to: null },
-      { label: "Формус", external: "https://forms-dubble.ru" },
       { label: "Компас", external: "https://даббл-компас.рф" },
       { label: "Карьера", to: null },
     ],

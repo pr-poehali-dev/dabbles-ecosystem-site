@@ -1,0 +1,1 @@
+UPDATE home_cards SET is_active = FALSE WHERE id IN (3, 6, 10);

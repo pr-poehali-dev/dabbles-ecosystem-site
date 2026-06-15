@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { request } from "@/lib/api";
+import NoticeBanner from "@/components/NoticeBanner";
 
 type OrgNode = {
   id: number;
@@ -28,73 +29,68 @@ function buildTree(nodes: OrgNode[]): (OrgNode & { children: OrgNode[] })[] {
 
 type TreeNode = OrgNode & { children: TreeNode[] };
 
-function OrgNodeCard({ node, level = 0 }: { node: TreeNode; level?: number }) {
-  const [open, setOpen] = useState(true);
+function OrgAccordionNode({ node, level = 0 }: { node: TreeNode; level?: number }) {
+  // По умолчанию всё закрыто
+  const [open, setOpen] = useState(false);
   const hasChildren = node.children.length > 0;
   const isRoot = level === 0;
 
-  // Отступ на каждый уровень (меньше на мобиле, больше на десктопе)
-  const [isMobile, setIsMobile] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(max-width: 639px)");
-    const update = () => setIsMobile(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
-  const indent = level * (isMobile ? 14 : 32);
-
   return (
-    <div style={{ marginLeft: indent }}>
-      {/* Карточка */}
-      <div className="relative mb-2">
-        {/* Вертикальная линия слева (для не-рутовых) */}
-        {level > 0 && (
-          <div
-            className="absolute left-[-20px] top-[50%] w-4 border-t border-dashed border-black/20"
-            style={{ top: "50%" }}
-          />
+    <div>
+      {/* Заголовок-карточка (вся строка кликабельна) */}
+      <button
+        type="button"
+        onClick={() => hasChildren && setOpen((o) => !o)}
+        className={`w-full text-left flex items-start gap-2.5 md:gap-3 rounded-2xl px-3.5 py-3 md:px-5 md:py-4 border transition-colors ${
+          isRoot
+            ? "bg-white border-[#1a0a6e]/20 shadow-sm hover:border-[#1a0a6e]/40"
+            : level === 1
+            ? "bg-[#f5f5fb] border-black/8 hover:bg-[#eef0fb]"
+            : "bg-[#f9f9fc] border-black/6 hover:bg-[#f0f0f7]"
+        } ${hasChildren ? "cursor-pointer" : "cursor-default"}`}
+      >
+        {/* Индикатор */}
+        {hasChildren ? (
+          <span
+            className={`w-6 h-6 mt-0.5 rounded-full border-2 border-[#2ec4a0] flex items-center justify-center shrink-0 transition-transform ${
+              open ? "bg-[#2ec4a0]/10" : ""
+            }`}
+          >
+            <Icon name={open ? "Minus" : "Plus"} size={12} className="text-[#2ec4a0]" />
+          </span>
+        ) : (
+          <span className="w-6 h-6 mt-0.5 flex items-center justify-center shrink-0">
+            <span className="w-2 h-2 rounded-full bg-black/20" />
+          </span>
         )}
 
-        <div
-          className={`flex items-center gap-2.5 md:gap-3 rounded-2xl px-3.5 py-3 md:px-5 md:py-4 border transition-all ${
-            isRoot
-              ? "bg-white border-[#1a0a6e]/20 shadow-sm"
-              : level === 1
-              ? "bg-[#f5f5fb] border-black/8 shadow-sm"
-              : "bg-[#f9f9fc] border-black/6"
-          }`}
-        >
-          {/* Кнопка развернуть/свернуть */}
-          {hasChildren ? (
-            <button
-              onClick={() => setOpen(o => !o)}
-              className="w-6 h-6 rounded-full border-2 border-[#2ec4a0] flex items-center justify-center shrink-0 hover:bg-[#2ec4a0]/10 transition-colors"
-            >
-              <Icon name={open ? "Minus" : "Plus"} size={12} className="text-[#2ec4a0]" />
-            </button>
-          ) : (
-            <div className="w-6 h-6 flex items-center justify-center shrink-0">
-              <div className="w-2 h-2 rounded-full bg-black/20" />
-            </div>
+        <span className="flex-1 min-w-0">
+          <span
+            className={`block font-bold leading-snug break-words ${
+              isRoot ? "text-[#0e1a4a] text-[15px] md:text-[16px]" : "text-[#0e1a4a] text-[13px] md:text-[14px]"
+            }`}
+          >
+            {node.title}
+          </span>
+          {node.subtitle && (
+            <span className="block text-[12px] md:text-[13px] text-black/45 mt-0.5 break-words">
+              {node.subtitle}
+            </span>
           )}
+        </span>
 
-          <div className="flex-1 min-w-0">
-            <div className={`font-bold leading-snug ${isRoot ? "text-[#0e1a4a] text-[15px]" : level === 1 ? "text-[#0e1a4a] text-[14px]" : "text-[#0e1a4a] text-[13px]"}`}>
-              {node.title}
-            </div>
-            {node.subtitle && (
-              <div className="text-[12px] text-black/40 mt-0.5">{node.subtitle}</div>
-            )}
-          </div>
-        </div>
-      </div>
+        {hasChildren && (
+          <span className="text-[11px] text-black/30 font-semibold shrink-0 mt-1 hidden sm:block">
+            {node.children.length}
+          </span>
+        )}
+      </button>
 
-      {/* Дочерние элементы */}
+      {/* Дочерние элементы — с небольшим отступом, без горизонтального скролла */}
       {hasChildren && open && (
-        <div className="relative ml-1.5 pl-3 md:ml-3 md:pl-5 border-l border-dashed border-black/15">
-          {node.children.map(child => (
-            <OrgNodeCard key={child.id} node={child} level={level + 1} />
+        <div className="mt-2 ml-3 md:ml-5 pl-3 md:pl-4 border-l-2 border-dashed border-black/12 space-y-2">
+          {node.children.map((child) => (
+            <OrgAccordionNode key={child.id} node={child} level={level + 1} />
           ))}
         </div>
       )}
@@ -148,6 +144,13 @@ export default function About() {
             <p className="text-white/60 text-lg md:text-xl leading-relaxed max-w-2xl">
               «Даббл» — не просто корпорация. Мы создаём экосистему сервисов, где бизнес и повседневная жизнь сливаются в единый бесшовный поток возможностей.
             </p>
+          </div>
+        </section>
+
+        {/* ВАЖНОЕ ОБЪЯВЛЕНИЕ */}
+        <section className="bg-white px-5 md:px-16 pt-10 md:pt-14">
+          <div className="max-w-4xl mx-auto">
+            <NoticeBanner />
           </div>
         </section>
 
@@ -230,24 +233,27 @@ export default function About() {
         </section>
 
         {/* ОРГ-СХЕМА */}
-        <section className="bg-white px-5 md:px-16 py-12 md:py-20">
+        <section id="structure" className="bg-white px-5 md:px-16 py-12 md:py-20 scroll-mt-[80px]">
           <div className="max-w-6xl mx-auto">
             <div className="flex items-center gap-2 text-[#1a0a6e] text-sm font-bold mb-4">
               <Icon name="Network" size={16} />
               Структура компании
             </div>
-            <h2 className="font-display text-3xl md:text-4xl font-black text-black mb-8 md:mb-12">
+            <h2 className="font-display text-3xl md:text-4xl font-black text-black mb-3">
               Команда «Даббл»
             </h2>
+            <p className="text-black/45 text-sm md:text-base mb-8 md:mb-10">
+              Нажмите на раздел, чтобы раскрыть подразделения.
+            </p>
 
             {nodes.length === 0 ? (
               <div className="flex items-center justify-center py-20 text-black/30">
                 <Icon name="Loader" size={24} className="animate-spin" />
               </div>
             ) : (
-              <div className="max-w-2xl">
+              <div className="max-w-2xl space-y-2">
                 {tree.map((root) => (
-                  <OrgNodeCard key={root.id} node={root as TreeNode} level={0} />
+                  <OrgAccordionNode key={root.id} node={root as TreeNode} level={0} />
                 ))}
               </div>
             )}

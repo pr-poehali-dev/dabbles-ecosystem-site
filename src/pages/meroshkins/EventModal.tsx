@@ -85,17 +85,22 @@ export default function EventModal({ event, defaultDate, rooms, onClose, onSaved
 
   return (
     <div
-      className="fixed inset-0 z-50 flex justify-end"
+      className="fixed inset-0 z-50 flex items-end sm:items-stretch sm:justify-end"
       style={{ background: "rgba(0,0,0,0.35)", backdropFilter: "blur(4px)" }}
       onClick={onClose}
     >
       <div
-        className="bg-white h-full w-full max-w-[440px] flex flex-col shadow-2xl"
-        style={{ ...SF, borderRadius: "20px 0 0 20px" }}
+        className="bg-white w-full sm:max-w-[440px] flex flex-col shadow-2xl max-h-[90dvh] sm:max-h-none sm:h-full rounded-t-[22px] sm:rounded-tr-none sm:rounded-l-[20px]"
+        style={SF}
         onClick={e => e.stopPropagation()}
       >
+        {/* Полоска-хваталка для мобилки */}
+        <div className="sm:hidden flex justify-center pt-2.5 pb-1 shrink-0">
+          <div className="w-10 h-1 rounded-full bg-black/15" />
+        </div>
+
         {/* HEADER */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-black/6 shrink-0">
+        <div className="flex items-center gap-3 px-5 py-3 sm:py-4 border-b border-black/6 shrink-0">
           <div className="w-3 h-3 rounded-full shrink-0" style={{ background: form.color }} />
           <span className="font-semibold text-[15px] text-black tracking-[-0.2px] flex-1 truncate">
             {isNew ? "Новое мероприятие" : (form.title || "Мероприятие")}

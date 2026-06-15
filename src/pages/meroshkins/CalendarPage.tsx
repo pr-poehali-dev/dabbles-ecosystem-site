@@ -195,7 +195,7 @@ export default function CalendarPage() {
               return (
                 <div
                   key={i}
-                  className={`min-h-[88px] md:min-h-[120px] p-1 md:p-2 cursor-pointer transition-colors group ${
+                  className={`min-h-[120px] md:min-h-[120px] p-1 md:p-2 cursor-pointer transition-colors group ${
                     d ? (isWeekend ? "bg-black/[0.01] hover:bg-[#f5f3ff]/60" : "hover:bg-[#f5f3ff]/40") : "bg-black/[0.015]"
                   }`}
                   onClick={() => {
@@ -223,10 +223,10 @@ export default function CalendarPage() {
                             onMouseEnter={e => setTooltip({ event: ev, x: e.clientX, y: e.clientY })}
                             onMouseLeave={() => setTooltip(null)}
                           >
-                            {/* Мобиль — компактная плашка с читаемым заголовком */}
-                            <div className="md:hidden px-1 py-0.5">
+                            {/* Мобиль — плашка с читаемым заголовком */}
+                            <div className="md:hidden px-1.5 py-1">
                               <span
-                                className="text-[10px] font-semibold leading-tight line-clamp-2 break-words"
+                                className="block text-[11px] font-semibold leading-snug line-clamp-3 break-words"
                                 style={{ color: ev.color }}
                               >
                                 {ev.title}

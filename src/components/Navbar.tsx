@@ -18,10 +18,8 @@ const SEGMENTS = ["Для всех", "Для бизнеса", "Для грант
 // Сетка сервисов (правая иконка)
 const SERVICES_GRID = [
   { icon: "CheckSquare", label: "Трекер", href: "" },
-  { icon: "FileText", label: "Формус", href: "https://forms-dubble.ru" },
   { icon: "Compass", label: "Компас", href: "https://даббл-компас.рф" },
   { icon: "CalendarDays", label: "Мерошкинс", href: "/meroshkins" },
-  { icon: "FileSignature", label: "КП", href: "/kp" },
   { icon: "IdCard", label: "Даббл ID", href: "/id" },
 ];
 
@@ -45,9 +43,7 @@ const MENU_SECTIONS: MenuSection[] = [
     title: "Сервисы",
     items: [
       { label: "Мерошкинс", href: "/meroshkins", icon: "CalendarDays", desc: "Управление событиями" },
-      { label: "Формус", href: "https://forms-dubble.ru", icon: "FileText", desc: "Онлайн-формы" },
       { label: "Компас", href: "https://даббл-компас.рф", icon: "Compass", desc: "Путешествия" },
-      { label: "Коммерческие предложения", href: "/kp", icon: "FileSignature", desc: "Генератор КП" },
     ],
   },
   {

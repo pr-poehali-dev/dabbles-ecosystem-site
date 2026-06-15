@@ -28,7 +28,6 @@ type HomeCard = {
 // ── Fallback-данные (если бэкенд недоступен) ──
 const FB_FINANCE: HomeCard[] = [
   { id: 11, card_type: "finance", title: "Управление задачами\nи проектами", subtitle: "", icon: "", image_url: IMG.piggy, gradient: "", href: "", is_light: false, is_feature: false, sort_order: 1 },
-  { id: 12, card_type: "finance", title: "Конструктор форм\nс дизайном на выбор", subtitle: "", icon: "", image_url: IMG.sticker, gradient: "", href: "https://forms-dubble.ru", is_light: false, is_feature: false, sort_order: 2 },
   { id: 13, card_type: "finance", title: "Попробуй Даббл Про\nза 1 ₽", subtitle: "", icon: "", image_url: "", gradient: "", href: "/about", is_light: false, is_feature: true, sort_order: 3 },
   { id: 14, card_type: "finance", title: "Витрина сервисов\nот Даббл", subtitle: "", icon: "", image_url: IMG.gift, gradient: "", href: "/about", is_light: false, is_feature: false, sort_order: 4 },
 ];
