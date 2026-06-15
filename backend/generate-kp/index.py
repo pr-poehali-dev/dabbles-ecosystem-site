@@ -1,25 +1,28 @@
-# v5 — CloudConvert
+# v6 — Documentero
 import json
 import os
-import io
-import base64
 import uuid
+import urllib.request
+import urllib.error
 from datetime import datetime
 import psycopg2
 import boto3
-from docx import Document
-from pdf_builder import build_kp_pdf
-from docx_filler import fill_docx
-from cloudconvert import docx_to_pdf
+import base64
 
 CORS = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, DELETE',
     'Access-Control-Allow-Headers': 'Content-Type, X-Auth-Token',
 }
 
+DOCUMENTERO_URL = 'https://app.documentero.com/api/generate'
+DOCUMENTERO_DOC = 'Waf2OyofsXSAuT9rmhQR'
+DOCUMENTERO_KEY = '6QFVLII-Q4RUPRI-VPG6POI-LYMP27I'
+
+
 def db():
     return psycopg2.connect(os.environ['DATABASE_URL'])
+
 
 def s3_client():
     return boto3.client(
@@ -29,6 +32,7 @@ def s3_client():
         aws_secret_access_key=os.environ['AWS_SECRET_ACCESS_KEY'],
     )
 
+
 def resp(status, body):
     return {
         'statusCode': status,
@@ -36,6 +40,7 @@ def resp(status, body):
         'isBase64Encoded': False,
         'body': json.dumps(body, ensure_ascii=False, default=str),
     }
+
 
 def esc(v):
     if v is None:
@@ -45,6 +50,7 @@ def esc(v):
     if isinstance(v, (int, float)):
         return str(v)
     return "'" + str(v).replace("'", "''") + "'"
+
 
 def get_admin(conn, token, schema):
     if not token:
@@ -60,12 +66,14 @@ def get_admin(conn, token, schema):
         return None
     return {'id': row[0]}
 
+
 def format_money(val):
     try:
         f = float(val)
-        return '{:,.2f}'.format(f).replace(',', ' ')
+        return '{:,.2f}'.format(f).replace(',', ' ').replace('.', ',')
     except Exception:
         return str(val)
+
 
 def check_stopwords(text, stopwords):
     text_lower = text.lower()
@@ -74,56 +82,54 @@ def check_stopwords(text, stopwords):
             return sw
     return None
 
-def apply_replacements(text, replacements):
-    for key, val in replacements.items():
-        text = text.replace('{' + key + '}', str(val))
-    return text
 
-def extract_docx_blocks(doc, replacements):
-    """Читает docx, возвращает список блоков для PDF."""
-    TABLE_MARKER = '{ТАБЛИЦА_ПОЗИЦИЙ}'
-    blocks = []
+def call_documentero(data: dict) -> str:
+    """Отправляет запрос в Documentero, возвращает URL готового PDF."""
+    payload = {
+        'document': DOCUMENTERO_DOC,
+        'apiKey': DOCUMENTERO_KEY,
+        'format': 'pdf',
+        'data': data,
+    }
+    body = json.dumps(payload, ensure_ascii=False).encode('utf-8')
+    req = urllib.request.Request(
+        DOCUMENTERO_URL,
+        data=body,
+        method='POST',
+        headers={'Content-Type': 'application/json'},
+    )
+    with urllib.request.urlopen(req, timeout=60) as r:
+        result = json.loads(r.read().decode('utf-8'))
 
-    body = doc.element.body
-    para_map = {p._element: p for p in doc.paragraphs}
-    table_map = {t._element: t for t in doc.tables}
+    if result.get('status') != 200:
+        raise RuntimeError(f"Documentero error: {result}")
 
-    for child in body:
-        tag = child.tag.split('}')[-1] if '}' in child.tag else child.tag
-        if tag == 'p':
-            para = para_map.get(child)
-            if para is None:
-                continue
-            raw = ''.join(r.text for r in para.runs)
-            txt = apply_replacements(raw, replacements)
-            bold = any(r.bold for r in para.runs if r.text.strip())
-            align_str = str(para.alignment)
-            align = 1 if 'CENTER' in align_str else (2 if 'RIGHT' in align_str else 0)
-            if TABLE_MARKER in txt:
-                blocks.append({'type': 'table_marker'})
-            else:
-                blocks.append({'type': 'para', 'text': txt, 'bold': bold, 'align': align})
-        elif tag == 'tbl':
-            tbl = table_map.get(child)
-            if tbl is None:
-                continue
-            has_marker = any(
-                TABLE_MARKER in apply_replacements(''.join(p.text for p in cell.paragraphs), replacements)
-                for row in tbl.rows for cell in row.cells
-            )
-            if has_marker:
-                blocks.append({'type': 'table_marker'})
-            else:
-                rows_data = [
-                    [apply_replacements(''.join(p.text for p in cell.paragraphs), replacements) for cell in row.cells]
-                    for row in tbl.rows
-                ]
-                blocks.append({'type': 'docx_table', 'rows': rows_data})
+    pdf_url = result.get('data', '')
+    if not pdf_url:
+        raise RuntimeError('Documentero: пустой URL в ответе')
+    return pdf_url
 
-    return blocks
+
+def download_and_store(pdf_url: str, safe_org: str, client) -> str:
+    """Скачивает PDF по ссылке и кладёт в S3, возвращает CDN URL."""
+    req = urllib.request.Request(pdf_url)
+    with urllib.request.urlopen(req, timeout=60) as r:
+        pdf_bytes = r.read()
+
+    result_key = f'kp-results/{uuid.uuid4()}/KP_{safe_org}.pdf'
+    client.put_object(
+        Bucket='files',
+        Key=result_key,
+        Body=pdf_bytes,
+        ContentType='application/pdf',
+        ContentDisposition='attachment; filename="KP.pdf"',
+    )
+    cdn_url = f"https://cdn.poehali.dev/projects/{os.environ['AWS_ACCESS_KEY_ID']}/bucket/{result_key}"
+    return cdn_url
+
 
 def handler(event, context):
-    """Генерирует КП (PDF) из .docx шаблона с проверкой стоп-слов и автонумерацией."""
+    """Генерирует КП (PDF) через Documentero с проверкой стоп-слов и автонумерацией."""
     method = event.get('httpMethod', 'GET')
     if method == 'OPTIONS':
         return {'statusCode': 200, 'headers': CORS, 'isBase64Encoded': False, 'body': ''}
@@ -133,42 +139,8 @@ def handler(event, context):
     headers_in = event.get('headers') or {}
     token = headers_in.get('X-Auth-Token') or headers_in.get('x-auth-token') or ''
 
-    conn = db()
-    client = s3_client()
     schema = os.environ.get('MAIN_DB_SCHEMA', 'public')
-
-    # === GET TEMPLATE ===
-    if action == 'get-template' and method == 'GET':
-        with conn.cursor() as cur:
-            cur.execute(f"SELECT id, name, file_url, uploaded_at FROM {schema}.kp_templates WHERE is_active=TRUE ORDER BY id DESC LIMIT 1")
-            row = cur.fetchone()
-        conn.close()
-        if not row:
-            return resp(404, {'error': 'Шаблон не загружен'})
-        return resp(200, {'id': row[0], 'name': row[1], 'file_url': row[2], 'uploaded_at': row[3]})
-
-    # === UPLOAD TEMPLATE ===
-    if action == 'upload-template' and method == 'POST':
-        if not get_admin(conn, token, schema):
-            conn.close()
-            return resp(403, {'error': 'Доступ запрещён'})
-        body = json.loads(event.get('body') or '{}')
-        file_b64 = body.get('file_base64', '')
-        file_name = body.get('file_name', 'template.docx')
-        if not file_b64:
-            conn.close()
-            return resp(400, {'error': 'Файл не передан'})
-        file_bytes = base64.b64decode(file_b64)
-        key = f'kp-templates/{uuid.uuid4()}/{file_name}'
-        client.put_object(Bucket='files', Key=key, Body=file_bytes,
-            ContentType='application/vnd.openxmlformats-officedocument.wordprocessingml.document')
-        cdn_url = f"https://cdn.poehali.dev/projects/{os.environ['AWS_ACCESS_KEY_ID']}/bucket/{key}"
-        with conn.cursor() as cur:
-            cur.execute(f"UPDATE {schema}.kp_templates SET is_active=FALSE")
-            cur.execute(f"INSERT INTO {schema}.kp_templates (name,file_url,is_active) VALUES ({esc(file_name)},{esc(cdn_url)},TRUE)")
-        conn.commit()
-        conn.close()
-        return resp(200, {'ok': True, 'url': cdn_url})
+    conn = db()
 
     # === STOPWORDS ===
     if action == 'stopwords':
@@ -211,99 +183,103 @@ def handler(event, context):
             conn.close()
             return resp(200, {'ok': True})
 
+    # === GET KP HISTORY (admin) ===
+    if action == 'history' and method == 'GET':
+        if not get_admin(conn, token, schema):
+            conn.close()
+            return resp(403, {'error': 'Доступ запрещён'})
+        with conn.cursor() as cur:
+            cur.execute(
+                f"SELECT id, organization, director_name, total_amount, doc_number, result_url, created_at "
+                f"FROM {schema}.kp_requests ORDER BY id DESC LIMIT 50"
+            )
+            rows = cur.fetchall()
+        conn.close()
+        keys = ['id', 'organization', 'director_name', 'total_amount', 'doc_number', 'result_url', 'created_at']
+        return resp(200, {'items': [dict(zip(keys, r)) for r in rows]})
+
     # === GENERATE KP ===
     if action == 'generate' and method == 'POST':
-        body = json.loads(event.get('body') or '{}')
-        organization = body.get('organization', '')
-        director_name = body.get('director_name', '')
-        items = body.get('items', [])
+        body_raw = json.loads(event.get('body') or '{}')
+        organization = body_raw.get('organization', '').strip()
+        director_name = body_raw.get('director_name', '').strip()
+        items = body_raw.get('items', [])
 
         if not organization or not director_name or not items:
             conn.close()
             return resp(400, {'error': 'Заполните все обязательные поля'})
 
+        # Проверка стоп-слов
         with conn.cursor() as cur:
             cur.execute(f"SELECT word FROM {schema}.kp_stopwords")
             stopwords = [r[0] for r in cur.fetchall()]
 
-        check_text = organization + ' ' + director_name + ' ' + ' '.join(it.get('name','') for it in items)
+        check_text = organization + ' ' + director_name + ' ' + ' '.join(it.get('name', '') for it in items)
         if check_stopwords(check_text, stopwords):
             conn.close()
             return resp(403, {'error': 'DENIED', 'code': 'stopword_match'})
 
-        with conn.cursor() as cur:
-            cur.execute(f"SELECT file_url FROM {schema}.kp_templates WHERE is_active=TRUE ORDER BY id DESC LIMIT 1")
-            row = cur.fetchone()
-        if not row:
-            conn.close()
-            return resp(404, {'error': 'Шаблон КП не загружен. Обратитесь к администратору.'})
-
-        template_url = row[0]
-
+        # Автонумерация
         with conn.cursor() as cur:
             cur.execute(f"SELECT nextval('{schema}.kp_doc_seq')")
             seq_num = cur.fetchone()[0]
         doc_number = f"89-101/{datetime.now().year}-{seq_num}"
 
-        prefix = f"https://cdn.poehali.dev/projects/{os.environ['AWS_ACCESS_KEY_ID']}/bucket/"
-        s3_key = template_url.replace(prefix, '')
-        obj = client.get_object(Bucket='files', Key=s3_key)
-        template_bytes = obj['Body'].read()
-
         total = sum(float(it.get('total', 0) or 0) for it in items)
 
-        replacements = {
+        # Формируем таблицу позиций как массив объектов (секция Documentero)
+        table_rows = []
+        for idx, it in enumerate(items, 1):
+            qty = it.get('qty', 1)
+            price = it.get('price', 0)
+            it_total = it.get('total', float(qty) * float(price))
+            table_rows.append({
+                'НОМ': str(idx),
+                'НАИМЕНОВАНИЕ': it.get('name', ''),
+                'ЕД': it.get('unit', 'шт.'),
+                'КОЛ': str(qty),
+                'ЦЕНА': format_money(price),
+                'СУММА': format_money(it_total),
+            })
+
+        # Данные для Documentero
+        doc_data = {
             'ОРГАНИЗАЦИЯ': organization,
-            'organization': organization,
             'ФИО_руководителя': director_name,
-            'director_name': director_name,
             'ДАТА': datetime.now().strftime('%d.%m.%Y'),
-            'date': datetime.now().strftime('%d.%m.%Y'),
-            'ИТОГО': format_money(total) + ' руб.',
-            'total': format_money(total),
             'НОМЕР_ДОКУМЕНТА': doc_number,
-            'doc_number': doc_number,
-            'НОМ': doc_number,
+            'ИТОГО': format_money(total) + ' руб.',
+            'ТАБЛИЦА_ПОЗИЦИЙ': table_rows,
         }
 
-        # 1) Заполняем .docx шаблон данными + таблицей позиций
-        filled_docx = fill_docx(template_bytes, replacements, items, total)
-
-        # 2) Конвертируем в PDF через CloudConvert (качество 1-в-1).
-        #    При сбое — fallback на встроенный генератор fpdf2.
-        pdf_engine = 'cloudconvert'
         try:
-            pdf_bytes = docx_to_pdf(filled_docx, filename=f'KP_{doc_number}.docx')
-            if not pdf_bytes or len(pdf_bytes) < 500:
-                raise RuntimeError('CloudConvert: пустой результат')
+            pdf_url = call_documentero(doc_data)
         except Exception as e:
-            pdf_engine = 'fallback'
-            print(f'CloudConvert недоступен, fallback: {e}')
-            doc_obj = Document(io.BytesIO(template_bytes))
-            blocks = extract_docx_blocks(doc_obj, replacements)
-            pdf_bytes = build_kp_pdf(blocks, items, total,
-                                     organization=organization,
-                                     director_name=director_name,
-                                     doc_number=doc_number)
+            conn.close()
+            print(f'Documentero error: {e}')
+            return resp(502, {'error': f'Ошибка генерации документа: {str(e)}'})
 
+        # Скачиваем и сохраняем в S3
+        client = s3_client()
         safe_org = organization[:30].replace('/', '-').replace('"', '')
-        result_key = f'kp-results/{uuid.uuid4()}/KP_{safe_org}.pdf'
-        client.put_object(
-            Bucket='files', Key=result_key, Body=pdf_bytes,
-            ContentType='application/pdf',
-            ContentDisposition='attachment; filename="KP.pdf"'
-        )
-        result_url = f"https://cdn.poehali.dev/projects/{os.environ['AWS_ACCESS_KEY_ID']}/bucket/{result_key}"
+        try:
+            result_url = download_and_store(pdf_url, safe_org, client)
+        except Exception:
+            # Если не удалось скачать — отдаём прямую ссылку Documentero
+            result_url = pdf_url
 
+        # Сохраняем в БД
         with conn.cursor() as cur:
             items_json = json.dumps(items, ensure_ascii=False)
             cur.execute(
-                f"INSERT INTO {schema}.kp_requests (organization,director_name,items,total_amount,result_url,doc_number) "
-                f"VALUES ({esc(organization)},{esc(director_name)},{esc(items_json)}::jsonb,{esc(total)},{esc(result_url)},{esc(doc_number)})"
+                f"INSERT INTO {schema}.kp_requests (organization, director_name, items, total_amount, result_url, doc_number) "
+                f"VALUES ({esc(organization)}, {esc(director_name)}, {esc(items_json)}::jsonb, "
+                f"{esc(total)}, {esc(result_url)}, {esc(doc_number)})"
             )
         conn.commit()
         conn.close()
-        return resp(200, {'ok': True, 'download_url': result_url, 'doc_number': doc_number, 'engine': pdf_engine})
+
+        return resp(200, {'ok': True, 'download_url': result_url, 'doc_number': doc_number})
 
     conn.close()
     return resp(404, {'error': 'Неизвестное действие'})

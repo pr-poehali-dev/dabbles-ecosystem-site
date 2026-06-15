@@ -7,18 +7,17 @@
       "expectedStatus": 200
     },
     {
-      "name": "Получить шаблон",
-      "method": "GET",
-      "path": "/?action=get-template",
-      "expectedStatus": 200,
-      "expectedBody": {"id": 1},
-      "bodyMatcher": "partial"
-    },
-    {
       "name": "Список стоп-слов",
       "method": "GET",
       "path": "/?action=stopwords",
       "expectedStatus": 200
+    },
+    {
+      "name": "Генерация без данных — ошибка 400",
+      "method": "POST",
+      "path": "/?action=generate",
+      "body": {},
+      "expectedStatus": 400
     }
   ]
 }
