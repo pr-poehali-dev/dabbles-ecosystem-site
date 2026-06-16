@@ -33,6 +33,7 @@ export default function MeroshkinsShare() {
   const [selected, setSelected] = useState<MEvent | null>(null);
   const [modalEvent, setModalEvent] = useState<MEvent | null | undefined>(undefined);
   const [newDate, setNewDate] = useState("");
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
 
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
