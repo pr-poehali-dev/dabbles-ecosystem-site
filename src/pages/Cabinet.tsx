@@ -117,6 +117,12 @@ export default function Cabinet() {
             <div className="text-[11px] text-black/40 truncate">{user.position || user.email}</div>
           </div>
           <Link
+            to="/edo"
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold text-[#1a0a6e] hover:bg-[#1a0a6e]/8 transition-colors mb-1"
+          >
+            <Icon name="FileStack" size={16} /> ЭДО
+          </Link>
+          <Link
             to="/id/profile"
             className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-sm text-black/60 hover:bg-black/5 hover:text-black transition-colors mb-1"
           >
