@@ -161,40 +161,92 @@ export default function MeroshkinsShare() {
           )}
         </div>
 
-        <div className="grid grid-cols-7 mb-1">
-          {WEEKDAYS.map(d => <div key={d} className="text-center text-xs font-bold text-black/30 py-2">{d}</div>)}
+        {/* Десктоп: обычная сетка */}
+        <div className="hidden md:block">
+          <div className="grid grid-cols-7 mb-1">
+            {WEEKDAYS.map(d => <div key={d} className="text-center text-xs font-bold text-black/30 py-2">{d}</div>)}
+          </div>
+          <div className="grid grid-cols-7 gap-1">
+            {cells.map((d, i) => {
+              const isToday = d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+              const dayEvents = d ? eventsOn(d) : [];
+              return (
+                <div key={i}
+                  className={`min-h-[80px] rounded-2xl p-2 ${d ? "bg-white border border-black/5" : ""} ${isEditor && d ? "cursor-pointer hover:border-[#7c3aed]/30 transition-colors" : ""}`}
+                  onClick={() => {
+                    if (isEditor && d) {
+                      setNewDate(`${year}-${String(month+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`);
+                      setModalEvent(null);
+                    }
+                  }}
+                >
+                  {d && (
+                    <>
+                      <div className={`text-xs font-bold mb-1.5 w-6 h-6 flex items-center justify-center rounded-full ${isToday ? "bg-[#7c3aed] text-white" : "text-black/50"}`}>{d}</div>
+                      {dayEvents.slice(0, 3).map(ev => (
+                        <div key={ev.id}
+                          className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md truncate text-white cursor-pointer hover:opacity-80 mb-0.5"
+                          style={{ background: ev.color }}
+                          onClick={e => { e.stopPropagation(); if (isEditor) setModalEvent(ev); else setSelected(ev); }}>
+                          {formatTime(ev.starts_at)} {ev.title}
+                        </div>
+                      ))}
+                      {dayEvents.length > 3 && <div className="text-[10px] text-black/35 pl-1.5">+{dayEvents.length - 3}</div>}
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
-        <div className="grid grid-cols-7 gap-1">
-          {cells.map((d, i) => {
+
+        {/* Мобилка: список событий по дням */}
+        <div className="md:hidden space-y-2">
+          {cells.filter(d => d !== null && eventsOn(d as number).length > 0).map(d => {
+            const dayEvents = eventsOn(d as number);
             const isToday = d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
-            const dayEvents = d ? eventsOn(d) : [];
+            const dateStr = new Date(year, month, d as number).toLocaleDateString("ru-RU", { weekday: "short", day: "numeric", month: "short" });
             return (
-              <div key={i}
-                className={`min-h-[80px] rounded-2xl p-2 ${d ? "bg-white border border-black/5" : ""} ${isEditor && d ? "cursor-pointer hover:border-[#7c3aed]/30 transition-colors" : ""}`}
-                onClick={() => {
-                  if (isEditor && d) {
-                    setNewDate(`${year}-${String(month+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`);
-                    setModalEvent(null);
-                  }
-                }}
-              >
-                {d && (
-                  <>
-                    <div className={`text-xs font-bold mb-1.5 w-6 h-6 flex items-center justify-center rounded-full ${isToday ? "bg-[#7c3aed] text-white" : "text-black/50"}`}>{d}</div>
-                    {dayEvents.slice(0, 3).map(ev => (
-                      <div key={ev.id}
-                        className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md truncate text-white cursor-pointer hover:opacity-80 mb-0.5"
-                        style={{ background: ev.color }}
-                        onClick={e => { e.stopPropagation(); if (isEditor) setModalEvent(ev); else setSelected(ev); }}>
-                        {formatTime(ev.starts_at)} {ev.title}
+              <div key={d} className="bg-white rounded-2xl border border-black/5 overflow-hidden">
+                <div className={`px-4 py-2 flex items-center gap-2 border-b border-black/5 ${isToday ? "bg-[#7c3aed]/5" : ""}`}>
+                  <span className={`text-xs font-bold ${isToday ? "text-[#7c3aed]" : "text-black/40"}`}>{dateStr}</span>
+                  {isToday && <span className="text-[10px] bg-[#7c3aed] text-white px-1.5 py-0.5 rounded-full font-semibold">Сегодня</span>}
+                </div>
+                <div className="divide-y divide-black/4">
+                  {dayEvents.map(ev => (
+                    <div key={ev.id}
+                      className="flex items-center gap-3 px-4 py-3 cursor-pointer active:bg-black/3"
+                      onClick={() => { if (isEditor) setModalEvent(ev); else setSelected(ev); }}
+                    >
+                      <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: ev.color }} />
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-semibold text-black leading-snug">{ev.title}</div>
+                        {ev.starts_at && (
+                          <div className="text-xs text-black/40 mt-0.5">{formatTime(ev.starts_at)}{ev.ends_at ? ` — ${formatTime(ev.ends_at)}` : ""}{ev.room_name ? ` · ${ev.room_name}` : ""}</div>
+                        )}
                       </div>
-                    ))}
-                    {dayEvents.length > 3 && <div className="text-[10px] text-black/35 pl-1.5">+{dayEvents.length - 3}</div>}
-                  </>
-                )}
+                      <Icon name="ChevronRight" size={14} className="text-black/20 shrink-0" />
+                    </div>
+                  ))}
+                </div>
               </div>
             );
           })}
+          {cells.filter(d => d !== null && eventsOn(d as number).length > 0).length === 0 && (
+            <div className="text-center py-16 text-black/30">
+              <Icon name="CalendarDays" size={32} className="mx-auto mb-3 opacity-40" />
+              <p className="text-sm">Нет мероприятий в этом месяце</p>
+            </div>
+          )}
+          {isEditor && (
+            <button
+              onClick={() => { const d = today.getDate(); setNewDate(`${year}-${String(month+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`); setModalEvent(null); }}
+              className="w-full py-3 rounded-2xl border-2 border-dashed border-[#7c3aed]/30 text-[#7c3aed] text-sm font-semibold flex items-center justify-center gap-2"
+            >
+              <Icon name="Plus" size={16} />
+              Добавить мероприятие
+            </button>
+          )}
         </div>
       </div>
 
