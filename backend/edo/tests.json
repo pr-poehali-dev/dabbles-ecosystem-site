@@ -1,0 +1,27 @@
+{
+  "tests": [
+    {
+      "name": "Stats (no auth)",
+      "method": "GET",
+      "path": "/?action=stats",
+      "expectedStatus": 401,
+      "expectedBody": {"error": "Не авторизован"},
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "List docs (no auth)",
+      "method": "GET",
+      "path": "/?action=list",
+      "expectedStatus": 401,
+      "expectedBody": {"error": "Не авторизован"},
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "CORS preflight",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200,
+      "bodyMatcher": "partial"
+    }
+  ]
+}
