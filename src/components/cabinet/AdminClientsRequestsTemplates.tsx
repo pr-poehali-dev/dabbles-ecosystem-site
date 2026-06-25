@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { cpApi, formatDate } from "@/lib/client-api";
+import Icon from "@/components/ui/icon";
 import { useToast } from "@/components/ui/use-toast";
 import { Modal, FormField, ModalButtons } from "./AdminClientsShared";
 
@@ -40,6 +42,23 @@ export default function AdminClientsRequestsTemplates({
   editTpl, setEditTpl,
 }: Props) {
   const { toast } = useToast();
+  const [testEmailTo, setTestEmailTo] = useState("");
+  const [testResult, setTestResult] = useState<{ ok: boolean; result: unknown; smtp_host: string; smtp_port: string; smtp_user: string; smtp_password_set: boolean } | null>(null);
+  const [testLoading, setTestLoading] = useState(false);
+
+  const handleTestEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setTestLoading(true);
+    setTestResult(null);
+    try {
+      const r = await cpApi.adminTestEmail(testEmailTo || undefined);
+      setTestResult(r);
+    } catch (err: unknown) {
+      toast({ title: "Ошибка запроса", description: err instanceof Error ? err.message : "", variant: "destructive" });
+    } finally {
+      setTestLoading(false);
+    }
+  };
 
   const handleSaveTpl = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,6 +116,35 @@ export default function AdminClientsRequestsTemplates({
 
   return (
     <div className="space-y-3">
+      {/* ── Диагностика SMTP ── */}
+      <div className="bg-white rounded-2xl border border-black/8 p-4">
+        <div className="font-bold text-black text-[13px] mb-3 flex items-center gap-2">
+          <Icon name="MailCheck" size={15} className="text-[#1a0a6e]" /> Проверка отправки писем
+        </div>
+        <form onSubmit={handleTestEmail} className="flex gap-2 items-center flex-wrap">
+          <input
+            value={testEmailTo}
+            onChange={e => setTestEmailTo(e.target.value)}
+            placeholder="Email для тестового письма (необязательно)"
+            type="email"
+            className="flex-1 min-w-0 px-3 py-2 rounded-xl border border-black/10 text-sm bg-[#f5f5f7] focus:outline-none"
+          />
+          <button type="submit" disabled={testLoading}
+            className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1a0a6e] text-white text-sm font-semibold disabled:opacity-50">
+            {testLoading ? <Icon name="Loader2" size={14} className="animate-spin" /> : <Icon name="Send" size={14} />}
+            Отправить тест
+          </button>
+        </form>
+        {testResult && (
+          <div className={`mt-3 p-3 rounded-xl text-[12px] font-mono space-y-1 ${testResult.ok ? "bg-green-50 text-green-800" : "bg-red-50 text-red-800"}`}>
+            <div className="font-bold">{testResult.ok ? "✅ Письмо отправлено!" : "❌ Ошибка отправки"}</div>
+            <div>Host: <b>{testResult.smtp_host || "—"}</b> Port: <b>{testResult.smtp_port || "—"}</b></div>
+            <div>User: <b>{testResult.smtp_user || "—"}</b> Password set: <b>{testResult.smtp_password_set ? "да" : "нет"}</b></div>
+            {!testResult.ok && <div className="mt-1 text-red-700 break-all">Ошибка: {String(testResult.result)}</div>}
+          </div>
+        )}
+      </div>
+
       {templates.map(t => (
         <div key={t.id} className="bg-white rounded-2xl border border-black/8 p-4 flex items-center gap-3">
           <div className="flex-1 min-w-0">

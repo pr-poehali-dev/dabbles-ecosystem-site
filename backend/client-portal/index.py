@@ -110,8 +110,9 @@ def send_email(to_email, subject, body_html, from_name=None):
                 s.login(user, password)
                 s.sendmail(user, [to_email], msg.as_bytes())
         return True
-    except Exception:
-        return False
+    except Exception as e:
+        print(f'[SMTP ERROR] host={host} port={port} user={user} to={to_email} err={e}')
+        return str(e)
 
 
 def render_template(html, variables):
@@ -770,6 +771,28 @@ def handler(event: dict, context) -> dict:
                 'new_requests': new_requests,
                 'total_paid': total_paid,
                 'total_pending': total_pending,
+            })
+
+        # ══ ДИАГНОСТИКА SMTP ══
+        if action == 'test-email' and method == 'POST':
+            admin = get_admin(conn, event)
+            if not admin: return resp(401, {'error': 'Нет доступа'})
+            body = json.loads(event.get('body') or '{}')
+            to = body.get('to') or admin['email']
+            host = os.environ.get('SMTP_HOST', '')
+            port = os.environ.get('SMTP_PORT', '')
+            user = os.environ.get('SMTP_USER', '')
+            has_pw = bool(os.environ.get('SMTP_PASSWORD', ''))
+            result = send_email(to, 'Тест SMTP — Клиентский портал',
+                f'<p>Это тестовое письмо. SMTP подключён корректно.</p><p>host={host} port={port} user={user}</p>')
+            return resp(200, {
+                'ok': result is True,
+                'result': result,
+                'smtp_host': host,
+                'smtp_port': port,
+                'smtp_user': user,
+                'smtp_password_set': has_pw,
+                'sent_to': to,
             })
 
         return resp(404, {'error': 'Неизвестное действие'})

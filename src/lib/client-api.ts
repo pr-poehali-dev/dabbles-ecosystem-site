@@ -148,6 +148,11 @@ export const cpApi = {
 
   adminTemplateUpdate: (data: { id: number; name?: string; subject?: string; body_html?: string }) =>
     cpRequest<{ ok: boolean }>("admin-template-update", { method: "POST", body: data, useAdminToken: true }),
+
+  adminTestEmail: (to?: string) =>
+    cpRequest<{ ok: boolean; result: unknown; smtp_host: string; smtp_port: string; smtp_user: string; smtp_password_set: boolean; sent_to: string }>(
+      "test-email", { method: "POST", body: to ? { to } : {}, useAdminToken: true }
+    ),
 };
 
 export const PAYMENT_STATUS: Record<string, { label: string; cls: string }> = {
