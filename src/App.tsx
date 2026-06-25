@@ -23,6 +23,7 @@ import KP from "./pages/KP";
 import KPRules from "./pages/KPRules";
 import NotFound from "./pages/NotFound";
 import EdoApp from "./pages/edo/index";
+import ClientPortal from "./pages/client/index";
 import { AuthProvider } from "@/lib/auth";
 
 const queryClient = new QueryClient();
@@ -48,6 +49,7 @@ const App = () => (
             <Route path="/meroshkins/invite" element={<MeroshkinsInvite />} />
             <Route path="/meroshkins/yandex-callback" element={<YandexCallback />} />
             <Route path="/edo/*" element={<EdoApp />} />
+            <Route path="/client/*" element={<ClientPortal />} />
             <Route path="/kp" element={<KP />} />
             <Route path="/kp-rules" element={<KPRules />} />
             <Route path="/vibe" element={<Vibe />} />
