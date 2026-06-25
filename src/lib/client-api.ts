@@ -2,9 +2,12 @@ const FN_URL_KEY = "client-portal";
 import urls from "../../backend/func2url.json";
 
 const TOKEN_KEY = "cp_token";
+const ADMIN_TOKEN_KEY = "dabbl_token";
+
 export const getCpToken = () => localStorage.getItem(TOKEN_KEY) || "";
 export const setCpToken = (t: string) => localStorage.setItem(TOKEN_KEY, t);
 export const clearCpToken = () => localStorage.removeItem(TOKEN_KEY);
+const getAdminToken = () => localStorage.getItem(ADMIN_TOKEN_KEY) || "";
 
 const BASE = (urls as Record<string, string>)[FN_URL_KEY];
 
@@ -12,11 +15,12 @@ async function cpRequest<T>(action: string, options: {
   method?: "GET" | "POST";
   body?: unknown;
   query?: Record<string, string | number>;
+  useAdminToken?: boolean;
 } = {}): Promise<T> {
-  const { method = "GET", body, query = {} } = options;
+  const { method = "GET", body, query = {}, useAdminToken = false } = options;
   const params = new URLSearchParams({ action, ...Object.fromEntries(Object.entries(query).map(([k, v]) => [k, String(v)])) });
   const url = `${BASE}?${params}`;
-  const token = getCpToken();
+  const token = useAdminToken ? getAdminToken() : getCpToken();
   const res = await fetch(url, {
     method,
     headers: {
@@ -84,66 +88,66 @@ export const cpApi = {
 
   myRequests: () => cpRequest<{ requests: CpRequest[] }>("my-requests"),
 
-  // Admin
+  // Admin (используют токен Даббл-авторизации)
   adminStats: () =>
-    cpRequest<{ clients_count: number; cases_count: number; new_requests: number; total_paid: number; total_pending: number }>("admin-stats"),
+    cpRequest<{ clients_count: number; cases_count: number; new_requests: number; total_paid: number; total_pending: number }>("admin-stats", { useAdminToken: true }),
 
   adminClients: (search = "") =>
-    cpRequest<{ clients: (CpClient & { created_at: string })[] }>("admin-clients", { query: search ? { search } : {} }),
+    cpRequest<{ clients: (CpClient & { created_at: string })[] }>("admin-clients", { query: search ? { search } : {}, useAdminToken: true }),
 
   adminClientGet: (id: number) =>
-    cpRequest<{ client: CpClient & { notes: string; is_active: string; created_at: string } }>("admin-client-get", { query: { id } }),
+    cpRequest<{ client: CpClient & { notes: string; is_active: string; created_at: string } }>("admin-client-get", { query: { id }, useAdminToken: true }),
 
   adminClientCreate: (data: Partial<CpClient> & { notes?: string }) =>
-    cpRequest<{ id: number; password: string }>("admin-client-create", { method: "POST", body: data }),
+    cpRequest<{ id: number; password: string }>("admin-client-create", { method: "POST", body: data, useAdminToken: true }),
 
   adminClientUpdate: (data: Partial<CpClient> & { id: number; notes?: string; is_active?: string }) =>
-    cpRequest<{ ok: boolean }>("admin-client-update", { method: "POST", body: data }),
+    cpRequest<{ ok: boolean }>("admin-client-update", { method: "POST", body: data, useAdminToken: true }),
 
   adminClientResetPassword: (id: number) =>
-    cpRequest<{ ok: boolean; password: string }>("admin-client-reset-password", { method: "POST", body: { id } }),
+    cpRequest<{ ok: boolean; password: string }>("admin-client-reset-password", { method: "POST", body: { id }, useAdminToken: true }),
 
   adminCases: (client_id?: number) =>
-    cpRequest<{ cases: (CpCase & { client_name: string; client_email: string })[] }>("admin-cases", { query: client_id ? { client_id } : {} }),
+    cpRequest<{ cases: (CpCase & { client_name: string; client_email: string })[] }>("admin-cases", { query: client_id ? { client_id } : {}, useAdminToken: true }),
 
   adminCaseCreate: (data: Partial<CpCase> & { client_id: number }) =>
-    cpRequest<{ id: number }>("admin-case-create", { method: "POST", body: data }),
+    cpRequest<{ id: number }>("admin-case-create", { method: "POST", body: data, useAdminToken: true }),
 
   adminCaseUpdate: (data: Partial<CpCase> & { id: number }) =>
-    cpRequest<{ ok: boolean }>("admin-case-update", { method: "POST", body: data }),
+    cpRequest<{ ok: boolean }>("admin-case-update", { method: "POST", body: data, useAdminToken: true }),
 
   adminCaseAddStatus: (data: { case_id: number; status: string; label: string; comment?: string; notify?: boolean }) =>
-    cpRequest<{ ok: boolean }>("admin-case-add-status", { method: "POST", body: data }),
+    cpRequest<{ ok: boolean }>("admin-case-add-status", { method: "POST", body: data, useAdminToken: true }),
 
   adminPayments: (client_id?: number) =>
-    cpRequest<{ payments: (CpPayment & { client_name: string })[] }>("admin-payments", { query: client_id ? { client_id } : {} }),
+    cpRequest<{ payments: (CpPayment & { client_name: string })[] }>("admin-payments", { query: client_id ? { client_id } : {}, useAdminToken: true }),
 
   adminPaymentCreate: (data: { client_id: number; amount: number; basis: string; case_id?: number; due_date?: string; notes?: string; notify?: boolean }) =>
-    cpRequest<{ id: number }>("admin-payment-create", { method: "POST", body: data }),
+    cpRequest<{ id: number }>("admin-payment-create", { method: "POST", body: data, useAdminToken: true }),
 
   adminPaymentUpdate: (data: { id: number; status?: string; payment_date?: string; amount?: number; basis?: string }) =>
-    cpRequest<{ ok: boolean }>("admin-payment-update", { method: "POST", body: data }),
+    cpRequest<{ ok: boolean }>("admin-payment-update", { method: "POST", body: data, useAdminToken: true }),
 
   adminDocuments: (client_id: number) =>
-    cpRequest<{ documents: CpDocument[] }>("admin-documents", { query: { client_id } }),
+    cpRequest<{ documents: CpDocument[] }>("admin-documents", { query: { client_id }, useAdminToken: true }),
 
   adminDocumentSave: (data: Partial<CpDocument> & { client_id?: number }) =>
-    cpRequest<{ id?: number; ok?: boolean }>("admin-document-save", { method: "POST", body: data }),
+    cpRequest<{ id?: number; ok?: boolean }>("admin-document-save", { method: "POST", body: data, useAdminToken: true }),
 
   adminRequests: (params: { client_id?: number; status?: string } = {}) =>
-    cpRequest<{ requests: (CpRequest & { client_name: string; client_email: string })[] }>("admin-requests", { query: params as Record<string, string | number> }),
+    cpRequest<{ requests: (CpRequest & { client_name: string; client_email: string })[] }>("admin-requests", { query: params as Record<string, string | number>, useAdminToken: true }),
 
   adminRequestUpdate: (data: { id: number; status?: string; admin_comment?: string }) =>
-    cpRequest<{ ok: boolean }>("admin-request-update", { method: "POST", body: data }),
+    cpRequest<{ ok: boolean }>("admin-request-update", { method: "POST", body: data, useAdminToken: true }),
 
   adminSendDoc: (data: { client_id: number; doc_title: string; doc_content?: string; file_url?: string }) =>
-    cpRequest<{ ok: boolean; sent_to: string }>("admin-send-doc", { method: "POST", body: data }),
+    cpRequest<{ ok: boolean; sent_to: string }>("admin-send-doc", { method: "POST", body: data, useAdminToken: true }),
 
   adminTemplates: () =>
-    cpRequest<{ templates: { id: number; code: string; name: string; subject: string; body_html: string; variables: string }[] }>("admin-templates"),
+    cpRequest<{ templates: { id: number; code: string; name: string; subject: string; body_html: string; variables: string }[] }>("admin-templates", { useAdminToken: true }),
 
   adminTemplateUpdate: (data: { id: number; name?: string; subject?: string; body_html?: string }) =>
-    cpRequest<{ ok: boolean }>("admin-template-update", { method: "POST", body: data }),
+    cpRequest<{ ok: boolean }>("admin-template-update", { method: "POST", body: data, useAdminToken: true }),
 };
 
 export const PAYMENT_STATUS: Record<string, { label: string; cls: string }> = {
