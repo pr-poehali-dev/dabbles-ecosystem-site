@@ -1,4 +1,4 @@
-import json, os, secrets, hashlib, smtplib, re
+import json, os, secrets, hashlib, smtplib, re  # v2
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import psycopg2
