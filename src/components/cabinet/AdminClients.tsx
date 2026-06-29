@@ -6,6 +6,7 @@ import { Modal, FormField, ModalButtons } from "./AdminClientsShared";
 import AdminClientsCases from "./AdminClientsCases";
 import AdminClientsPayments from "./AdminClientsPayments";
 import AdminClientsRequestsTemplates from "./AdminClientsRequestsTemplates";
+import ClientCard from "./ClientCard";
 
 type Tab = "clients" | "cases" | "payments" | "requests" | "templates";
 
@@ -16,6 +17,7 @@ export default function AdminClients() {
   // Clients
   const [clients, setClients] = useState<(CpClient & { created_at: string })[]>([]);
   const [search, setSearch] = useState("");
+  const [openCardId, setOpenCardId] = useState<number | null>(null);
   const [showClientForm, setShowClientForm] = useState(false);
   const [clientForm, setClientForm] = useState({ full_name: "", email: "", phone: "", address: "", passport: "", inn: "", notes: "" });
   const [clientSaving, setClientSaving] = useState(false);
@@ -192,7 +194,11 @@ export default function AdminClients() {
             ) : (
               <div className="divide-y divide-black/5">
                 {clients.map(c => (
-                  <div key={c.id} className="flex items-center gap-3 px-4 py-3 hover:bg-black/2">
+                  <div
+                    key={c.id}
+                    onClick={() => setOpenCardId(c.id)}
+                    className="flex items-center gap-3 px-4 py-3 hover:bg-[#1a0a6e]/5 cursor-pointer transition-colors group"
+                  >
                     <div className="w-8 h-8 rounded-full bg-[#1a0a6e]/10 flex items-center justify-center text-[12px] font-black text-[#1a0a6e] shrink-0">
                       {c.full_name?.[0] || "?"}
                     </div>
@@ -200,35 +206,8 @@ export default function AdminClients() {
                       <div className="text-[13px] font-semibold text-black truncate">{c.full_name}</div>
                       <div className="text-[11px] text-black/40">{c.email} {c.phone ? `· ${c.phone}` : ""}</div>
                     </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <button
-                        onClick={() => { setShowDocsModal(null); openDocsModal(c.id); }}
-                        title="Документы"
-                        className="p-1.5 rounded-lg hover:bg-black/5 text-black/40 hover:text-[#1a0a6e]"
-                      >
-                        <Icon name="FileText" size={14} />
-                      </button>
-                      <button
-                        onClick={() => setShowSendDoc(c.id)}
-                        title="Отправить документ"
-                        className="p-1.5 rounded-lg hover:bg-black/5 text-black/40 hover:text-[#1a0a6e]"
-                      >
-                        <Icon name="Send" size={14} />
-                      </button>
-                      <button
-                        onClick={() => handleResetPassword(c.id)}
-                        title="Сбросить пароль"
-                        className="p-1.5 rounded-lg hover:bg-black/5 text-black/40 hover:text-yellow-600"
-                      >
-                        <Icon name="KeyRound" size={14} />
-                      </button>
-                      <button
-                        onClick={() => handleClientToggle(c.id, "yes")}
-                        title="Блокировать"
-                        className="p-1.5 rounded-lg hover:bg-black/5 text-black/40 hover:text-red-500"
-                      >
-                        <Icon name="Ban" size={14} />
-                      </button>
+                    <div className="flex items-center gap-1.5 text-[12px] font-semibold text-[#1a0a6e] shrink-0 opacity-60 group-hover:opacity-100">
+                      Открыть <Icon name="ChevronRight" size={15} />
                     </div>
                   </div>
                 ))}
@@ -283,6 +262,15 @@ export default function AdminClients() {
           loadTemplates={loadTemplates}
           editTpl={editTpl}
           setEditTpl={setEditTpl}
+        />
+      )}
+
+      {/* ══ CRM-КАРТОЧКА КЛИЕНТА ══ */}
+      {openCardId && (
+        <ClientCard
+          clientId={openCardId}
+          onClose={() => setOpenCardId(null)}
+          onChanged={loadClients}
         />
       )}
 

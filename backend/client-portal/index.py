@@ -1,6 +1,8 @@
-import json, os, secrets, hashlib, smtplib, re  # v2
+import json, os, secrets, hashlib, smtplib, re  # v3
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.header import Header
+from email.utils import formataddr, formatdate, make_msgid
 import psycopg2
 
 CORS = {
@@ -94,21 +96,32 @@ def send_email(to_email, subject, body_html, from_name=None):
     sender_name = from_name or os.environ.get('SMTP_FROM_NAME', 'Личный кабинет')
     if not host or not user or not password:
         return False
+    # Текстовая версия из HTML (важно для антиспама)
+    text_body = re.sub(r'<[^>]+>', '', body_html)
+    text_body = re.sub(r'\n\s*\n+', '\n\n', text_body).strip()
     msg = MIMEMultipart('alternative')
-    msg['Subject'] = subject
-    msg['From'] = f'{sender_name} <{user}>'
+    msg['Subject'] = Header(subject, 'utf-8')
+    # From обязан содержать тот же адрес, что и SMTP_USER (требование Mail.ru)
+    msg['From'] = formataddr((str(Header(sender_name, 'utf-8')), user))
     msg['To'] = to_email
+    msg['Reply-To'] = user
+    msg['Date'] = formatdate(localtime=True)
+    msg['Message-ID'] = make_msgid(domain=user.split('@')[-1] if '@' in user else None)
+    msg.attach(MIMEText(text_body, 'plain', 'utf-8'))
     msg.attach(MIMEText(body_html, 'html', 'utf-8'))
     try:
         if port == 465:
-            with smtplib.SMTP_SSL(host, port, timeout=15) as s:
+            with smtplib.SMTP_SSL(host, port, timeout=20) as s:
                 s.login(user, password)
                 s.sendmail(user, [to_email], msg.as_bytes())
         else:
-            with smtplib.SMTP(host, port, timeout=15) as s:
+            with smtplib.SMTP(host, port, timeout=20) as s:
+                s.ehlo()
                 s.starttls()
+                s.ehlo()
                 s.login(user, password)
                 s.sendmail(user, [to_email], msg.as_bytes())
+        print(f'[SMTP OK] to={to_email} subject={subject}')
         return True
     except Exception as e:
         print(f'[SMTP ERROR] host={host} port={port} user={user} to={to_email} err={e}')
