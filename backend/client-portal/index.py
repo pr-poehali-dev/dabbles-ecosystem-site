@@ -449,8 +449,8 @@ def handler(event: dict, context) -> dict:
             admin = get_admin(conn, event)
             if not admin: return resp(401, {'error': 'Нет доступа'})
             client_id = qs.get('client_id')
-            where = "is_active = 'yes'"
-            if client_id: where += f" AND client_id = {esc(int(client_id))}"
+            where = "c.is_active = 'yes'"
+            if client_id: where += f" AND c.client_id = {esc(int(client_id))}"
             with conn.cursor() as cur:
                 cur.execute(
                     f"SELECT c.id, c.case_number, c.title, c.plaintiff, c.defendant, c.amount, c.status, c.created_at, "
