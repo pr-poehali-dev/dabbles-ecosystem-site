@@ -105,6 +105,23 @@ export default function ClientCard({ clientId, onClose, onChanged }: Props) {
     toast({ title: "Пароль сброшен", description: `Новый пароль: ${r.password} — отправлен клиенту` });
   };
 
+  const [sendingCreds, setSendingCreds] = useState(false);
+  const sendCredentials = async () => {
+    setSendingCreds(true);
+    try {
+      const r = await cpApi.adminClientSendCredentials(clientId);
+      if (r.ok) {
+        toast({ title: "Доступ отправлен", description: `Логин и пароль отправлены на ${r.sent_to}` });
+      } else {
+        toast({ title: "Письмо не отправлено", description: `Пароль создан: ${r.password}. Ошибка: ${String(r.result)}`, variant: "destructive" });
+      }
+    } catch (err: unknown) {
+      toast({ title: "Ошибка", description: err instanceof Error ? err.message : "", variant: "destructive" });
+    } finally {
+      setSendingCreds(false);
+    }
+  };
+
   const toggleActive = async () => {
     if (!client) return;
     await cpApi.adminClientUpdate({ id: clientId, is_active: client.is_active === "yes" ? "no" : "yes" });
@@ -237,6 +254,7 @@ export default function ClientCard({ clientId, onClose, onChanged }: Props) {
                 )}
                 <div className="flex gap-2 flex-wrap pt-1">
                   <button onClick={() => setEditProfile(true)} className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1a0a6e] text-white text-sm font-semibold"><Icon name="Pencil" size={14} /> Редактировать</button>
+                  <button onClick={sendCredentials} disabled={sendingCreds} className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-green-600 text-white text-sm font-semibold disabled:opacity-50"><Icon name="Mail" size={14} /> {sendingCreds ? "Отправка..." : "Отправить доступ"}</button>
                   <button onClick={resetPassword} className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-black/10 text-sm font-semibold text-black/70 hover:bg-black/5"><Icon name="KeyRound" size={14} /> Сбросить пароль</button>
                   <button onClick={toggleActive} className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-black/10 text-sm font-semibold text-red-500 hover:bg-red-50"><Icon name="Ban" size={14} /> {client.is_active === "yes" ? "Заблокировать" : "Разблокировать"}</button>
                 </div>

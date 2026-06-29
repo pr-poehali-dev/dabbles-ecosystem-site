@@ -21,6 +21,7 @@ const SERVICES_GRID = [
   { icon: "Compass", label: "Компас", href: "https://даббл-компас.рф" },
   { icon: "CalendarDays", label: "Мерошкинс", href: "/meroshkins" },
   { icon: "IdCard", label: "Даббл ID", href: "/id" },
+  { icon: "Scale", label: "Юр сервис", href: "/client" },
 ];
 
 // Главное меню разделов сайта

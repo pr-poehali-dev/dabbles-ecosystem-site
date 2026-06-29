@@ -441,6 +441,30 @@ def handler(event: dict, context) -> dict:
                     f'<p>Вход: <a href="{PORTAL_URL}">{PORTAL_URL}</a></p>')
             return resp(200, {'ok': True, 'password': new_password})
 
+        if action == 'admin-client-send-credentials' and method == 'POST':
+            admin = get_admin(conn, event)
+            if not admin: return resp(401, {'error': 'Нет доступа'})
+            body = json.loads(event.get('body') or '{}')
+            client_id = int(body.get('id', 0))
+            new_password = secrets.token_urlsafe(8)
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"UPDATE cp_clients SET password_hash = {esc(hash_pw(new_password))}, updated_at = NOW() WHERE id = {esc(client_id)}"
+                )
+                cur.execute(f"SELECT email, full_name FROM cp_clients WHERE id = {esc(client_id)} LIMIT 1")
+                row = cur.fetchone()
+            conn.commit()
+            if not row:
+                return resp(404, {'error': 'Клиент не найден'})
+            sent = send_from_template(conn, 'welcome', row[0], {
+                'full_name': row[1],
+                'email': row[0],
+                'password': new_password,
+                'portal_url': PORTAL_URL,
+                'company_name': os.environ.get('SMTP_FROM_NAME', 'Личный кабинет'),
+            })
+            return resp(200, {'ok': sent is True, 'result': sent, 'sent_to': row[0], 'password': new_password})
+
         # ══════════════════════════════════════════════════════════
         # ADMIN: ДЕЛА
         # ══════════════════════════════════════════════════════════

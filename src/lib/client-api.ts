@@ -107,6 +107,9 @@ export const cpApi = {
   adminClientResetPassword: (id: number) =>
     cpRequest<{ ok: boolean; password: string }>("admin-client-reset-password", { method: "POST", body: { id }, useAdminToken: true }),
 
+  adminClientSendCredentials: (id: number) =>
+    cpRequest<{ ok: boolean; result: unknown; sent_to: string; password: string }>("admin-client-send-credentials", { method: "POST", body: { id }, useAdminToken: true }),
+
   adminCases: (client_id?: number) =>
     cpRequest<{ cases: (CpCase & { client_name: string; client_email: string })[] }>("admin-cases", { query: client_id ? { client_id } : {}, useAdminToken: true }),
 
