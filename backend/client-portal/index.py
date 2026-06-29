@@ -12,7 +12,7 @@ CORS = {
 }
 
 CARD_NUMBER = '2202200659138646'
-PORTAL_URL = os.environ.get('PORTAL_URL', 'https://dabbles-ecosystem-site.poehali.dev/client')
+PORTAL_URL = os.environ.get('PORTAL_URL', 'https://xn----8sbarwhfgi0a.xn--p1ai/client')
 
 REQUEST_TYPES = {
     'recalculation': 'Заявление на перерасчёт',
