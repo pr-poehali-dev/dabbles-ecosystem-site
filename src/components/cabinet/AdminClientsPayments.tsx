@@ -56,9 +56,30 @@ export default function AdminClientsPayments({
     loadPayments();
   };
 
+  const handleReminders = async () => {
+    try {
+      const r = await cpApi.adminPaymentReminders();
+      if (r.total === 0) {
+        toast({ title: "Напоминания не нужны", description: "Нет счетов с дедлайном в ближайшие 3 дня" });
+      } else if (r.errors.length === 0) {
+        toast({ title: `Отправлено ${r.sent.length} напоминаний`, description: r.sent.map(s => s.email).join(", ") });
+      } else {
+        toast({ title: `Отправлено ${r.sent.length} из ${r.total}`, description: `Ошибки: ${r.errors.length}`, variant: "destructive" });
+      }
+    } catch {
+      toast({ title: "Ошибка", variant: "destructive" });
+    }
+  };
+
   return (
     <div>
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-end gap-2 mb-4">
+        <button
+          onClick={handleReminders}
+          className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-black/10 text-sm font-semibold text-black/60 hover:bg-black/5"
+        >
+          <Icon name="Bell" size={15} /> Напомнить об оплате
+        </button>
         <button
           onClick={() => setShowPayForm(true)}
           className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1a0a6e] text-white text-sm font-semibold"

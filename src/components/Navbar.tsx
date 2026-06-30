@@ -27,16 +27,16 @@ const SERVICES_GRID = [
 // Главное меню разделов сайта
 type MenuSection = {
   title: string;
-  items: { label: string; href: string; icon: string; desc?: string }[];
+  items: { label: string; href: string; icon: string; desc?: string; disabled?: boolean }[];
 };
 
 const MENU_SECTIONS: MenuSection[] = [
   {
     title: "Компания",
     items: [
-      { label: "О компании", href: "/about", icon: "Building2", desc: "Миссия и экосистема" },
+      { label: "О компании", href: "/about", icon: "Building2", desc: "Миссия и экосистема", disabled: true },
       { label: "Организационная структура", href: "/about#structure", icon: "Network", desc: "Как устроена корпорация" },
-      { label: "Генеральный директор", href: "/director", icon: "UserCog", desc: "Обращение руководителя" },
+      { label: "Генеральный директор", href: "/director", icon: "UserCog", desc: "Обращение руководителя", disabled: true },
       { label: "Реквизиты", href: "/legal", icon: "Scale", desc: "Юридическая информация" },
     ],
   },
@@ -213,15 +213,16 @@ export default function Navbar({ menuOpen, scrollTo, setMenuOpen, audience = "Д
                       {sec.items.map((it) => (
                         <li key={it.label}>
                           <button
-                            onClick={() => goLink(it.href)}
-                            className="w-full flex items-start gap-3 p-2.5 rounded-2xl hover:bg-[#f5f5f7] transition-colors text-left group"
+                            onClick={() => !it.disabled && goLink(it.href)}
+                            disabled={it.disabled}
+                            className={`w-full flex items-start gap-3 p-2.5 rounded-2xl transition-colors text-left group ${it.disabled ? "opacity-35 cursor-not-allowed" : "hover:bg-[#f5f5f7]"}`}
                           >
                             <div className="w-9 h-9 rounded-xl bg-[#f0f0f5] group-hover:bg-white flex items-center justify-center shrink-0 transition-colors">
                               <Icon name={it.icon} size={17} className="text-black/55" />
                             </div>
                             <div className="min-w-0">
                               <div className="text-[14px] font-semibold text-black leading-tight">{it.label}</div>
-                              {it.desc && <div className="text-[12px] text-black/40 leading-tight mt-0.5">{it.desc}</div>}
+                              {it.desc && <div className={`text-[12px] leading-tight mt-0.5 ${it.disabled ? "text-black/30" : "text-black/40"}`}>{it.disabled ? "Скоро" : it.desc}</div>}
                             </div>
                           </button>
                         </li>
@@ -260,11 +261,15 @@ export default function Navbar({ menuOpen, scrollTo, setMenuOpen, audience = "Д
                 {sec.items.map((it) => (
                   <button
                     key={it.label}
-                    onClick={() => goLink(it.href)}
-                    className="w-full flex items-center gap-3 px-2 py-3 rounded-xl hover:bg-black/4 transition-colors text-left"
+                    onClick={() => !it.disabled && goLink(it.href)}
+                    disabled={it.disabled}
+                    className={`w-full flex items-center gap-3 px-2 py-3 rounded-xl transition-colors text-left ${it.disabled ? "opacity-35 cursor-not-allowed" : "hover:bg-black/4"}`}
                   >
                     <Icon name={it.icon} size={18} className="text-black/45 shrink-0" />
-                    <span className="text-[15px] font-medium text-black/80">{it.label}</span>
+                    <div>
+                      <span className="text-[15px] font-medium text-black/80">{it.label}</span>
+                      {it.disabled && <span className="ml-2 text-[11px] text-black/30">Скоро</span>}
+                    </div>
                   </button>
                 ))}
               </div>

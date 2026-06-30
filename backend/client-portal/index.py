@@ -757,6 +757,60 @@ def handler(event: dict, context) -> dict:
             })
             return resp(200, {'ok': ok, 'sent_to': row[0]})
 
+        if action == 'admin-send-email' and method == 'POST':
+            """Отправить произвольное письмо клиенту."""
+            admin = get_admin(conn, event)
+            if not admin: return resp(401, {'error': 'Нет доступа'})
+            body = json.loads(event.get('body') or '{}')
+            client_id = int(body.get('client_id', 0))
+            subject = body.get('subject', '').strip()
+            message = body.get('message', '').strip()
+            if not client_id or not subject or not message:
+                return resp(400, {'error': 'Заполните получателя, тему и текст'})
+            with conn.cursor() as cur:
+                cur.execute(f"SELECT email, full_name FROM cp_clients WHERE id = {esc(client_id)} LIMIT 1")
+                row = cur.fetchone()
+            if not row: return resp(404, {'error': 'Клиент не найден'})
+            company = os.environ.get('SMTP_FROM_NAME', 'Личный кабинет')
+            html = (
+                f'<p>Здравствуйте, <b>{row[1]}</b>!</p>'
+                f'<div style="line-height:1.7">{message.replace(chr(10), "<br>")}</div>'
+                f'<p style="margin-top:24px">С уважением,<br><b>{company}</b></p>'
+                f'<p><a href="{PORTAL_URL}">Личный кабинет</a></p>'
+            )
+            ok = send_email(row[0], subject, html)
+            return resp(200, {'ok': ok is True, 'sent_to': row[0]})
+
+        if action == 'admin-payment-reminders' and method == 'POST':
+            """Отправить напоминания об оплате всем клиентам, у кого дедлайн через ≤3 дня."""
+            admin = get_admin(conn, event)
+            if not admin: return resp(401, {'error': 'Нет доступа'})
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT p.id, p.amount, p.basis, p.due_date, cl.email, cl.full_name "
+                    "FROM cp_payments p JOIN cp_clients cl ON cl.id = p.client_id "
+                    "WHERE p.status = 'pending' AND p.due_date IS NOT NULL "
+                    "AND p.due_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '3 days'"
+                )
+                rows = cur.fetchall()
+            sent, errors = [], []
+            for r in rows:
+                pay_id, amount, basis, due_date, email, full_name = r
+                due_str = due_date.strftime('%d.%m.%Y') if hasattr(due_date, 'strftime') else str(due_date)
+                ok = send_from_template(conn, 'new_payment', email, {
+                    'full_name': full_name,
+                    'amount': f"{float(amount):,.2f}".replace(',', ' '),
+                    'basis': basis,
+                    'due_date': due_str,
+                    'portal_url': PORTAL_URL,
+                    'company_name': os.environ.get('SMTP_FROM_NAME', 'Кабинет'),
+                })
+                if ok is True:
+                    sent.append({'payment_id': pay_id, 'email': email})
+                else:
+                    errors.append({'payment_id': pay_id, 'email': email, 'error': str(ok)})
+            return resp(200, {'sent': sent, 'errors': errors, 'total': len(rows)})
+
         # ══════════════════════════════════════════════════════════
         # ADMIN: EMAIL-ШАБЛОНЫ
         # ══════════════════════════════════════════════════════════

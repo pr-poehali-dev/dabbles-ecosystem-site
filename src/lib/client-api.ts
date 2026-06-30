@@ -110,6 +110,12 @@ export const cpApi = {
   adminClientSendCredentials: (id: number) =>
     cpRequest<{ ok: boolean; result: unknown; sent_to: string; password: string }>("admin-client-send-credentials", { method: "POST", body: { id }, useAdminToken: true }),
 
+  adminSendEmail: (data: { client_id: number; subject: string; message: string }) =>
+    cpRequest<{ ok: boolean; sent_to: string }>("admin-send-email", { method: "POST", body: data, useAdminToken: true }),
+
+  adminPaymentReminders: () =>
+    cpRequest<{ sent: { payment_id: number; email: string }[]; errors: { payment_id: number; email: string; error: string }[]; total: number }>("admin-payment-reminders", { method: "POST", body: {}, useAdminToken: true }),
+
   adminCases: (client_id?: number) =>
     cpRequest<{ cases: (CpCase & { client_name: string; client_email: string })[] }>("admin-cases", { query: client_id ? { client_id } : {}, useAdminToken: true }),
 

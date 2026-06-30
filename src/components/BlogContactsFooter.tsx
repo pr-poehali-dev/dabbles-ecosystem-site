@@ -24,7 +24,7 @@ const FOOTER_LINKS = [
   {
     title: "Компания",
     links: [
-      { label: "О компании", to: "/about" },
+      { label: "О компании", to: null },
       { label: "Инвесторам", href: "#initiatives" },
       { label: "Контакты", href: "#contacts" },
     ],

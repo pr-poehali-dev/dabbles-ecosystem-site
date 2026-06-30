@@ -3,7 +3,7 @@ import { cpApi, CpClient, CpCase, CpPayment, PAYMENT_STATUS, CASE_STATUS_COLORS,
 import Icon from "@/components/ui/icon";
 import { useToast } from "@/components/ui/use-toast";
 
-type CardTab = "profile" | "cases" | "payments" | "documents" | "requests";
+type CardTab = "profile" | "cases" | "payments" | "documents" | "requests" | "email";
 
 type ClientFull = CpClient & { notes: string; is_active: string; created_at: string };
 type CaseRow = CpCase & { client_name: string; client_email: string };
@@ -17,6 +17,7 @@ const TABS: { key: CardTab; label: string; icon: string }[] = [
   { key: "payments", label: "Оплаты", icon: "CreditCard" },
   { key: "documents", label: "Документы", icon: "FileText" },
   { key: "requests", label: "Заявления", icon: "Inbox" },
+  { key: "email", label: "Письмо", icon: "Mail" },
 ];
 
 const DOC_TYPES: Record<string, string> = {
@@ -414,8 +415,59 @@ export default function ClientCard({ clientId, onClose, onChanged }: Props) {
               })}
             </div>
           )}
+
+          {/* ── ПИСЬМО ── */}
+          {tab === "email" && (
+            <EmailForm clientId={clientId} clientEmail={client?.email} toast={toast} input={input} lbl={lbl} />
+          )}
         </div>
       </div>
     </div>
+  );
+}
+
+function EmailForm({ clientId, clientEmail, toast, input, lbl }: {
+  clientId: number; clientEmail?: string;
+  toast: ReturnType<typeof import("@/components/ui/use-toast").useToast>["toast"];
+  input: string; lbl: string;
+}) {
+  const [form, setForm] = useState({ subject: "", message: "" });
+  const [sending, setSending] = useState(false);
+
+  const send = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSending(true);
+    try {
+      const r = await cpApi.adminSendEmail({ client_id: clientId, subject: form.subject, message: form.message });
+      if (r.ok) {
+        toast({ title: "Письмо отправлено", description: `На ${r.sent_to}` });
+        setForm({ subject: "", message: "" });
+      } else {
+        toast({ title: "Ошибка отправки", variant: "destructive" });
+      }
+    } catch (err: unknown) {
+      toast({ title: "Ошибка", description: err instanceof Error ? err.message : "", variant: "destructive" });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <form onSubmit={send} className="space-y-4">
+      <div className="bg-[#f5f5f7] rounded-xl p-3 text-[12px] text-black/50">
+        Получатель: <span className="font-semibold text-black">{clientEmail || "—"}</span>
+      </div>
+      <div>
+        <label className={lbl}>Тема письма *</label>
+        <input className={input} required placeholder="Информация по вашему делу" value={form.subject} onChange={e => setForm(p => ({ ...p, subject: e.target.value }))} />
+      </div>
+      <div>
+        <label className={lbl}>Текст письма *</label>
+        <textarea className={`${input} resize-none`} rows={8} required placeholder="Здравствуйте! Сообщаем вам..." value={form.message} onChange={e => setForm(p => ({ ...p, message: e.target.value }))} />
+      </div>
+      <button type="submit" disabled={sending} className="w-full py-3 rounded-xl bg-[#1a0a6e] text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-50">
+        <Icon name="Send" size={15} /> {sending ? "Отправляем..." : "Отправить письмо"}
+      </button>
+    </form>
   );
 }
