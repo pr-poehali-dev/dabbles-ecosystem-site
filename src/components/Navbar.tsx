@@ -35,7 +35,7 @@ const MENU_SECTIONS: MenuSection[] = [
     title: "Компания",
     items: [
       { label: "О компании", href: "/about", icon: "Building2", desc: "Миссия и экосистема", disabled: true },
-      { label: "Организационная структура", href: "/about#structure", icon: "Network", desc: "Как устроена корпорация" },
+      { label: "Организационная структура", href: "/about#structure", icon: "Network", desc: "Как устроена корпорация", disabled: true },
       { label: "Генеральный директор", href: "/director", icon: "UserCog", desc: "Обращение руководителя", disabled: true },
       { label: "Реквизиты", href: "/legal", icon: "Scale", desc: "Юридическая информация" },
     ],
