@@ -12,10 +12,6 @@ interface NavbarProps {
   setAudience?: (a: string) => void;
 }
 
-// Пилюли-сегменты
-const SEGMENTS = ["Для всех", "Для бизнеса", "Для грантополучателей"];
-
-// Сетка сервисов (правая иконка)
 const SERVICES_GRID = [
   { icon: "CheckSquare", label: "Трекер", href: "" },
   { icon: "Compass", label: "Компас", href: "https://даббл-компас.рф" },
@@ -24,7 +20,6 @@ const SERVICES_GRID = [
   { icon: "Scale", label: "Юр сервис", href: "/client" },
 ];
 
-// Главное меню разделов сайта
 type MenuSection = {
   title: string;
   items: { label: string; href: string; icon: string; desc?: string; disabled?: boolean }[];
@@ -57,7 +52,7 @@ const MENU_SECTIONS: MenuSection[] = [
   },
 ];
 
-export default function Navbar({ menuOpen, scrollTo, setMenuOpen, audience = "Для всех", setAudience }: NavbarProps) {
+export default function Navbar({ menuOpen, scrollTo, setMenuOpen, setAudience }: NavbarProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [gridOpen, setGridOpen] = useState(false);
   const { user } = useAuth();
@@ -66,6 +61,7 @@ export default function Navbar({ menuOpen, scrollTo, setMenuOpen, audience = "Д
   const goLink = (href: string) => {
     setMenuOpen(false);
     setGridOpen(false);
+    if (!href) return;
     if (href.startsWith("http")) window.open(href, "_blank");
     else if (href.startsWith("#")) scrollTo(href);
     else if (href.includes("#")) {
@@ -77,75 +73,88 @@ export default function Navbar({ menuOpen, scrollTo, setMenuOpen, audience = "Д
 
   return (
     <>
-      {/* ОСНОВНАЯ ШАПКА */}
-      <div className="sticky top-0 z-50 px-3 md:px-5 pt-2 pb-1.5 bg-[#f0f0f5]/90 backdrop-blur-md">
-        <nav className="bg-white rounded-[20px] shadow-[0_2px_12px_rgba(0,0,0,0.06)] h-[52px] flex items-center px-3 md:px-5 gap-2 md:gap-3">
-          {/* LOGO */}
+      {/* ── ШАПКА — центрированная пилюля как на рефе ── */}
+      <div className="sticky top-0 z-50 flex justify-center px-4 pt-3 pb-2 bg-[#edf5e0]/80 backdrop-blur-md">
+        <nav className="bg-white rounded-[18px] shadow-[0_2px_16px_rgba(0,0,0,0.08)] h-[60px] flex items-center px-4 gap-3 w-full max-w-3xl">
+
+          {/* ЛОГО */}
           <button onClick={() => scrollTo("#hero")} className="shrink-0 flex items-center">
             <img
               src="https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/bucket/3bb7bd0c-31d8-44c0-85ef-0bd65a2a3961.png"
               alt="Даббл"
-              className="h-7 w-auto object-contain"
+              className="h-8 w-auto object-contain"
             />
           </button>
 
-          {/* МЕНЮ-кнопка */}
+          {/* МЕНЮ-кнопка (десктоп) */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="hidden md:flex items-center gap-2 pl-2 pr-1 shrink-0"
+            className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-black/5 transition-colors shrink-0"
           >
-            <div className="relative w-5 h-5 flex flex-col justify-center gap-[4px]">
-              <span className={`block h-[2px] w-5 bg-black rounded-full transition-transform ${menuOpen ? "translate-y-[3px] rotate-45" : ""}`} />
-              <span className={`block h-[2px] w-5 bg-black rounded-full transition-all ${menuOpen ? "-translate-y-[3px] -rotate-45" : ""}`} />
-              {!menuOpen && <span className="absolute -top-0.5 right-0 w-1.5 h-1.5 rounded-full bg-[#FD4160]" />}
+            <div className="relative w-5 h-4 flex flex-col justify-between">
+              <span className={`block h-[2px] w-5 bg-black rounded-full transition-all duration-200 ${menuOpen ? "translate-y-[7px] rotate-45" : ""}`} />
+              <span className={`block h-[2px] w-5 bg-black rounded-full transition-all duration-200 ${menuOpen ? "-translate-y-[9px] -rotate-45" : ""}`} />
+              {!menuOpen && <span className="absolute -top-1 right-0 w-1.5 h-1.5 rounded-full bg-[#FD4160]" />}
             </div>
-            <span className="text-[13px] font-semibold text-black">Меню</span>
+            <span className="text-[14px] font-semibold text-black">Меню</span>
           </button>
 
-          {/* ПОИСК + КАБИНЕТ + СЕРВИСЫ */}
-          <div className="ml-auto flex items-center gap-1.5 shrink-0">
+          {/* ПОИСК — по центру */}
+          <div className="flex-1 mx-2">
             {searchOpen ? (
-              <div className="flex items-center gap-2 border border-black/10 rounded-2xl px-3 py-2 bg-[#f5f5f7]">
-                <Icon name="Search" size={16} className="text-black/40" />
+              <div className="flex items-center gap-2 border border-black/12 rounded-[14px] px-3 py-2 bg-[#f5f5f7]">
+                <Icon name="Search" size={15} className="text-black/40 shrink-0" />
                 <input
                   autoFocus
                   placeholder="Поиск..."
-                  className="text-sm outline-none bg-transparent w-28 md:w-36 text-black placeholder-black/30"
+                  className="text-[14px] outline-none bg-transparent w-full text-black placeholder-black/30"
                   onBlur={() => setSearchOpen(false)}
                 />
               </div>
             ) : (
               <button
                 onClick={() => setSearchOpen(true)}
-                className="p-2.5 rounded-2xl hover:bg-black/5 transition-colors text-black/55 hover:text-black"
-                title="Поиск"
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-[14px] bg-[#f5f5f7] text-black/35 hover:bg-black/8 transition-colors text-[14px]"
               >
-                <Icon name="Search" size={21} />
+                <Icon name="Search" size={15} />
+                <span className="hidden sm:inline">Ищете что-то конкретное?</span>
               </button>
             )}
+          </div>
 
-            {/* Кабинет/Обучайся с нами */}
+          {/* ПРАВАЯ ЧАСТЬ: зелёная кнопка + иконка ЛК */}
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Зелёная кнопка CTA */}
             <Link
               to={user ? "/cabinet" : "/login"}
-              className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-[14px] text-black text-[13px] font-bold transition-all hover:opacity-90"
+              className="hidden sm:flex items-center gap-1.5 px-5 py-2.5 rounded-[14px] text-black text-[14px] font-bold transition-all hover:opacity-90 whitespace-nowrap"
               style={{ background: "linear-gradient(120deg, #9FC96D 0%, #C1F089 100%)" }}
             >
               {user ? "Кабинет" : "Обучайся с нами!"}
             </Link>
 
-            {/* GRID — сервисы (4 квадратика) */}
+            {/* Иконка человечка — ЛК */}
+            <Link
+              to={user ? "/cabinet" : "/login"}
+              className="w-10 h-10 rounded-[14px] bg-[#f5f5f7] flex items-center justify-center text-black/60 hover:bg-black/10 transition-colors"
+              title={user ? "Личный кабинет" : "Войти"}
+            >
+              <Icon name="User" size={18} />
+            </Link>
+
+            {/* Сетка сервисов */}
             <div className="relative">
               <button
                 onClick={() => setGridOpen(!gridOpen)}
-                className="w-11 h-11 rounded-2xl border-2 border-[#0077FF]/30 flex items-center justify-center hover:bg-[#0077FF]/5 transition-colors text-[#0077FF]"
+                className="w-10 h-10 rounded-[14px] bg-[#f5f5f7] flex items-center justify-center text-black/60 hover:bg-black/10 transition-colors"
                 title="Сервисы"
               >
-                <Icon name="LayoutGrid" size={20} />
+                <Icon name="LayoutGrid" size={18} />
               </button>
               {gridOpen && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setGridOpen(false)} />
-                  <div className="absolute right-0 top-14 w-64 bg-white rounded-2xl shadow-xl border border-black/8 p-3 z-50">
+                  <div className="absolute right-0 top-12 w-64 bg-white rounded-2xl shadow-xl border border-black/8 p-3 z-50">
                     <p className="text-[11px] font-bold text-black/35 uppercase tracking-wider px-1 mb-2">Сервисы Даббл</p>
                     <div className="grid grid-cols-3 gap-1.5">
                       {SERVICES_GRID.map((s) => (
@@ -154,8 +163,8 @@ export default function Navbar({ menuOpen, scrollTo, setMenuOpen, audience = "Д
                           onClick={() => goLink(s.href)}
                           className="flex flex-col items-center gap-1.5 p-2.5 rounded-xl hover:bg-black/5 transition-colors"
                         >
-                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1a0a6e]/10 to-[#0077FF]/10 flex items-center justify-center">
-                            <Icon name={s.icon} size={18} className="text-[#0077FF]" />
+                          <div className="w-10 h-10 rounded-xl bg-[#f0f8e8] flex items-center justify-center">
+                            <Icon name={s.icon} size={18} className="text-[#5a9a2a]" />
                           </div>
                           <span className="text-[11px] text-black/55 font-medium leading-tight text-center">{s.label}</span>
                         </button>
@@ -166,47 +175,50 @@ export default function Navbar({ menuOpen, scrollTo, setMenuOpen, audience = "Д
               )}
             </div>
 
-            {/* MOBILE MENU */}
+            {/* Бургер мобилка */}
             <button
               onClick={() => setMenuOpen(!menuOpen)}
-              className="md:hidden p-2.5 rounded-2xl hover:bg-black/5 text-black/60"
+              className="md:hidden w-10 h-10 rounded-[14px] bg-[#f5f5f7] flex items-center justify-center text-black/60"
             >
-              <Icon name={menuOpen ? "X" : "Menu"} size={22} />
+              <Icon name={menuOpen ? "X" : "Menu"} size={18} />
             </button>
           </div>
         </nav>
       </div>
 
-      {/* ── РАСКРЫВАЮЩЕЕСЯ МЕНЮ РАЗДЕЛОВ ── */}
+      {/* ── РАСКРЫВАЮЩЕЕСЯ МЕНЮ ── */}
       {menuOpen && (
         <>
-          {/* Затемнение (десктоп) */}
           <div
-            className="hidden md:block fixed inset-0 z-40 bg-black/20 backdrop-blur-[2px]"
+            className="hidden md:block fixed inset-0 z-40 bg-black/15 backdrop-blur-[2px]"
             onClick={() => setMenuOpen(false)}
           />
 
-          {/* DESKTOP — выпадающая панель */}
-          <div className="hidden md:block fixed left-5 right-5 top-[80px] z-50 max-w-5xl mx-auto">
-            <div className="bg-white rounded-[28px] shadow-2xl border border-black/6 p-8">
-              <div className="grid grid-cols-3 gap-8">
+          {/* DESKTOP — центрированная панель */}
+          <div className="hidden md:flex fixed left-0 right-0 top-[76px] z-50 justify-center px-4">
+            <div className="bg-white rounded-[24px] shadow-2xl border border-black/6 p-7 w-full max-w-3xl">
+              <div className="grid grid-cols-3 gap-6">
                 {MENU_SECTIONS.map((sec) => (
                   <div key={sec.title}>
-                    <p className="text-[12px] font-bold text-[#0077FF] uppercase tracking-wider mb-4">{sec.title}</p>
-                    <ul className="space-y-1">
+                    <p className="text-[11px] font-bold text-[#5a9a2a] uppercase tracking-wider mb-3">{sec.title}</p>
+                    <ul className="space-y-0.5">
                       {sec.items.map((it) => (
                         <li key={it.label}>
                           <button
                             onClick={() => !it.disabled && goLink(it.href)}
                             disabled={it.disabled}
-                            className={`w-full flex items-start gap-3 p-2.5 rounded-2xl transition-colors text-left group ${it.disabled ? "opacity-35 cursor-not-allowed" : "hover:bg-[#f5f5f7]"}`}
+                            className={`w-full flex items-start gap-2.5 p-2 rounded-xl transition-colors text-left group ${it.disabled ? "opacity-35 cursor-not-allowed" : "hover:bg-[#f5f5f7]"}`}
                           >
-                            <div className="w-9 h-9 rounded-xl bg-[#f0f0f5] group-hover:bg-white flex items-center justify-center shrink-0 transition-colors">
-                              <Icon name={it.icon} size={17} className="text-black/55" />
+                            <div className="w-8 h-8 rounded-lg bg-[#f0f8e8] flex items-center justify-center shrink-0">
+                              <Icon name={it.icon} size={15} className="text-[#5a9a2a]" />
                             </div>
                             <div className="min-w-0">
-                              <div className="text-[14px] font-semibold text-black leading-tight">{it.label}</div>
-                              {it.desc && <div className={`text-[12px] leading-tight mt-0.5 ${it.disabled ? "text-black/30" : "text-black/40"}`}>{it.disabled ? "Скоро" : it.desc}</div>}
+                              <div className="text-[13px] font-semibold text-black leading-tight">{it.label}</div>
+                              {it.desc && (
+                                <div className="text-[11px] text-black/40 leading-tight mt-0.5">
+                                  {it.disabled ? "Скоро" : it.desc}
+                                </div>
+                              )}
                             </div>
                           </button>
                         </li>
@@ -217,58 +229,40 @@ export default function Navbar({ menuOpen, scrollTo, setMenuOpen, audience = "Д
               </div>
             </div>
           </div>
-        </>
-      )}
 
-      {/* MOBILE OVERLAY */}
-      {menuOpen && (
-        <div className="fixed inset-0 z-40 bg-white flex flex-col pt-[88px] overflow-y-auto md:hidden">
-          <div className="flex flex-col p-5 gap-1">
-            {/* Сегменты */}
-            <div className="flex gap-1 bg-[#f5f5f7] rounded-2xl p-1 mb-4">
-              {SEGMENTS.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => { setAudience?.(s); }}
-                  className={`flex-1 px-2 py-2 rounded-xl text-[12px] font-semibold transition-all ${
-                    audience === s ? "bg-white text-black shadow-sm" : "text-black/45"
-                  }`}
-                >
-                  {s}
-                </button>
+          {/* MOBILE */}
+          <div className="fixed inset-0 z-40 bg-white flex flex-col pt-[80px] overflow-y-auto md:hidden">
+            <div className="flex flex-col p-5 gap-1">
+              {MENU_SECTIONS.map((sec) => (
+                <div key={sec.title} className="mb-3">
+                  <p className="text-[11px] font-bold text-[#5a9a2a] uppercase tracking-wider px-2 mb-1.5">{sec.title}</p>
+                  {sec.items.map((it) => (
+                    <button
+                      key={it.label}
+                      onClick={() => !it.disabled && goLink(it.href)}
+                      disabled={it.disabled}
+                      className={`w-full flex items-center gap-3 px-2 py-3 rounded-xl transition-colors text-left ${it.disabled ? "opacity-35 cursor-not-allowed" : "hover:bg-black/4"}`}
+                    >
+                      <Icon name={it.icon} size={18} className="text-[#5a9a2a] shrink-0" />
+                      <div>
+                        <span className="text-[15px] font-medium text-black/80">{it.label}</span>
+                        {it.disabled && <span className="ml-2 text-[11px] text-black/30">Скоро</span>}
+                      </div>
+                    </button>
+                  ))}
+                </div>
               ))}
+              <Link
+                to={user ? "/cabinet" : "/login"}
+                onClick={() => setMenuOpen(false)}
+                className="mt-2 flex items-center justify-center gap-2 px-4 py-3.5 rounded-2xl text-black text-lg font-bold"
+                style={{ background: "linear-gradient(120deg, #9FC96D 0%, #C1F089 100%)" }}
+              >
+                {user ? "Личный кабинет" : "Обучайся с нами!"}
+              </Link>
             </div>
-
-            {MENU_SECTIONS.map((sec) => (
-              <div key={sec.title} className="mb-3">
-                <p className="text-[11px] font-bold text-[#0077FF] uppercase tracking-wider px-2 mb-1.5">{sec.title}</p>
-                {sec.items.map((it) => (
-                  <button
-                    key={it.label}
-                    onClick={() => !it.disabled && goLink(it.href)}
-                    disabled={it.disabled}
-                    className={`w-full flex items-center gap-3 px-2 py-3 rounded-xl transition-colors text-left ${it.disabled ? "opacity-35 cursor-not-allowed" : "hover:bg-black/4"}`}
-                  >
-                    <Icon name={it.icon} size={18} className="text-black/45 shrink-0" />
-                    <div>
-                      <span className="text-[15px] font-medium text-black/80">{it.label}</span>
-                      {it.disabled && <span className="ml-2 text-[11px] text-black/30">Скоро</span>}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            ))}
-
-            <Link
-              to={user ? "/cabinet" : "/login"}
-              onClick={() => setMenuOpen(false)}
-              className="mt-2 flex items-center justify-center gap-2 px-4 py-3.5 rounded-2xl text-white text-lg font-semibold"
-              style={{ background: "linear-gradient(120deg, #1a0a6e 0%, #0077FF 100%)" }}
-            >
-              {user ? "Личный кабинет" : "Войти"}
-            </Link>
           </div>
-        </div>
+        </>
       )}
     </>
   );
