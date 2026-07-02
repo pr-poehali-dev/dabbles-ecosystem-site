@@ -77,46 +77,30 @@ export default function Navbar({ menuOpen, scrollTo, setMenuOpen, audience = "Д
 
   return (
     <>
-      {/* ОСНОВНАЯ ШАПКА — белая пилюля */}
-      <div className="sticky top-0 z-50 px-3 md:px-5 pt-3 pb-2 bg-[#f0f0f5]/80 backdrop-blur-md">
-        <nav className="bg-white rounded-[26px] shadow-[0_4px_20px_rgba(0,0,0,0.05)] h-[64px] flex items-center px-3 md:px-4 gap-2 md:gap-3">
-          {/* LOGO Даббл */}
-          <button onClick={() => scrollTo("#hero")} className="shrink-0 flex items-center pl-2">
+      {/* ОСНОВНАЯ ШАПКА */}
+      <div className="sticky top-0 z-50 px-3 md:px-5 pt-2 pb-1.5 bg-[#f0f0f5]/90 backdrop-blur-md">
+        <nav className="bg-white rounded-[20px] shadow-[0_2px_12px_rgba(0,0,0,0.06)] h-[52px] flex items-center px-3 md:px-5 gap-2 md:gap-3">
+          {/* LOGO */}
+          <button onClick={() => scrollTo("#hero")} className="shrink-0 flex items-center">
             <img
-              src="https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/bucket/279bdee6-7783-4862-83f9-25bd24811276.png"
+              src="https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/bucket/3bb7bd0c-31d8-44c0-85ef-0bd65a2a3961.png"
               alt="Даббл"
-              className="h-8 w-auto object-contain"
-              style={{ filter: "invert(1)" }}
+              className="h-7 w-auto object-contain"
             />
           </button>
 
-          {/* МЕНЮ-кнопка (раскрывает меню разделов) */}
+          {/* МЕНЮ-кнопка */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="hidden md:flex items-center gap-2.5 pl-3 pr-1 shrink-0"
+            className="hidden md:flex items-center gap-2 pl-2 pr-1 shrink-0"
           >
-            <div className="relative w-6 h-6 flex flex-col justify-center gap-[5px]">
-              <span className={`block h-[2.5px] w-6 bg-black rounded-full transition-transform ${menuOpen ? "translate-y-[3.5px] rotate-45" : ""}`} />
-              <span className={`block h-[2.5px] w-6 bg-black rounded-full transition-all ${menuOpen ? "-translate-y-[4px] -rotate-45" : ""}`} />
+            <div className="relative w-5 h-5 flex flex-col justify-center gap-[4px]">
+              <span className={`block h-[2px] w-5 bg-black rounded-full transition-transform ${menuOpen ? "translate-y-[3px] rotate-45" : ""}`} />
+              <span className={`block h-[2px] w-5 bg-black rounded-full transition-all ${menuOpen ? "-translate-y-[3px] -rotate-45" : ""}`} />
               {!menuOpen && <span className="absolute -top-0.5 right-0 w-1.5 h-1.5 rounded-full bg-[#FD4160]" />}
             </div>
-            <span className="text-[15px] font-semibold text-black">Меню</span>
+            <span className="text-[13px] font-semibold text-black">Меню</span>
           </button>
-
-          {/* СЕГМЕНТЫ — пилюли */}
-          <div className="hidden lg:flex items-center gap-1 flex-1 justify-center bg-[#f5f5f7] rounded-2xl p-1 max-w-lg mx-2">
-            {SEGMENTS.map((s) => (
-              <button
-                key={s}
-                onClick={() => setAudience?.(s)}
-                className={`flex-1 px-3 py-2 rounded-xl text-[13px] font-semibold whitespace-nowrap transition-all ${
-                  audience === s ? "bg-white text-black shadow-sm" : "text-black/45 hover:text-black/70"
-                }`}
-              >
-                {s}
-              </button>
-            ))}
-          </div>
 
           {/* ПОИСК + КАБИНЕТ + СЕРВИСЫ */}
           <div className="ml-auto flex items-center gap-1.5 shrink-0">
@@ -140,13 +124,13 @@ export default function Navbar({ menuOpen, scrollTo, setMenuOpen, audience = "Д
               </button>
             )}
 
-            {/* Кабинет/Войти */}
+            {/* Кабинет/Обучайся с нами */}
             <Link
               to={user ? "/cabinet" : "/login"}
-              className="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-2xl text-white text-[15px] font-semibold transition-all hover:opacity-90"
-              style={{ background: "linear-gradient(120deg, #1a0a6e 0%, #0077FF 100%)" }}
+              className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-[14px] text-black text-[13px] font-bold transition-all hover:opacity-90"
+              style={{ background: "linear-gradient(120deg, #9FC96D 0%, #C1F089 100%)" }}
             >
-              {user ? "Кабинет" : "Личный кабинет"}
+              {user ? "Кабинет" : "Обучайся с нами!"}
             </Link>
 
             {/* GRID — сервисы (4 квадратика) */}
