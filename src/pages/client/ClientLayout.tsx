@@ -4,7 +4,8 @@ import { cpApi, clearCpToken, CpClient } from "@/lib/client-api";
 import Icon from "@/components/ui/icon";
 
 const NAV = [
-  { to: "/client/cases", icon: "Scale", label: "Мои дела" },
+  { to: "/client", icon: "Home", label: "Главная", exact: true },
+  { to: "/client/cases", icon: "Scale", label: "Дела" },
   { to: "/client/payments", icon: "CreditCard", label: "Оплаты" },
   { to: "/client/documents", icon: "FileText", label: "Документы" },
   { to: "/client/submit", icon: "FilePlus2", label: "Заявления" },
@@ -31,8 +32,8 @@ export default function ClientLayout({ children }: Props) {
     navigate("/client");
   };
 
-  const isActive = (to: string) =>
-    location.pathname === to || location.pathname.startsWith(to + "/");
+  const isActive = (to: string, exact?: boolean) =>
+    exact ? location.pathname === to : (location.pathname === to || location.pathname.startsWith(to + "/"));
 
   const initials = client?.full_name
     ? client.full_name.split(" ").slice(0, 2).map(w => w[0]).join("").toUpperCase()
@@ -103,7 +104,7 @@ export default function ClientLayout({ children }: Props) {
               key={n.to}
               to={n.to}
               className={`flex items-center gap-2.5 px-3 py-2.5 rounded-[12px] text-[13px] font-medium transition-all mb-0.5 ${
-                isActive(n.to)
+                isActive(n.to, n.exact)
                   ? "bg-white text-black shadow-sm font-semibold"
                   : "text-black/45 hover:text-black hover:bg-white/70"
               }`}
@@ -111,7 +112,7 @@ export default function ClientLayout({ children }: Props) {
               <Icon
                 name={n.icon}
                 size={16}
-                className={isActive(n.to) ? "text-[#5a9a2a]" : "text-black/30"}
+                className={isActive(n.to, n.exact) ? "text-[#5a9a2a]" : "text-black/30"}
               />
               {n.label}
             </Link>
@@ -132,7 +133,7 @@ export default function ClientLayout({ children }: Props) {
               key={n.to}
               to={n.to}
               className={`flex-1 flex flex-col items-center justify-center gap-[3px] transition-colors ${
-                isActive(n.to) ? "text-[#5a9a2a]" : "text-black/35"
+                isActive(n.to, n.exact) ? "text-[#5a9a2a]" : "text-black/35"
               }`}
             >
               <Icon name={n.icon} size={19} />
@@ -176,7 +177,7 @@ export default function ClientLayout({ children }: Props) {
                   to={n.to}
                   onClick={() => setSideOpen(false)}
                   className={`flex items-center gap-3 px-3 py-3 rounded-xl text-[14px] font-medium transition-colors ${
-                    isActive(n.to)
+                    isActive(n.to, n.exact)
                       ? "bg-[#f0f8e8] text-[#5a9a2a] font-semibold"
                       : "text-black/55 hover:bg-black/5 hover:text-black"
                   }`}

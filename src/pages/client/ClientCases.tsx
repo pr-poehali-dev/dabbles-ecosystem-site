@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { cpApi, CpCase, CASE_STATUS_COLORS, formatMoney, formatDate } from "@/lib/client-api";
 import Icon from "@/components/ui/icon";
-import ClientAccount from "./ClientAccount";
 
 export default function ClientCases() {
   const [cases, setCases] = useState<CpCase[]>([]);
@@ -21,7 +20,6 @@ export default function ClientCases() {
 
   return (
     <div className="pb-20 md:pb-0">
-      <ClientAccount />
       <div className="mb-5">
         <h1 className="text-[22px] font-black text-black tracking-tight">Мои дела</h1>
         <p className="text-black/40 text-sm mt-0.5">{cases.length} {cases.length === 1 ? "дело" : "дел"}</p>

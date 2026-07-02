@@ -3,6 +3,7 @@ import { Routes, Route, useNavigate } from "react-router-dom";
 import { getCpToken } from "@/lib/client-api";
 import ClientLogin from "./ClientLogin";
 import ClientLayout from "./ClientLayout";
+import ClientDashboard from "./ClientDashboard";
 import ClientCases from "./ClientCases";
 import ClientCaseView from "./ClientCaseView";
 import ClientPayments from "./ClientPayments";
@@ -18,12 +19,12 @@ function ProtectedRoutes() {
   return (
     <ClientLayout>
       <Routes>
+        <Route index element={<ClientDashboard />} />
         <Route path="cases" element={<ClientCases />} />
         <Route path="cases/:id" element={<ClientCaseView />} />
         <Route path="payments" element={<ClientPayments />} />
         <Route path="documents" element={<ClientDocuments />} />
         <Route path="submit" element={<ClientSubmit />} />
-        <Route index element={<ClientCases />} />
       </Routes>
     </ClientLayout>
   );
