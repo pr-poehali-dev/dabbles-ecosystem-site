@@ -18,7 +18,7 @@ export default function ClientLogin() {
     try {
       const r = await cpApi.login(email.trim().toLowerCase(), password);
       setCpToken(r.token);
-      navigate("/client/cases");
+      navigate("/client/home");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Ошибка входа");
     } finally {

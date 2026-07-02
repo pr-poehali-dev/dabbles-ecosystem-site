@@ -4,7 +4,7 @@ import { cpApi, clearCpToken, CpClient } from "@/lib/client-api";
 import Icon from "@/components/ui/icon";
 
 const NAV = [
-  { to: "/client", icon: "Home", label: "Главная", exact: true },
+  { to: "/client/home", icon: "Home", label: "Главная", exact: true },
   { to: "/client/cases", icon: "Scale", label: "Дела" },
   { to: "/client/payments", icon: "CreditCard", label: "Оплаты" },
   { to: "/client/documents", icon: "FileText", label: "Документы" },
@@ -27,7 +27,7 @@ export default function ClientLayout({ children }: Props) {
   }, [navigate]);
 
   const handleLogout = async () => {
-    await cpApi.logout();
+    await cpApi.logout().catch(() => {});
     clearCpToken();
     navigate("/client");
   };
