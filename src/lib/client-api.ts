@@ -52,7 +52,7 @@ export interface CpPayment {
   payment_date: string | null; due_date: string | null;
   notes: string; created_at: string;
   case_number: string | null; case_title: string | null;
-  card_number: string;
+  card_number: string; payment_type: string;
 }
 
 export interface CpDocument {
@@ -79,6 +79,9 @@ export const cpApi = {
     id: number; account_number: string; balance: number; currency: string;
     card_number: string; expiry_month: number; expiry_year: number; card_holder: string;
   } }>("my-account"),
+
+  topupRequest: (amount: number) =>
+    cpRequest<{ id: number }>("client-topup-request", { method: "POST", body: { amount } }),
 
   cases: () => cpRequest<{ cases: CpCase[] }>("cases"),
 

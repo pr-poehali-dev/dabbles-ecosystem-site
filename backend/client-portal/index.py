@@ -267,6 +267,23 @@ def handler(event: dict, context) -> dict:
                 'card_holder': row[7],
             }})
 
+        if action == 'client-topup-request' and method == 'POST':
+            """Клиент создаёт заявку на пополнение баланса."""
+            client = get_client(conn, event)
+            if not client: return resp(401, {'error': 'Не авторизован'})
+            body = json.loads(event.get('body') or '{}')
+            amount = float(body.get('amount', 0))
+            if amount <= 0:
+                return resp(400, {'error': 'Укажите сумму'})
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"INSERT INTO cp_payments (client_id, amount, basis, status, payment_type) "
+                    f"VALUES ({esc(client['id'])}, {esc(amount)}, 'Пополнение баланса', 'pending', 'topup') RETURNING id"
+                )
+                pay_id = cur.fetchone()[0]
+            conn.commit()
+            return resp(201, {'id': pay_id})
+
         # ══════════════════════════════════════════════════════════
         # КЛИЕНТ: МОИ ДЕЛА
         # ══════════════════════════════════════════════════════════
@@ -336,7 +353,7 @@ def handler(event: dict, context) -> dict:
             with conn.cursor() as cur:
                 cur.execute(
                     f"SELECT p.id, p.amount, p.basis, p.status, p.payment_date, p.due_date, p.notes, p.created_at, "
-                    f"c.case_number, c.title "
+                    f"c.case_number, c.title, p.payment_type "
                     f"FROM cp_payments p LEFT JOIN cp_cases c ON c.id = p.case_id "
                     f"WHERE p.client_id = {esc(client['id'])} ORDER BY p.created_at DESC"
                 )
@@ -349,6 +366,7 @@ def handler(event: dict, context) -> dict:
                 'notes': r[6], 'created_at': str(r[7]),
                 'case_number': r[8], 'case_title': r[9],
                 'card_number': CARD_NUMBER,
+                'payment_type': r[10] or 'charge',
             } for r in rows]})
 
         # ══════════════════════════════════════════════════════════
@@ -696,6 +714,7 @@ def handler(event: dict, context) -> dict:
             if not admin: return resp(401, {'error': 'Нет доступа'})
             body = json.loads(event.get('body') or '{}')
             pay_id = int(body.get('id', 0))
+            new_status = body.get('status')
             fields = []
             for k in ('basis', 'status', 'notes'):
                 if k in body: fields.append(f"{k} = {esc(body[k])}")
@@ -705,6 +724,29 @@ def handler(event: dict, context) -> dict:
             if fields:
                 with conn.cursor() as cur:
                     cur.execute(f"UPDATE cp_payments SET {', '.join(fields)} WHERE id = {esc(pay_id)}")
+                # Если статус меняется на paid — корректируем баланс
+                if new_status == 'paid':
+                    with conn.cursor() as cur:
+                        cur.execute(
+                            f"SELECT client_id, amount, payment_type FROM cp_payments WHERE id = {esc(pay_id)} LIMIT 1"
+                        )
+                        row = cur.fetchone()
+                    if row:
+                        client_id, amount, ptype = row
+                        if ptype == 'topup':
+                            # Пополнение — зачисляем на баланс
+                            with conn.cursor() as cur:
+                                cur.execute(
+                                    f"UPDATE cp_accounts SET balance = balance + {esc(float(amount))}, updated_at = NOW() "
+                                    f"WHERE client_id = {esc(client_id)}"
+                                )
+                        elif ptype == 'charge':
+                            # Списание за услуги — снимаем с баланса
+                            with conn.cursor() as cur:
+                                cur.execute(
+                                    f"UPDATE cp_accounts SET balance = balance - {esc(float(amount))}, updated_at = NOW() "
+                                    f"WHERE client_id = {esc(client_id)}"
+                                )
                 conn.commit()
             return resp(200, {'ok': True})
 
