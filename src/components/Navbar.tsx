@@ -91,9 +91,10 @@ export default function Navbar({ menuOpen, scrollTo, setMenuOpen, setAudience }:
             onClick={() => setMenuOpen(!menuOpen)}
             className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-black/5 transition-colors shrink-0"
           >
-            <div className="relative w-5 h-4 flex flex-col justify-between">
-              <span className={`block h-[2px] w-5 bg-black rounded-full transition-all duration-200 ${menuOpen ? "translate-y-[7px] rotate-45" : ""}`} />
-              <span className={`block h-[2px] w-5 bg-black rounded-full transition-all duration-200 ${menuOpen ? "-translate-y-[9px] -rotate-45" : ""}`} />
+            <div className="relative w-5 flex flex-col gap-[4px]">
+              <span className={`block h-[2px] w-5 bg-black rounded-full transition-all duration-200 ${menuOpen ? "translate-y-[6px] rotate-45" : ""}`} />
+              <span className={`block h-[2px] w-5 bg-black rounded-full transition-all duration-200 ${menuOpen ? "opacity-0" : ""}`} />
+              <span className={`block h-[2px] w-5 bg-black rounded-full transition-all duration-200 ${menuOpen ? "-translate-y-[6px] -rotate-45" : ""}`} />
               {!menuOpen && <span className="absolute -top-1 right-0 w-1.5 h-1.5 rounded-full bg-[#FD4160]" />}
             </div>
             <span className="text-[14px] font-semibold text-black">Меню</span>
@@ -127,7 +128,7 @@ export default function Navbar({ menuOpen, scrollTo, setMenuOpen, setAudience }:
             {/* Зелёная кнопка CTA */}
             <Link
               to={user ? "/cabinet" : "/login"}
-              className="hidden sm:flex items-center gap-1.5 px-5 py-2.5 rounded-[14px] text-black text-[14px] font-bold transition-all hover:opacity-90 whitespace-nowrap"
+              className="hidden sm:flex items-center gap-1.5 px-5 py-2.5 rounded-[14px] text-white text-[14px] font-bold transition-all hover:opacity-90 whitespace-nowrap"
               style={{ background: "linear-gradient(120deg, #9FC96D 0%, #C1F089 100%)" }}
             >
               {user ? "Кабинет" : "Обучайся с нами!"}
