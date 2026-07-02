@@ -125,7 +125,7 @@ function TopupModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: ()
 
 // ── КАРТА ──────────────────────────────────────────────────────────────
 function AccountCard({ account, onTopup }: { account: Account; onTopup: () => void }) {
-  const [hidden, setHidden] = useState(true);
+  const [hidden, setHidden] = useState(false);
   const { toast } = useToast();
 
   const expiry = `${String(account.expiry_month).padStart(2, "0")}/${String(account.expiry_year).slice(-2)}`;
