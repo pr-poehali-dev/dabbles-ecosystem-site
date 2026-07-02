@@ -189,18 +189,6 @@ function AccountCard({ account, onTopup }: { account: Account; onTopup: () => vo
         </div>
       </div>
 
-      {/* Номер карты */}
-      <button onClick={() => copy(account.card_number, "Номер карты")}
-        className="relative w-full flex items-center justify-between bg-white/10 hover:bg-white/20 transition-colors rounded-xl px-4 py-2.5 mb-3 group">
-        <div className="text-white/70 text-[10px] uppercase tracking-widest">Номер карты</div>
-        <div className="flex items-center gap-2">
-          <span className="text-white font-mono text-[13px] font-semibold tracking-widest">
-            {hidden ? `•••• •••• •••• ${account.card_number.slice(-4)}` : account.card_number}
-          </span>
-          <Icon name="Copy" size={12} className="text-white/50 group-hover:text-white transition-colors" />
-        </div>
-      </button>
-
       {/* Кнопка Пополнить */}
       <button onClick={onTopup}
         className="relative w-full flex items-center justify-center gap-2 bg-white text-[#2d6a0a] font-bold text-[14px] py-3 rounded-xl hover:bg-white/90 transition-colors">
