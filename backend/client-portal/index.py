@@ -31,9 +31,11 @@ def create_account_and_card(conn, client_id: int, full_name: str):
     exp_month = today.month
     exp_year = today.year + 4
     # Имя на карте: транслит ФИО
-    translit_map = str.maketrans('АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя',
-        'ABVGDEEZHZIYKLMNOPRSTUFKHTSCHSHSHIYEYUYAabvgdeezhi yklmnoprstufkhtschshshiyeyuya')
-    holder = full_name.upper().translate(translit_map)[:26]
+    _tr = {'А':'A','Б':'B','В':'V','Г':'G','Д':'D','Е':'E','Ё':'E','Ж':'ZH','З':'Z',
+           'И':'I','Й':'Y','К':'K','Л':'L','М':'M','Н':'N','О':'O','П':'P','Р':'R',
+           'С':'S','Т':'T','У':'U','Ф':'F','Х':'KH','Ц':'TS','Ч':'CH','Ш':'SH',
+           'Щ':'SCH','Ъ':'','Ы':'Y','Ь':'','Э':'E','Ю':'YU','Я':'YA'}
+    holder = ''.join(_tr.get(c, c) for c in full_name.upper() if c.isalpha() or c == ' ')[:26]
     with conn.cursor() as cur:
         cur.execute(
             f"INSERT INTO cp_accounts (client_id, account_number) VALUES ({esc(client_id)}, {esc(account_number)}) RETURNING id"
