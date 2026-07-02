@@ -5,9 +5,9 @@ import Icon from "@/components/ui/icon";
 
 const NAV = [
   { to: "/client/cases", icon: "Scale", label: "Мои дела" },
-  { to: "/client/payments", icon: "CreditCard", label: "История оплат" },
-  { to: "/client/documents", icon: "FileText", label: "Мои документы" },
-  { to: "/client/submit", icon: "FilePlus2", label: "Подать заявление" },
+  { to: "/client/payments", icon: "CreditCard", label: "Оплаты" },
+  { to: "/client/documents", icon: "FileText", label: "Документы" },
+  { to: "/client/submit", icon: "FilePlus2", label: "Заявления" },
 ];
 
 interface Props { children: React.ReactNode }
@@ -16,7 +16,7 @@ export default function ClientLayout({ children }: Props) {
   const location = useLocation();
   const navigate = useNavigate();
   const [client, setClient] = useState<CpClient | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [sideOpen, setSideOpen] = useState(false);
 
   useEffect(() => {
     cpApi.me().then(r => setClient(r.client)).catch(() => {
@@ -31,21 +31,21 @@ export default function ClientLayout({ children }: Props) {
     navigate("/client");
   };
 
-  const isActive = (to: string) => location.pathname === to || location.pathname.startsWith(to + "/");
+  const isActive = (to: string) =>
+    location.pathname === to || location.pathname.startsWith(to + "/");
 
   const initials = client?.full_name
     ? client.full_name.split(" ").slice(0, 2).map(w => w[0]).join("").toUpperCase()
     : "?";
 
-  const firstName = client?.full_name?.split(" ")[0] || "";
-
   return (
-    <div className="min-h-screen bg-[#f0f2f5] flex flex-col font-body">
+    <div className="min-h-screen bg-[#f0f2f5] font-body flex flex-col">
 
-      {/* ── ВЕРХНЯЯ ШАПКА ── */}
-      <header className="bg-white border-b border-black/6 sticky top-0 z-30">
-        <div className="max-w-6xl mx-auto px-4 md:px-8 h-[64px] flex items-center gap-4">
-          {/* Лого */}
+      {/* ── ШАПКА ── */}
+      <header className="bg-white border-b border-black/6 sticky top-0 z-30 shrink-0">
+        <div className="h-[60px] flex items-center px-4 md:px-6 gap-3">
+
+          {/* Логотип */}
           <Link to="/client/cases" className="shrink-0">
             <img
               src="https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/bucket/3bb7bd0c-31d8-44c0-85ef-0bd65a2a3961.png"
@@ -54,65 +54,64 @@ export default function ClientLayout({ children }: Props) {
             />
           </Link>
 
-          {/* Поиск — по центру */}
-          <div className="flex-1 max-w-md mx-auto hidden md:block">
-            <div className="flex items-center gap-2 bg-[#f5f5f7] rounded-[14px] px-3 py-2.5 text-black/35">
-              <Icon name="Search" size={16} />
-              <span className="text-[14px]">Поиск</span>
+          {/* Поиск по центру (десктоп) */}
+          <div className="hidden md:flex flex-1 max-w-sm mx-auto">
+            <div className="w-full flex items-center gap-2 bg-[#f5f5f7] rounded-[12px] px-3 py-2 text-black/35 text-[13px]">
+              <Icon name="Search" size={14} />
+              <span>Поиск</span>
             </div>
           </div>
 
           {/* Правая часть */}
-          <div className="ml-auto flex items-center gap-3">
-            {/* Сетка сервисов */}
-            <button className="w-9 h-9 rounded-xl bg-[#f5f5f7] flex items-center justify-center text-black/50 hover:bg-black/10 transition-colors hidden md:flex">
-              <Icon name="LayoutGrid" size={18} />
-            </button>
-
-            {/* Аватар + имя */}
+          <div className="ml-auto flex items-center gap-2">
+            {/* Аватар + имя (десктоп) */}
             <button
               onClick={handleLogout}
-              className="flex items-center gap-2.5 pl-1 pr-2 py-1 rounded-xl hover:bg-black/5 transition-colors group"
+              className="hidden md:flex items-center gap-2 px-2 py-1.5 rounded-xl hover:bg-black/5 transition-colors group"
               title="Выйти"
             >
-              <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-[13px] font-bold shrink-0"
-                style={{ background: "linear-gradient(135deg, #9FC96D 0%, #5a9a2a 100%)" }}>
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center text-white text-[12px] font-bold shrink-0"
+                style={{ background: "linear-gradient(135deg, #9FC96D 0%, #5a9a2a 100%)" }}
+              >
                 {initials}
               </div>
-              <span className="text-[14px] font-semibold text-black hidden sm:block">{firstName}</span>
-              <Icon name="LogOut" size={14} className="text-black/30 group-hover:text-black/60 transition-colors" />
+              <span className="text-[13px] font-semibold text-black max-w-[120px] truncate">
+                {client?.full_name?.split(" ")[0] || "..."}
+              </span>
+              <Icon name="LogOut" size={13} className="text-black/30 group-hover:text-black/60" />
             </button>
 
-            {/* Мобильное меню */}
+            {/* Бургер (мобилка) */}
             <button
-              onClick={() => setMenuOpen(m => !m)}
+              onClick={() => setSideOpen(true)}
               className="md:hidden w-9 h-9 rounded-xl bg-[#f5f5f7] flex items-center justify-center text-black/60"
             >
-              <Icon name={menuOpen ? "X" : "Menu"} size={18} />
+              <Icon name="Menu" size={18} />
             </button>
           </div>
         </div>
       </header>
 
-      {/* ── ОСНОВНОЙ КОНТЕНТ ── */}
-      <div className="flex flex-1 max-w-6xl mx-auto w-full px-4 md:px-8 py-6 gap-6">
+      {/* ── ТЕЛО ── */}
+      <div className="flex flex-1 overflow-hidden">
 
-        {/* Сайдбар (десктоп) */}
-        <aside className="hidden md:flex flex-col w-[220px] shrink-0 gap-1">
+        {/* Сайдбар десктоп */}
+        <aside className="hidden md:flex flex-col w-[200px] shrink-0 py-4 px-2">
           {NAV.map(n => (
             <Link
               key={n.to}
               to={n.to}
-              className={`flex items-center gap-3 px-4 py-3 rounded-[14px] text-[14px] font-medium transition-all ${
+              className={`flex items-center gap-2.5 px-3 py-2.5 rounded-[12px] text-[13px] font-medium transition-all mb-0.5 ${
                 isActive(n.to)
                   ? "bg-white text-black shadow-sm font-semibold"
-                  : "text-black/50 hover:text-black hover:bg-white/60"
+                  : "text-black/45 hover:text-black hover:bg-white/70"
               }`}
             >
               <Icon
                 name={n.icon}
-                size={17}
-                className={isActive(n.to) ? "text-[#5a9a2a]" : "text-black/35"}
+                size={16}
+                className={isActive(n.to) ? "text-[#5a9a2a]" : "text-black/30"}
               />
               {n.label}
             </Link>
@@ -120,57 +119,82 @@ export default function ClientLayout({ children }: Props) {
         </aside>
 
         {/* Контент */}
-        <main className="flex-1 min-w-0">
+        <main className="flex-1 min-w-0 overflow-y-auto px-4 md:px-6 py-5 pb-24 md:pb-6">
           {children}
         </main>
       </div>
 
-      {/* Мобильная навигация — снизу */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-black/8 flex z-30">
-        {NAV.map(n => (
-          <Link
-            key={n.to}
-            to={n.to}
-            className={`flex-1 flex flex-col items-center gap-1 py-2.5 transition-colors ${
-              isActive(n.to) ? "text-[#5a9a2a]" : "text-black/35"
-            }`}
-          >
-            <Icon name={n.icon} size={20} />
-            <span className="text-[9px] font-semibold leading-none">{n.label.split(" ")[0]}</span>
-          </Link>
-        ))}
+      {/* ── НИЖНЯЯ НАВИГАЦИЯ (мобилка) ── */}
+      <nav className="md:hidden fixed bottom-0 inset-x-0 bg-white border-t border-black/8 z-30 safe-area-bottom">
+        <div className="flex items-stretch h-[56px]">
+          {NAV.map(n => (
+            <Link
+              key={n.to}
+              to={n.to}
+              className={`flex-1 flex flex-col items-center justify-center gap-[3px] transition-colors ${
+                isActive(n.to) ? "text-[#5a9a2a]" : "text-black/35"
+              }`}
+            >
+              <Icon name={n.icon} size={19} />
+              <span className="text-[9px] font-semibold leading-none tracking-tight whitespace-nowrap">
+                {n.label}
+              </span>
+            </Link>
+          ))}
+        </div>
       </nav>
 
-      {/* Мобильное боковое меню */}
-      {menuOpen && (
-        <div className="fixed inset-0 z-40 md:hidden">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setMenuOpen(false)} />
-          <div className="absolute left-0 top-0 bottom-0 w-72 bg-white flex flex-col z-50 shadow-2xl">
-            <div className="px-5 py-5 border-b border-black/6 flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center text-white text-[14px] font-bold shrink-0"
-                style={{ background: "linear-gradient(135deg, #9FC96D 0%, #5a9a2a 100%)" }}>
-                {initials}
+      {/* ── БОКОВОЕ МЕНЮ (мобилка) ── */}
+      {sideOpen && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setSideOpen(false)} />
+          <div className="absolute left-0 top-0 bottom-0 w-[280px] bg-white flex flex-col shadow-2xl">
+            {/* Шапка */}
+            <div className="px-5 py-4 border-b border-black/6 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-9 h-9 rounded-full flex items-center justify-center text-white text-[13px] font-bold"
+                  style={{ background: "linear-gradient(135deg, #9FC96D 0%, #5a9a2a 100%)" }}
+                >
+                  {initials}
+                </div>
+                <div className="overflow-hidden">
+                  <div className="text-[13px] font-bold text-black truncate">{client?.full_name}</div>
+                  <div className="text-[11px] text-black/40 truncate">{client?.email}</div>
+                </div>
               </div>
-              <div>
-                <div className="text-[14px] font-semibold text-black">{client?.full_name}</div>
-                <div className="text-[11px] text-black/40">{client?.email}</div>
-              </div>
+              <button onClick={() => setSideOpen(false)} className="text-black/30 hover:text-black p-1">
+                <Icon name="X" size={18} />
+              </button>
             </div>
-            <nav className="flex-1 p-3 space-y-0.5">
+
+            {/* Навигация */}
+            <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
               {NAV.map(n => (
-                <Link key={n.to} to={n.to} onClick={() => setMenuOpen(false)}
+                <Link
+                  key={n.to}
+                  to={n.to}
+                  onClick={() => setSideOpen(false)}
                   className={`flex items-center gap-3 px-3 py-3 rounded-xl text-[14px] font-medium transition-colors ${
-                    isActive(n.to) ? "bg-[#f0f8e8] text-[#5a9a2a] font-semibold" : "text-black/55 hover:bg-black/5 hover:text-black"
-                  }`}>
+                    isActive(n.to)
+                      ? "bg-[#f0f8e8] text-[#5a9a2a] font-semibold"
+                      : "text-black/55 hover:bg-black/5 hover:text-black"
+                  }`}
+                >
                   <Icon name={n.icon} size={17} />
                   {n.label}
                 </Link>
               ))}
             </nav>
+
+            {/* Выход */}
             <div className="p-3 border-t border-black/6">
-              <button onClick={handleLogout}
-                className="w-full flex items-center gap-2.5 px-3 py-3 rounded-xl text-[14px] text-black/50 hover:bg-black/5">
-                <Icon name="LogOut" size={16} /> Выйти
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-[14px] text-black/50 hover:bg-black/5"
+              >
+                <Icon name="LogOut" size={16} />
+                Выйти
               </button>
             </div>
           </div>

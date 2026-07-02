@@ -14,6 +14,36 @@ CORS = {
 CARD_NUMBER = '2202200659138646'
 PORTAL_URL = os.environ.get('PORTAL_URL', 'https://xn----8sbarwhfgi0a.xn--p1ai/client')
 
+
+def create_account_and_card(conn, client_id: int, full_name: str):
+    """Создаёт лицевой счёт и виртуальную карту для клиента."""
+    import random
+    # Лицевой счёт: 40817 810 + 11 цифр из client_id + random
+    suffix = str(client_id).zfill(4) + str(random.randint(1000000, 9999999))
+    account_number = f"40817810{suffix}"
+    # Полный номер карты: 4 группы по 4 цифры, начинается с 4276
+    raw = "4276" + str(random.randint(100000000000, 999999999999))
+    card_full = raw[:16]
+    card_masked = f"{card_full[:4]} {card_full[4:8]} {card_full[8:12]} {card_full[12:]}"
+    # Срок действия: 4 года от сейчас
+    from datetime import date
+    today = date.today()
+    exp_month = today.month
+    exp_year = today.year + 4
+    # Имя на карте: транслит ФИО
+    translit_map = str.maketrans('АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя',
+        'ABVGDEEZHZIYKLMNOPRSTUFKHTSCHSHSHIYEYUYAabvgdeezhi yklmnoprstufkhtschshshiyeyuya')
+    holder = full_name.upper().translate(translit_map)[:26]
+    with conn.cursor() as cur:
+        cur.execute(
+            f"INSERT INTO cp_accounts (client_id, account_number) VALUES ({esc(client_id)}, {esc(account_number)}) RETURNING id"
+        )
+        account_id = cur.fetchone()[0]
+        cur.execute(
+            f"INSERT INTO cp_cards (account_id, client_id, card_number, card_number_full, expiry_month, expiry_year, card_holder) "
+            f"VALUES ({esc(account_id)}, {esc(client_id)}, {esc(card_masked)}, {esc(card_full)}, {esc(exp_month)}, {esc(exp_year)}, {esc(holder)})"
+        )
+
 REQUEST_TYPES = {
     'recalculation': 'Заявление на перерасчёт',
     'termination': 'Заявление на расторжение договора',
@@ -197,6 +227,43 @@ def handler(event: dict, context) -> dict:
             client = get_client(conn, event)
             if not client: return resp(401, {'error': 'Не авторизован'})
             return resp(200, {'client': client})
+
+        if action == 'my-account' and method == 'GET':
+            """Вернуть лицевой счёт и карту текущего клиента."""
+            client = get_client(conn, event)
+            if not client: return resp(401, {'error': 'Не авторизован'})
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"SELECT a.id, a.account_number, a.balance, a.currency, "
+                    f"c.card_number, c.expiry_month, c.expiry_year, c.card_holder "
+                    f"FROM cp_accounts a LEFT JOIN cp_cards c ON c.account_id = a.id "
+                    f"WHERE a.client_id = {esc(client['id'])} AND a.is_active = TRUE LIMIT 1"
+                )
+                row = cur.fetchone()
+            if not row:
+                # Создаём счёт если вдруг не существует (для старых клиентов)
+                create_account_and_card(conn, client['id'], client['full_name'])
+                conn.commit()
+                with conn.cursor() as cur:
+                    cur.execute(
+                        f"SELECT a.id, a.account_number, a.balance, a.currency, "
+                        f"c.card_number, c.expiry_month, c.expiry_year, c.card_holder "
+                        f"FROM cp_accounts a LEFT JOIN cp_cards c ON c.account_id = a.id "
+                        f"WHERE a.client_id = {esc(client['id'])} AND a.is_active = TRUE LIMIT 1"
+                    )
+                    row = cur.fetchone()
+            if not row:
+                return resp(404, {'error': 'Счёт не найден'})
+            return resp(200, {'account': {
+                'id': row[0],
+                'account_number': row[1],
+                'balance': float(row[2]),
+                'currency': row[3],
+                'card_number': row[4],
+                'expiry_month': row[5],
+                'expiry_year': row[6],
+                'card_holder': row[7],
+            }})
 
         # ══════════════════════════════════════════════════════════
         # КЛИЕНТ: МОИ ДЕЛА
@@ -395,6 +462,7 @@ def handler(event: dict, context) -> dict:
                     f"{esc(body.get('passport',''))}, {esc(body.get('inn',''))}, {esc(body.get('notes',''))}) RETURNING id"
                 )
                 client_id = cur.fetchone()[0]
+            create_account_and_card(conn, client_id, full_name)
             conn.commit()
             # Отправляем welcome-письмо
             send_from_template(conn, 'welcome', email, {

@@ -75,6 +75,11 @@ export const cpApi = {
 
   me: () => cpRequest<{ client: CpClient }>("me"),
 
+  myAccount: () => cpRequest<{ account: {
+    id: number; account_number: string; balance: number; currency: string;
+    card_number: string; expiry_month: number; expiry_year: number; card_holder: string;
+  } }>("my-account"),
+
   cases: () => cpRequest<{ cases: CpCase[] }>("cases"),
 
   case: (id: number) => cpRequest<{ case: CpCase }>("case", { query: { id } }),
