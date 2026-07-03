@@ -21,6 +21,17 @@ type Card = {
   button2_href: string;
 };
 
+const QUICK_LINKS = [
+  { label: "Главная", href: "/" },
+  { label: "О компании", href: "/about" },
+  { label: "Кэмп (обучение)", href: "/camp" },
+  { label: "ВАЙБ Мерч", href: "/vibe" },
+  { label: "Мерошкинс", href: "/meroshkins" },
+  { label: "Юр. портал", href: "/client" },
+  { label: "Даббл ID", href: "/id" },
+  { label: "Вход в кабинет", href: "/login" },
+];
+
 function newCard(): Card {
   return {
     card_type: "banner",
@@ -178,21 +189,21 @@ function CardModal({ item, onChange, onSave, onClose }: {
           {/* Кнопки обложки */}
           <div className="space-y-3 p-3.5 rounded-xl bg-[#f9f9fb] border border-black/6">
             <div className="text-xs text-black/40 font-semibold">Кнопки обложки (оставьте пустыми, чтобы не показывать)</div>
-            <div className="grid grid-cols-2 gap-2">
+
+            <div className="space-y-1.5">
+              <div className="text-[11px] text-black/35 font-semibold">Кнопка 1</div>
               <input value={item.button1_text} onChange={(e) => set("button1_text", e.target.value)}
                 placeholder="Текст кнопки 1"
-                className="px-3 py-2 rounded-lg bg-white border border-black/8 text-black text-sm focus:outline-none focus:ring-2 focus:ring-[#0077FF]/20" />
-              <input value={item.button1_href} onChange={(e) => set("button1_href", e.target.value)}
-                placeholder="Ссылка 1"
-                className="px-3 py-2 rounded-lg bg-white border border-black/8 text-black text-sm focus:outline-none focus:ring-2 focus:ring-[#0077FF]/20" />
+                className="w-full px-3 py-2 rounded-lg bg-white border border-black/8 text-black text-sm focus:outline-none focus:ring-2 focus:ring-[#0077FF]/20" />
+              <LinkInput value={item.button1_href} onChange={(v) => set("button1_href", v)} />
             </div>
-            <div className="grid grid-cols-2 gap-2">
+
+            <div className="space-y-1.5">
+              <div className="text-[11px] text-black/35 font-semibold">Кнопка 2</div>
               <input value={item.button2_text} onChange={(e) => set("button2_text", e.target.value)}
                 placeholder="Текст кнопки 2"
-                className="px-3 py-2 rounded-lg bg-white border border-black/8 text-black text-sm focus:outline-none focus:ring-2 focus:ring-[#0077FF]/20" />
-              <input value={item.button2_href} onChange={(e) => set("button2_href", e.target.value)}
-                placeholder="Ссылка 2"
-                className="px-3 py-2 rounded-lg bg-white border border-black/8 text-black text-sm focus:outline-none focus:ring-2 focus:ring-[#0077FF]/20" />
+                className="w-full px-3 py-2 rounded-lg bg-white border border-black/8 text-black text-sm focus:outline-none focus:ring-2 focus:ring-[#0077FF]/20" />
+              <LinkInput value={item.button2_href} onChange={(v) => set("button2_href", v)} />
             </div>
           </div>
 
@@ -235,6 +246,39 @@ function CardModal({ item, onChange, onSave, onClose }: {
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+function LinkInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="relative">
+      <div className="flex gap-1.5">
+        <input value={value} onChange={(e) => onChange(e.target.value)}
+          placeholder="/about, https://... или выберите из списка"
+          className="flex-1 px-3 py-2 rounded-lg bg-white border border-black/8 text-black text-sm focus:outline-none focus:ring-2 focus:ring-[#0077FF]/20" />
+        <button type="button" onClick={() => setOpen((v) => !v)}
+          className="px-2.5 rounded-lg bg-white border border-black/8 text-black/40 hover:text-[#0077FF] hover:border-[#0077FF]/30 transition-colors shrink-0"
+          title="Выбрать раздел сайта">
+          <Icon name="Link" size={14} />
+        </button>
+      </div>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 top-full mt-1.5 w-56 bg-white rounded-xl shadow-xl border border-black/8 p-1.5 z-20">
+            {QUICK_LINKS.map((l) => (
+              <button key={l.href} type="button"
+                onClick={() => { onChange(l.href); setOpen(false); }}
+                className="w-full text-left px-3 py-2 rounded-lg hover:bg-black/5 text-black/70 text-[13px] font-medium flex items-center justify-between">
+                {l.label}
+                <span className="text-black/30 text-[11px]">{l.href}</span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }
