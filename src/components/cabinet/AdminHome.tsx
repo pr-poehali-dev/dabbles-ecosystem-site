@@ -15,6 +15,10 @@ type Card = {
   is_feature: boolean;
   sort_order: number;
   is_active?: boolean;
+  button1_text: string;
+  button1_href: string;
+  button2_text: string;
+  button2_href: string;
 };
 
 const TYPE_LABELS: Record<string, string> = {
@@ -50,6 +54,10 @@ function newCard(type: string): Card {
     is_feature: false,
     sort_order: 99,
     is_active: true,
+    button1_text: "",
+    button1_href: "",
+    button2_text: "",
+    button2_href: "",
   };
 }
 
@@ -202,13 +210,38 @@ function CardModal({ item, onChange, onSave, onClose }: {
             </div>
           )}
 
-          {/* Ссылка */}
-          <div>
-            <label className="text-xs text-black/40 font-semibold block mb-1.5">Ссылка (URL или /путь, пусто = неактивна)</label>
-            <input value={item.href} onChange={(e) => set("href", e.target.value)}
-              placeholder="/about или https://..."
-              className="w-full px-3.5 py-2.5 rounded-xl bg-[#f5f5f7] border border-black/8 text-black text-sm focus:outline-none focus:ring-2 focus:ring-[#0077FF]/20" />
-          </div>
+          {/* Ссылка (не для баннера — у баннера свои 2 кнопки) */}
+          {!isBanner && (
+            <div>
+              <label className="text-xs text-black/40 font-semibold block mb-1.5">Ссылка (URL или /путь, пусто = неактивна)</label>
+              <input value={item.href} onChange={(e) => set("href", e.target.value)}
+                placeholder="/about или https://..."
+                className="w-full px-3.5 py-2.5 rounded-xl bg-[#f5f5f7] border border-black/8 text-black text-sm focus:outline-none focus:ring-2 focus:ring-[#0077FF]/20" />
+            </div>
+          )}
+
+          {/* Кнопки баннера (если пусто — кнопка не показывается на сайте) */}
+          {isBanner && (
+            <div className="space-y-3 p-3.5 rounded-xl bg-[#f9f9fb] border border-black/6">
+              <div className="text-xs text-black/40 font-semibold">Кнопки обложки (оставьте пустыми, чтобы не показывать)</div>
+              <div className="grid grid-cols-2 gap-2">
+                <input value={item.button1_text} onChange={(e) => set("button1_text", e.target.value)}
+                  placeholder="Текст кнопки 1"
+                  className="px-3 py-2 rounded-lg bg-white border border-black/8 text-black text-sm focus:outline-none focus:ring-2 focus:ring-[#0077FF]/20" />
+                <input value={item.button1_href} onChange={(e) => set("button1_href", e.target.value)}
+                  placeholder="Ссылка 1"
+                  className="px-3 py-2 rounded-lg bg-white border border-black/8 text-black text-sm focus:outline-none focus:ring-2 focus:ring-[#0077FF]/20" />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <input value={item.button2_text} onChange={(e) => set("button2_text", e.target.value)}
+                  placeholder="Текст кнопки 2"
+                  className="px-3 py-2 rounded-lg bg-white border border-black/8 text-black text-sm focus:outline-none focus:ring-2 focus:ring-[#0077FF]/20" />
+                <input value={item.button2_href} onChange={(e) => set("button2_href", e.target.value)}
+                  placeholder="Ссылка 2"
+                  className="px-3 py-2 rounded-lg bg-white border border-black/8 text-black text-sm focus:outline-none focus:ring-2 focus:ring-[#0077FF]/20" />
+              </div>
+            </div>
+          )}
 
           {/* Иконка + градиент для quick / feature */}
           {(isQuick || item.is_feature) && (

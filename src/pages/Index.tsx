@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import SberHome from "@/components/SberHome";
+import DabblDiscover from "@/components/DabblDiscover";
 
 export default function Index() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -23,6 +24,7 @@ export default function Index() {
         setAudience={setAudience}
       />
       <SberHome />
+      <DabblDiscover />
     </div>
   );
 }

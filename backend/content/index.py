@@ -66,7 +66,7 @@ SCHEMAS = {
     },
     'home': {
         'table': 'home_cards',
-        'fields': ['card_type', 'title', 'subtitle', 'icon', 'image_url', 'gradient', 'href', 'is_light', 'is_feature', 'sort_order', 'is_active'],
+        'fields': ['card_type', 'title', 'subtitle', 'icon', 'image_url', 'gradient', 'href', 'is_light', 'is_feature', 'sort_order', 'is_active', 'button1_text', 'button1_href', 'button2_text', 'button2_href'],
         'bools': ['is_light', 'is_feature', 'is_active'],
         'ints': ['sort_order'],
     },
