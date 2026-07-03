@@ -1,5 +1,6 @@
 import { useState } from "react";
 import VibeHero from "@/components/vibe/VibeHero";
+import VibeGallery from "@/components/vibe/VibeGallery";
 import VibeCatalog from "@/components/vibe/VibeCatalog";
 import VibeAboutContacts from "@/components/vibe/VibeAboutContacts";
 import VibeCart from "@/components/vibe/VibeCart";
@@ -32,6 +33,7 @@ export default function Vibe() {
   return (
     <div className="min-h-screen bg-white text-black font-body">
       <VibeHero scrollTo={scrollToSection} cartCount={cart.reduce((s, it) => s + it.qty, 0)} onCartClick={() => setCartOpen(true)} />
+      <VibeGallery />
       <VibeCatalog onAddToCart={addToCart} />
       <VibeAboutContacts />
 

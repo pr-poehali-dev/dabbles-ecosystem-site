@@ -12,31 +12,31 @@ export default function VibeAboutContacts() {
   return (
     <>
       {/* О БРЕНДЕ */}
-      <section id="about" className="px-5 md:px-8 py-16 md:py-24 bg-black text-white">
+      <section id="about" className="px-5 md:px-8 py-14 md:py-20 bg-[#FAFAF8]">
         <div className="max-w-6xl mx-auto">
           <FadeIn>
-            <div className="text-xs uppercase tracking-[0.25em] text-white/40 font-semibold mb-3">О бренде</div>
-            <h2 className="font-display text-3xl md:text-5xl font-black mb-5 max-w-3xl leading-tight">
-              ВАЙБ — это не просто одежда
-            </h2>
-            <p className="text-white/55 text-base md:text-lg max-w-2xl leading-relaxed mb-12">
-              Это способ показать свою принадлежность к комьюнити. Мы создаём вещи, которые хочется носить каждый день —
-              удобные, качественные и с характером.
+            <div className="flex items-center gap-2 mb-5">
+              <h2 className="font-display text-3xl md:text-5xl font-black text-black">О бренде</h2>
+              <Icon name="Heart" size={20} className="text-[#DAB332] -mt-4" />
+            </div>
+            <p className="text-black/55 text-base md:text-lg max-w-2xl leading-relaxed mb-10">
+              ВАЙБ — это не просто одежда. Это способ показать свою принадлежность к комьюнити.{" "}
+              <span className="font-bold text-black">Мы создаём вещи, которые хочется носить каждый день.</span>
             </p>
           </FadeIn>
 
           <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
             {VALUES.map((v, i) => (
               <FadeIn key={v.title} delay={i * 90}>
-                <div className="p-6 rounded-3xl bg-white/5 border border-white/10 h-full">
+                <div className="p-6 rounded-3xl bg-white border border-black/6 h-full hover:-translate-y-1 transition-transform">
                   <div
                     className="w-11 h-11 rounded-2xl flex items-center justify-center mb-4"
                     style={{ background: "linear-gradient(140deg, #EBD047 0%, #DAB332 100%)" }}
                   >
                     <Icon name={v.icon} size={20} className="text-black" />
                   </div>
-                  <h3 className="font-bold text-[15px] mb-1.5">{v.title}</h3>
-                  <p className="text-white/50 text-[13px] leading-relaxed">{v.desc}</p>
+                  <h3 className="font-bold text-black text-[15px] mb-1.5">{v.title}</h3>
+                  <p className="text-black/45 text-[13px] leading-relaxed">{v.desc}</p>
                 </div>
               </FadeIn>
             ))}
@@ -45,11 +45,13 @@ export default function VibeAboutContacts() {
       </section>
 
       {/* ДОСТАВКА */}
-      <section id="delivery" className="px-5 md:px-8 py-16 md:py-20 bg-[#FAFAF8]">
+      <section id="delivery" className="px-5 md:px-8 py-14 md:py-20 bg-black text-white">
         <div className="max-w-6xl mx-auto">
           <FadeIn>
-            <div className="text-xs uppercase tracking-[0.25em] text-black/40 font-semibold mb-3">Доставка и оплата</div>
-            <h2 className="font-display text-2xl md:text-4xl font-black mb-8 leading-tight">Как получить заказ</h2>
+            <div className="flex items-center gap-2 mb-8">
+              <h2 className="font-display text-2xl md:text-4xl font-black">Как получить заказ</h2>
+              <Icon name="Truck" size={18} className="text-[#EBD047] -mt-3" />
+            </div>
           </FadeIn>
           <div className="grid md:grid-cols-3 gap-4">
             {[
@@ -58,12 +60,15 @@ export default function VibeAboutContacts() {
               { icon: "Truck", title: "Получите мерч", desc: "Доставка курьером, почтой или самовывоз" },
             ].map((s, i) => (
               <FadeIn key={s.title} delay={i * 100}>
-                <div className="bg-white rounded-3xl p-6 border border-black/6">
-                  <div className="w-11 h-11 rounded-2xl bg-black flex items-center justify-center mb-4">
-                    <Icon name={s.icon} size={20} className="text-[#EBD047]" />
+                <div className="bg-white/5 border border-white/10 rounded-3xl p-6">
+                  <div
+                    className="w-11 h-11 rounded-2xl flex items-center justify-center mb-4"
+                    style={{ background: "linear-gradient(140deg, #EBD047 0%, #DAB332 100%)" }}
+                  >
+                    <Icon name={s.icon} size={20} className="text-black" />
                   </div>
-                  <h3 className="font-bold text-black text-[15px] mb-1.5">{s.title}</h3>
-                  <p className="text-black/45 text-[13px] leading-relaxed">{s.desc}</p>
+                  <h3 className="font-bold text-[15px] mb-1.5">{s.title}</h3>
+                  <p className="text-white/50 text-[13px] leading-relaxed">{s.desc}</p>
                 </div>
               </FadeIn>
             ))}
@@ -72,20 +77,34 @@ export default function VibeAboutContacts() {
       </section>
 
       {/* КОНТАКТЫ */}
-      <section id="contacts" className="px-5 md:px-8 py-16 md:py-20 bg-white">
-        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10">
+      <section id="contacts" className="px-5 md:px-8 py-14 md:py-20 bg-white">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-10 items-center">
           <FadeIn>
-            <div className="text-xs uppercase tracking-[0.25em] text-black/40 font-semibold mb-3">Контакты</div>
-            <h2 className="font-display text-2xl md:text-4xl font-black mb-6 leading-tight">Остались вопросы?</h2>
+            <div className="flex items-center gap-2 mb-5">
+              <h2 className="font-display text-2xl md:text-4xl font-black text-black">Остались вопросы?</h2>
+              <Icon name="MessageCircle" size={18} className="text-[#DAB332] -mt-3" />
+            </div>
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <Icon name="Phone" size={16} className="text-black/40" />
-                <span className="text-black/70 text-sm">+7 (900) 000-00-00</span>
+                <div className="w-9 h-9 rounded-full bg-[#f5f5f5] flex items-center justify-center shrink-0">
+                  <Icon name="Phone" size={15} className="text-black/50" />
+                </div>
+                <span className="text-black/70 text-sm font-medium">+7 (900) 000-00-00</span>
               </div>
               <div className="flex items-center gap-3">
-                <Icon name="Mail" size={16} className="text-black/40" />
-                <span className="text-black/70 text-sm">shop@vibe-brand.ru</span>
+                <div className="w-9 h-9 rounded-full bg-[#f5f5f5] flex items-center justify-center shrink-0">
+                  <Icon name="Mail" size={15} className="text-black/50" />
+                </div>
+                <span className="text-black/70 text-sm font-medium">shop@vibe-brand.ru</span>
               </div>
+            </div>
+          </FadeIn>
+          <FadeIn delay={100}>
+            <div
+              className="rounded-3xl p-8 flex items-center justify-center"
+              style={{ background: "linear-gradient(140deg, #EBD047 0%, #DAB332 100%)", minHeight: 160 }}
+            >
+              <span className="font-display font-black text-black text-4xl md:text-5xl">ВАЙБ</span>
             </div>
           </FadeIn>
         </div>
