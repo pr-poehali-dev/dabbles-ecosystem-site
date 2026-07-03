@@ -128,7 +128,7 @@ export default function Navbar({ menuOpen, scrollTo, setMenuOpen, setAudience }:
           <div className="flex items-center gap-2 shrink-0">
             {/* Зелёная кнопка CTA */}
             <Link
-              to={user ? "/cabinet" : "/login"}
+              to={user ? "/cabinet" : "/camp"}
               className="hidden sm:flex items-center gap-1.5 px-5 py-2.5 rounded-[14px] text-white text-[14px] font-bold transition-all hover:opacity-90 whitespace-nowrap"
               style={{ background: "linear-gradient(120deg, #9FC96D 0%, #C1F089 100%)" }}
             >
