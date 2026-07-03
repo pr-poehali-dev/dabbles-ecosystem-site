@@ -1,0 +1,1 @@
+ALTER TABLE camp_certificates ADD COLUMN IF NOT EXISTS pdf_url TEXT NOT NULL DEFAULT '';

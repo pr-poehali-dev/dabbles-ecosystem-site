@@ -36,9 +36,9 @@ const FB_BANNER: HomeCard = {
   is_feature: false,
   sort_order: 1,
   button1_text: "Обучайся с нами!",
-  button1_href: "/login",
+  button1_href: "/camp",
   button2_text: "Узнать больше",
-  button2_href: "/login",
+  button2_href: "/camp",
 };
 
 function go(href: string, navigate: ReturnType<typeof useNavigate>) {

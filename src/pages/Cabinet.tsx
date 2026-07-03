@@ -14,12 +14,13 @@ import AdminOAuth from "@/components/cabinet/AdminOAuth";
 import AdminOrgChart from "@/components/cabinet/AdminOrgChart";
 import AdminKP from "@/components/cabinet/AdminKP";
 import AdminClients from "@/components/cabinet/AdminClients";
+import AdminCamp from "@/components/cabinet/AdminCamp";
 import ChangePasswordModal from "@/components/cabinet/ChangePasswordModal";
 
 type Section =
   | "profile" | "tasks" | "documents" | "crm"
   | "admin-clients" | "admin-users" | "admin-oauth"
-  | "admin-org" | "admin-home" | "admin-kp";
+  | "admin-org" | "admin-home" | "admin-kp" | "admin-camp";
 
 const USER_NAV: { key: Section; label: string; icon: string; access?: string }[] = [
   { key: "profile",   label: "Профиль",    icon: "User" },
@@ -30,6 +31,7 @@ const USER_NAV: { key: Section; label: string; icon: string; access?: string }[]
 
 const ADMIN_NAV: { key: Section; label: string; icon: string; desc: string }[] = [
   { key: "admin-clients", label: "Юр. портал",     icon: "Scale",      desc: "Клиенты, дела, оплаты" },
+  { key: "admin-camp",    label: "Кэмп",           icon: "GraduationCap", desc: "Программы, лекции, тесты" },
   { key: "admin-users",   label: "Сотрудники",     icon: "UserPlus",   desc: "Управление командой" },
   { key: "admin-home",    label: "Главная",        icon: "Home",       desc: "Баннер и карточки" },
   { key: "admin-kp",      label: "КП — Шаблон",   icon: "FileDown",   desc: "Документ Word + стоп-слова" },
@@ -156,6 +158,7 @@ export default function Cabinet() {
           {section === "admin-home"     && isAdmin && <AdminHome />}
           {section === "admin-kp"       && isAdmin && <AdminKP />}
           {section === "admin-clients"  && isAdmin && <AdminClients />}
+          {section === "admin-camp"     && isAdmin && <AdminCamp />}
         </main>
       </div>
 

@@ -18,6 +18,7 @@ const SERVICES_GRID = [
   { icon: "CalendarDays", label: "Мерошкинс", href: "/meroshkins" },
   { icon: "IdCard", label: "Даббл ID", href: "/id" },
   { icon: "Scale", label: "Юр сервис", href: "/client" },
+  { icon: "GraduationCap", label: "Кэмп", href: "/camp" },
 ];
 
 type MenuSection = {
