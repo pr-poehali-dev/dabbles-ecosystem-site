@@ -1,32 +1,49 @@
-import { useState, FormEvent } from "react";
+import { useState } from "react";
 import VibeHero from "@/components/vibe/VibeHero";
-import VibeConceptMenu from "@/components/vibe/VibeConceptMenu";
-import VibePartnersContacts from "@/components/vibe/VibePartnersContacts";
-import { scrollToSection } from "@/components/vibe/constants";
+import VibeCatalog from "@/components/vibe/VibeCatalog";
+import VibeAboutContacts from "@/components/vibe/VibeAboutContacts";
+import VibeCart from "@/components/vibe/VibeCart";
+import { scrollToSection, CartItem, VibeProduct } from "@/components/vibe/constants";
 
 export default function Vibe() {
-  const [openCat, setOpenCat] = useState(0);
-  const [form, setForm] = useState({ name: "", contact: "", message: "" });
-  const [sent, setSent] = useState(false);
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [cartOpen, setCartOpen] = useState(false);
 
-  const submit = (e: FormEvent) => {
-    e.preventDefault();
-    setSent(true);
-    setTimeout(() => setSent(false), 4000);
-    setForm({ name: "", contact: "", message: "" });
+  const addToCart = (product: VibeProduct, size: string) => {
+    setCart((prev) => {
+      const idx = prev.findIndex((it) => it.product_id === product.id && it.size === size);
+      if (idx >= 0) {
+        const next = [...prev];
+        next[idx] = { ...next[idx], qty: next[idx].qty + 1 };
+        return next;
+      }
+      return [...prev, { product_id: product.id, name: product.name, price: product.price, size, qty: 1 }];
+    });
+    setCartOpen(true);
   };
 
+  const updateQty = (index: number, qty: number) => {
+    if (qty < 1) return;
+    setCart((prev) => prev.map((it, i) => (i === index ? { ...it, qty } : it)));
+  };
+
+  const removeItem = (index: number) => setCart((prev) => prev.filter((_, i) => i !== index));
+
   return (
-    <div className="min-h-screen bg-[#FBF6EE] text-[#1a1410] font-body">
-      <VibeHero scrollTo={scrollToSection} />
-      <VibeConceptMenu openCat={openCat} setOpenCat={setOpenCat} />
-      <VibePartnersContacts
-        scrollTo={scrollToSection}
-        form={form}
-        setForm={setForm}
-        sent={sent}
-        submit={submit}
-      />
+    <div className="min-h-screen bg-white text-black font-body">
+      <VibeHero scrollTo={scrollToSection} cartCount={cart.reduce((s, it) => s + it.qty, 0)} onCartClick={() => setCartOpen(true)} />
+      <VibeCatalog onAddToCart={addToCart} />
+      <VibeAboutContacts />
+
+      {cartOpen && (
+        <VibeCart
+          items={cart}
+          onClose={() => setCartOpen(false)}
+          onUpdateQty={updateQty}
+          onRemove={removeItem}
+          onClear={() => setCart([])}
+        />
+      )}
     </div>
   );
 }

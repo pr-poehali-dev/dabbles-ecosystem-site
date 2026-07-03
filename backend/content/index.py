@@ -190,8 +190,11 @@ def handler(event, context):
             iid = int(qs.get('id') or 0)
             if not iid:
                 return resp(400, {'error': 'id обязателен'})
-            # Деактивация вместо удаления для совместимости с правилами БД
-            if kind == 'blog':
+            if kind == 'home':
+                # Карточки главной (обложки) удаляются полностью по запросу пользователя
+                with conn.cursor() as cur:
+                    cur.execute(f"DELETE FROM {table} WHERE id = {iid}")
+            elif kind == 'blog':
                 with conn.cursor() as cur:
                     cur.execute(f"UPDATE {table} SET is_published = FALSE, updated_at = NOW() WHERE id = {iid}")
             else:

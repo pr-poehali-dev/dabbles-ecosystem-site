@@ -1,0 +1,29 @@
+{
+  "tests": [
+    {
+      "name": "CORS preflight",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Products list returns 200",
+      "method": "GET",
+      "path": "/?action=products",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Order without required fields fails",
+      "method": "POST",
+      "path": "/?action=order",
+      "body": {},
+      "expectedStatus": 400
+    },
+    {
+      "name": "Admin products unauthorized",
+      "method": "GET",
+      "path": "/?action=admin-products",
+      "expectedStatus": 401
+    }
+  ]
+}

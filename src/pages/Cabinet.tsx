@@ -15,12 +15,13 @@ import AdminOrgChart from "@/components/cabinet/AdminOrgChart";
 import AdminKP from "@/components/cabinet/AdminKP";
 import AdminClients from "@/components/cabinet/AdminClients";
 import AdminCamp from "@/components/cabinet/AdminCamp";
+import AdminVibeShop from "@/components/cabinet/AdminVibeShop";
 import ChangePasswordModal from "@/components/cabinet/ChangePasswordModal";
 
 type Section =
   | "profile" | "tasks" | "documents" | "crm"
   | "admin-clients" | "admin-users" | "admin-oauth"
-  | "admin-org" | "admin-home" | "admin-kp" | "admin-camp";
+  | "admin-org" | "admin-home" | "admin-kp" | "admin-camp" | "admin-vibe";
 
 const USER_NAV: { key: Section; label: string; icon: string; access?: string }[] = [
   { key: "profile",   label: "Профиль",    icon: "User" },
@@ -33,7 +34,8 @@ const ADMIN_NAV: { key: Section; label: string; icon: string; desc: string }[] =
   { key: "admin-clients", label: "Юр. портал",     icon: "Scale",      desc: "Клиенты, дела, оплаты" },
   { key: "admin-camp",    label: "Кэмп",           icon: "GraduationCap", desc: "Программы, лекции, тесты" },
   { key: "admin-users",   label: "Сотрудники",     icon: "UserPlus",   desc: "Управление командой" },
-  { key: "admin-home",    label: "Главная",        icon: "Home",       desc: "Баннер и карточки" },
+  { key: "admin-home",    label: "Главная",        icon: "Home",       desc: "Обложки-баннеры" },
+  { key: "admin-vibe",    label: "ВАЙБ Мерч",     icon: "ShoppingBag", desc: "Товары интернет-магазина" },
   { key: "admin-kp",      label: "КП — Шаблон",   icon: "FileDown",   desc: "Документ Word + стоп-слова" },
   { key: "admin-org",     label: "Оргструктура",   icon: "Network",    desc: "Схема компании" },
   { key: "admin-oauth",   label: "OAuth",          icon: "KeyRound",   desc: "Приложения и доступы" },
@@ -159,6 +161,7 @@ export default function Cabinet() {
           {section === "admin-kp"       && isAdmin && <AdminKP />}
           {section === "admin-clients"  && isAdmin && <AdminClients />}
           {section === "admin-camp"     && isAdmin && <AdminCamp />}
+          {section === "admin-vibe"     && isAdmin && <AdminVibeShop />}
         </main>
       </div>
 

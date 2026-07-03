@@ -1,118 +1,38 @@
 export const LOGO_URL = "https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/bucket/e4d62d23-6573-4358-9c1f-692248126380.png";
 
 export const NAV = [
-  { label: "Концепция", href: "#concept" },
-  { label: "Меню", href: "#menu" },
-  { label: "Атмосфера", href: "#vibe" },
-  { label: "Сотрудничество", href: "#partners" },
+  { label: "Каталог", href: "#catalog" },
+  { label: "О бренде", href: "#about" },
+  { label: "Доставка", href: "#delivery" },
   { label: "Контакты", href: "#contacts" },
-];
-
-export const MENU_CATEGORIES = [
-  {
-    icon: "Coffee",
-    title: "Кофе",
-    desc: "Спешелти-зерно местной обжарки",
-    items: [
-      { name: "Эспрессо", price: "180 ₽" },
-      { name: "Капучино", price: "260 ₽" },
-      { name: "Раф ванильный", price: "320 ₽" },
-      { name: "Флэт уайт", price: "280 ₽" },
-      { name: "Фильтр-кофе дня", price: "240 ₽" },
-    ],
-  },
-  {
-    icon: "Croissant",
-    title: "Свежая выпечка",
-    desc: "Каждое утро из печи",
-    items: [
-      { name: "Круассан классический", price: "180 ₽" },
-      { name: "Улитка с корицей", price: "210 ₽" },
-      { name: "Хлеб на закваске", price: "240 ₽" },
-      { name: "Чизкейк нью-йорк", price: "320 ₽" },
-      { name: "Морковный торт", price: "340 ₽" },
-    ],
-  },
-  {
-    icon: "GlassWater",
-    title: "Напитки",
-    desc: "Лимонады, матча, какао",
-    items: [
-      { name: "Матча латте", price: "320 ₽" },
-      { name: "Какао бельгийское", price: "280 ₽" },
-      { name: "Лимонад облепиха", price: "260 ₽" },
-      { name: "Чай улун / сенча", price: "220 ₽" },
-    ],
-  },
-];
-
-export const VIBES = [
-  { icon: "Music", title: "Lo-fi плейлисты", desc: "Атмосферный фон для работы и встреч" },
-  { icon: "Wifi", title: "Бесплатный Wi-Fi", desc: "Быстрый интернет, удобные розетки у каждого стола" },
-  { icon: "Sun", title: "Много света", desc: "Большие окна, живые растения, тёплое дерево" },
-  { icon: "BookOpen", title: "Книжная полка", desc: "Бери, читай, оставляй свою — у нас буккроссинг" },
-];
-
-export const PACKAGES = [
-  {
-    name: "Партнёрка",
-    price: "от 0 ₽",
-    period: "вход",
-    desc: "Приведи гостей — получай процент",
-    features: [
-      "Личный промокод и QR-материалы",
-      "10% с каждого чека по вашему коду",
-      "Доступ к личному кабинету с аналитикой",
-      "Выплаты раз в месяц на карту или счёт",
-      "Без обязательств и минимального оборота",
-    ],
-    accent: false,
-    badge: "",
-    cta: "Стать партнёром",
-  },
-  {
-    name: "Франшиза",
-    price: "от 1 200 000 ₽",
-    period: "паушальный взнос",
-    desc: "Откройте свою ВАЙБ в своём городе",
-    features: [
-      "Готовый бренд-бук и дизайн-проект",
-      "Обучение команды и шеф-бариста",
-      "Технологические карты и поставщики",
-      "Маркетинговая поддержка с открытия",
-      "Роялти 4% от выручки",
-      "Окупаемость от 14 месяцев",
-    ],
-    accent: true,
-    badge: "Хит сезона",
-    cta: "Получить презентацию",
-  },
-  {
-    name: "Корпоративный\u00A0договор",
-    price: "индивидуально",
-    period: "",
-    desc: "Для бизнес-центров и компаний",
-    features: [
-      "Корпоративные карты со скидкой 10–20%",
-      "Поставка кофе и выпечки в офис",
-      "Кофе-брейки на ваших мероприятиях",
-      "Брендированные позиции для команды",
-      "Безналичная оплата и закрывающие документы",
-    ],
-    accent: false,
-    badge: "",
-    cta: "Обсудить условия",
-  },
-];
-
-export const STEPS = [
-  { num: "01", title: "Оставляете заявку", desc: "Заполняете форму или пишете в Telegram — отвечаем в течение дня." },
-  { num: "02", title: "Созваниваемся", desc: "Знакомимся, отвечаем на вопросы, высылаем подробную презентацию." },
-  { num: "03", title: "Подписываем договор", desc: "Финализируем условия, оформляем документы, фиксируем стартовую дату." },
-  { num: "04", title: "Запускаемся", desc: "Помогаем со стартом: материалы, обучение, поддержка на старте." },
 ];
 
 export const scrollToSection = (href: string) => {
   const el = document.querySelector(href);
   if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
 };
+
+export type VibeProduct = {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  old_price: number | null;
+  image_url: string;
+  category: string;
+  sizes: string[];
+  sort_order: number;
+  is_active?: boolean;
+};
+
+export type CartItem = {
+  product_id: number;
+  name: string;
+  price: number;
+  size: string;
+  qty: number;
+};
+
+export function formatPrice(n: number): string {
+  return n.toLocaleString("ru-RU") + " ₽";
+}
