@@ -48,38 +48,71 @@ export default function CampLanding() {
         </div>
       </header>
 
-      {/* ── ПРОМО-ПОЛОСА ── */}
-      <div style={{ background: "linear-gradient(90deg, #FBF3D0 0%, #F5E7A8 100%)" }}>
-        <div className="max-w-6xl mx-auto px-4 md:px-6 py-2.5 flex items-center justify-center gap-2 text-[13px] md:text-[14px] font-bold text-black/80">
-          <Icon name="BookOpenText" size={15} />
-          Учимся 100% в тексте — без видео, в своём темпе
-        </div>
-      </div>
+      {/* ── HERO ОБЛОЖКА ── */}
+      <section className="px-3 md:px-5 pt-4">
+        <div
+          className="relative max-w-6xl mx-auto rounded-[40px] overflow-hidden px-6 md:px-10 pt-14 pb-16 md:pt-20 md:pb-20 text-center"
+          style={{ background: "linear-gradient(135deg, #F6DE6A 0%, #DAB332 55%, #C79B26 100%)" }}
+        >
+          {/* декоративные эмодзи */}
+          <span className="absolute left-[6%] top-[14%] text-[52px] md:text-[64px] rotate-[-12deg] select-none pointer-events-none drop-shadow-sm">📚</span>
+          <span className="absolute right-[8%] top-[10%] text-[46px] md:text-[58px] rotate-[14deg] select-none pointer-events-none drop-shadow-sm">🎓</span>
+          <span className="absolute left-[10%] bottom-[16%] text-[38px] md:text-[46px] rotate-[8deg] select-none pointer-events-none drop-shadow-sm hidden sm:block">✨</span>
+          <span className="absolute right-[12%] bottom-[12%] text-[42px] md:text-[52px] rotate-[-10deg] select-none pointer-events-none drop-shadow-sm hidden sm:block">💡</span>
 
-      {/* ── HERO ── */}
-      <section className="max-w-4xl mx-auto px-4 md:px-6 pt-14 pb-10 md:pt-20 md:pb-14 text-center">
-        <h1 className="font-display text-[34px] md:text-[52px] font-black leading-[1.08] mb-5">
-          Сделай первый шаг<br />к новой профессии
-        </h1>
-        <p className="text-black/50 text-[15px] md:text-[18px] leading-relaxed mb-8 max-w-lg mx-auto">
-          Образовательная платформа Даббл. Никаких видео — только структурированные текстовые лекции, тесты и именной сертификат.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Link
-            to="/camp/login?mode=register"
-            className="py-3.5 px-7 rounded-2xl text-black font-bold text-[15px] text-center transition-all hover:opacity-90 hover:-translate-y-0.5"
-            style={{ background: "linear-gradient(120deg, #EBD047 0%, #DAB332 100%)" }}
-          >
-            Начать обучение
-          </Link>
-          <a
-            href="#programs"
-            className="py-3.5 px-7 rounded-2xl bg-black/5 text-black font-bold text-[15px] text-center transition-all hover:bg-black/10"
-          >
-            Смотреть программы
-          </a>
+          <div className="relative z-10 max-w-2xl mx-auto">
+            <h1 className="font-display text-white text-[32px] md:text-[52px] font-black leading-[1.1] mb-6">
+              Найди новую профессию<br />в Кэмпе
+            </h1>
+
+            <div className="flex flex-col sm:flex-row gap-3 justify-center mb-10">
+              <Link
+                to="/camp/login?mode=register"
+                className="py-3.5 px-7 rounded-2xl bg-black text-white font-bold text-[15px] text-center transition-all hover:opacity-90 hover:-translate-y-0.5"
+              >
+                Начать обучение
+              </Link>
+              <a
+                href="#programs"
+                className="py-3.5 px-7 rounded-2xl bg-white/90 text-black font-bold text-[15px] text-center transition-all hover:bg-white"
+              >
+                Смотреть программы
+              </a>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3 md:gap-6">
+              <div>
+                <p className="text-white font-display text-xl md:text-3xl font-black leading-tight">100%</p>
+                <p className="text-white/70 text-[11px] md:text-[13px] mt-1">в текстовом формате</p>
+              </div>
+              <div>
+                <p className="text-white font-display text-xl md:text-3xl font-black leading-tight">0</p>
+                <p className="text-white/70 text-[11px] md:text-[13px] mt-1">видеолекций — только текст</p>
+              </div>
+              <div>
+                <p className="text-white font-display text-xl md:text-3xl font-black leading-tight">1</p>
+                <p className="text-white/70 text-[11px] md:text-[13px] mt-1">именной сертификат в конце</p>
+              </div>
+            </div>
+          </div>
+
         </div>
       </section>
+
+      {/* ── ПИЛЮЛИ-ФИЛЬТРЫ ── */}
+      <div className="max-w-6xl mx-auto px-4 md:px-6 -mt-6 md:-mt-7 relative z-10 flex items-center justify-center gap-2 flex-wrap">
+        {LEVELS.map((l) => (
+          <button
+            key={l}
+            onClick={() => setLevel(l)}
+            className={`px-5 py-2.5 rounded-full text-[13px] font-bold transition-all shadow-md ${
+              level === l ? "bg-black text-white" : "bg-white text-black/70 hover:bg-black/5"
+            }`}
+          >
+            {l}
+          </button>
+        ))}
+      </div>
 
       {/* ── ГОРИЗОНТАЛЬНАЯ ЛЕНТА ОБЛОЖЕК ── */}
       {programs.length > 0 && (
