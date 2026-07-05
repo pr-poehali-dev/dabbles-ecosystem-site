@@ -862,9 +862,21 @@ def handler(event: dict, context) -> dict:
             import base64, uuid
             data = json.loads(event.get('body') or '{}')
             file_b64 = data.get('file') or ''
-            file_bytes = base64.b64decode(file_b64)
+            if not file_b64:
+                return resp(400, {'error': 'Файл не передан'})
+            try:
+                file_bytes = base64.b64decode(file_b64, validate=True)
+            except Exception:
+                return resp(400, {'error': 'Файл повреждён при загрузке, попробуйте ещё раз'})
+            if not file_bytes.startswith(b'%PDF'):
+                return resp(400, {'error': 'Файл должен быть в формате PDF'})
+            if len(file_bytes) > 15 * 1024 * 1024:
+                return resp(400, {'error': 'Файл слишком большой (максимум 15 МБ)'})
 
-            png_bytes, page_w, page_h = render_template_preview(file_bytes)
+            try:
+                png_bytes, page_w, page_h = render_template_preview(file_bytes)
+            except Exception as e:
+                return resp(400, {'error': f'Не удалось прочитать PDF: {e}'})
 
             uid = uuid.uuid4()
             template_key = f"camp/cert-template/{uid}.pdf"
@@ -968,5 +980,7 @@ def handler(event: dict, context) -> dict:
             return resp(200, {'url': cdn_url})
 
         return resp(404, {'error': 'Неизвестное действие'})
+    except Exception as e:
+        return resp(500, {'error': f'Ошибка сервера: {e}'})
     finally:
         conn.close()

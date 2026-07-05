@@ -32,6 +32,7 @@ export default function AdminCampCertificates() {
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
+  const [uploadError, setUploadError] = useState("");
   const [activeField, setActiveField] = useState<FieldKey | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
@@ -60,12 +61,31 @@ export default function AdminCampCertificates() {
   const uploadTemplate = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setUploadError("");
+    if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+      setUploadError("Выберите файл в формате PDF");
+      e.target.value = "";
+      return;
+    }
+    if (file.size > 15 * 1024 * 1024) {
+      setUploadError("Файл слишком большой (максимум 15 МБ)");
+      e.target.value = "";
+      return;
+    }
     setUploading(true);
     try {
       const buf = await file.arrayBuffer();
-      const b64 = btoa(String.fromCharCode(...new Uint8Array(buf)));
+      let binary = "";
+      const bytes = new Uint8Array(buf);
+      const chunkSize = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunkSize) {
+        binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+      }
+      const b64 = btoa(binary);
       const res = await campApi.adminCertTemplateUpload(b64);
       setTpl((t) => ({ ...t, template_url: res.template_url, preview_url: res.preview_url, page_width: res.page_width, page_height: res.page_height }));
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Не удалось загрузить шаблон");
     } finally { setUploading(false); e.target.value = ""; }
   };
 
@@ -168,6 +188,12 @@ export default function AdminCampCertificates() {
                 </div>
               )}
               <input ref={fileRef} type="file" accept="application/pdf" className="hidden" onChange={uploadTemplate} />
+              {uploadError && (
+                <div className="flex items-center gap-2 mt-3 px-3.5 py-2.5 rounded-xl bg-red-50 text-red-600 text-[13px]">
+                  <Icon name="AlertCircle" size={14} />
+                  {uploadError}
+                </div>
+              )}
             </div>
 
             {tpl.preview_url && (
