@@ -1,0 +1,2 @@
+UPDATE camp_programs SET image_url = 'https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/files/b5a57828-1132-4dd3-95aa-3a6d36ccdf76.jpg' WHERE id = 1 AND image_url = '';
+UPDATE camp_programs SET image_url = 'https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/files/707aca21-9b28-4d47-a050-6f1bfeef2fec.jpg' WHERE id = 2 AND image_url = '';
