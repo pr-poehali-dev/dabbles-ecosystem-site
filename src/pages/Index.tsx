@@ -25,8 +25,8 @@ export default function Index() {
         audience={audience}
         setAudience={setAudience}
       />
-      <QuickLinksBar />
       <SberHome />
+      <QuickLinksBar />
       <EcosystemSection />
       <DabblDiscover />
     </div>
