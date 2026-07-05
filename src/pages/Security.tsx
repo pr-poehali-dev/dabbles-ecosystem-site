@@ -6,6 +6,7 @@ const LOGO_URL = "https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-77662
 const NEURAL_BG = "https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/files/21df7a33-73dd-4e18-a8b2-eadb81d1272a.jpg";
 const FACE_SCAN = "https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/files/20124642-3bda-4783-bb98-c1c3da01782d.jpg";
 const SHIELD_NODES = "https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/files/642f972d-c45b-4d1a-a1b8-767763fa06cf.jpg";
+const HERO_ILLUSTRATION = "https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/files/30cc5606-4eae-40b0-8f39-3660c6aa14a8.jpg";
 
 const ORANGE = "#F2A672";
 
@@ -117,7 +118,9 @@ export default function Security() {
           На главную
         </Link>
         <div className="flex-1 flex justify-center items-center gap-2.5">
-          <img src={LOGO_URL} alt="Корпоративная безопасность" className="h-8 w-auto object-contain" />
+          <div className="bg-white rounded-xl p-1.5 flex items-center justify-center">
+            <img src={LOGO_URL} alt="Корпоративная безопасность" className="h-6 w-auto object-contain" />
+          </div>
           <span className="hidden sm:inline text-white/70 text-xs font-semibold uppercase tracking-[0.2em]">
             Корпоративная безопасность
           </span>
@@ -128,47 +131,50 @@ export default function Security() {
       <div className="pt-[68px]">
         {/* HERO */}
         <section className="relative bg-black overflow-hidden">
-          <div className="absolute inset-0 opacity-30">
+          <div className="absolute inset-0 opacity-20">
             <img src={NEURAL_BG} alt="" className="w-full h-full object-cover" />
           </div>
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/70 to-black" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/80 to-black" />
           <FloatingOrbs />
 
-          <div className="relative max-w-5xl mx-auto px-5 md:px-10 py-20 md:py-32">
+          <div className="relative max-w-5xl mx-auto px-5 md:px-10 pt-14 md:pt-20 pb-0">
             <FadeIn>
-              <div
-                className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold mb-6"
-                style={{ background: `${ORANGE}20`, color: ORANGE }}
-              >
-                <Icon name="ShieldCheck" size={13} />
-                Департамент корпоративной безопасности
+              <div className="flex items-center gap-2 text-white/35 text-sm mb-8">
+                <span>Даббл — технологии для бизнеса</span>
+                <Icon name="ChevronRight" size={14} />
+                <span>Департамент корпоративной безопасности</span>
               </div>
             </FadeIn>
+
             <FadeIn delay={100}>
-              <h1 className="font-display text-4xl md:text-6xl font-black text-white leading-[1.05] mb-6 max-w-3xl">
-                Безопасность, встроенная в каждый процесс «Даббл»
+              <h1 className="font-display text-4xl md:text-6xl font-black text-white leading-[1.08] mb-6 max-w-3xl">
+                Безопасность, которая влияет на доверие, репутацию и рост компании
               </h1>
             </FadeIn>
             <FadeIn delay={200}>
               <p className="text-white/55 text-lg md:text-xl leading-relaxed max-w-2xl mb-10">
-                Мы используем современные технологические системы, чтобы защищать клиентов, партнёров и участников
-                наших проектов на каждом этапе — от регистрации до завершения мероприятия.
+                Технологические системы на основе нейросетей. Проверяем участников, партнёров и данные на каждом
+                этапе. Оперативно реагируем, если узнали об угрозе.
               </p>
             </FadeIn>
             <FadeIn delay={300}>
-              <div className="flex flex-wrap gap-3">
-                <div className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/5 border border-white/10 text-white/70 text-sm">
-                  <Icon name="Brain" size={15} style={{ color: ORANGE }} />
-                  Нейросетевой анализ
-                </div>
-                <div className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/5 border border-white/10 text-white/70 text-sm">
-                  <Icon name="Radar" size={15} style={{ color: ORANGE }} />
-                  Мониторинг 24/7
-                </div>
-                <div className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-white/5 border border-white/10 text-white/70 text-sm">
-                  <Icon name="ShieldCheck" size={15} style={{ color: ORANGE }} />
-                  Соответствие 152-ФЗ
-                </div>
+              <a
+                href="#sinc-all"
+                className="inline-flex items-center justify-center px-7 py-3.5 rounded-2xl font-bold text-[15px] transition-all hover:-translate-y-0.5"
+                style={{ background: ORANGE, color: "#1a1210" }}
+              >
+                Узнать про Sinc.all
+              </a>
+            </FadeIn>
+
+            <FadeIn delay={400}>
+              <div className="relative mt-14 md:mt-16 -mb-1 flex justify-center">
+                <img
+                  src={HERO_ILLUSTRATION}
+                  alt=""
+                  className="w-full max-w-2xl object-contain"
+                  style={{ animation: "floatSlow 7s ease-in-out infinite" }}
+                />
               </div>
             </FadeIn>
           </div>
@@ -236,7 +242,7 @@ export default function Security() {
         </section>
 
         {/* SINC.ALL */}
-        <section className="relative bg-black px-5 md:px-10 py-16 md:py-24 overflow-hidden">
+        <section id="sinc-all" className="relative bg-black px-5 md:px-10 py-16 md:py-24 overflow-hidden">
           <FloatingOrbs />
           <div className="relative max-w-5xl mx-auto">
             <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-center mb-14">
