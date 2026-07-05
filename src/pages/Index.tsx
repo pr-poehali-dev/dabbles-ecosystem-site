@@ -1,6 +1,8 @@
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import SberHome from "@/components/SberHome";
+import QuickLinksBar from "@/components/QuickLinksBar";
+import EcosystemSection from "@/components/EcosystemSection";
 import DabblDiscover from "@/components/DabblDiscover";
 
 export default function Index() {
@@ -23,7 +25,9 @@ export default function Index() {
         audience={audience}
         setAudience={setAudience}
       />
+      <QuickLinksBar />
       <SberHome />
+      <EcosystemSection />
       <DabblDiscover />
     </div>
   );
