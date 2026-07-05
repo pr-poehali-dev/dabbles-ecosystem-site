@@ -51,7 +51,7 @@ export default function CampLayout({ children }: { children: ReactNode }) {
           </nav>
 
           <div className="ml-auto flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2">
+            <Link to="/camp/app/profile" className="hidden sm:flex items-center gap-2 hover:opacity-75 transition-opacity" title="Мой профиль">
               <div
                 className="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold text-black"
                 style={{ background: "linear-gradient(140deg, #EBD047 0%, #DAB332 100%)" }}
@@ -61,7 +61,7 @@ export default function CampLayout({ children }: { children: ReactNode }) {
               <span className="text-[13px] font-semibold text-black max-w-[140px] truncate">
                 {student?.full_name || student?.email}
               </span>
-            </div>
+            </Link>
             <button onClick={logout} className="p-2 rounded-lg text-black/30 hover:text-black hover:bg-black/5 transition-colors" title="Выйти">
               <Icon name="LogOut" size={16} />
             </button>

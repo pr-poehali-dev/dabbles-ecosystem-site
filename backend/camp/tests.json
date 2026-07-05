@@ -36,6 +36,20 @@
       "method": "GET",
       "path": "/?action=admin-certificates",
       "expectedStatus": 401
+    },
+    {
+      "name": "Register without full name rejected",
+      "method": "POST",
+      "path": "/?action=register",
+      "body": {"email": "test@example.com", "password": "123456", "full_name": "Иван"},
+      "expectedStatus": 400
+    },
+    {
+      "name": "Profile update without token unauthorized",
+      "method": "POST",
+      "path": "/?action=profile-update",
+      "body": {"full_name": "Иван Иванов"},
+      "expectedStatus": 401
     }
   ]
 }

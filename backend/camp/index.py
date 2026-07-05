@@ -170,6 +170,8 @@ def handler(event: dict, context) -> dict:
                 return resp(400, {'error': 'Заполните все поля'})
             if len(password) < 6:
                 return resp(400, {'error': 'Пароль должен быть не короче 6 символов'})
+            if len(full_name.split()) < 2:
+                return resp(400, {'error': 'Укажите полное ФИО — оно будет напечатано на сертификате'})
             with conn.cursor() as cur:
                 cur.execute(f"SELECT id FROM camp_students WHERE email = {esc(email)} LIMIT 1")
                 if cur.fetchone():
@@ -223,6 +225,23 @@ def handler(event: dict, context) -> dict:
             student = get_student(conn, event)
             if not student: return resp(401, {'error': 'Не авторизован'})
             return resp(200, {'student': student})
+
+        if action == 'profile-update' and method == 'POST':
+            """Студент может поправить своё ФИО и телефон — ФИО используется при печати сертификата."""
+            student = get_student(conn, event)
+            if not student: return resp(401, {'error': 'Не авторизован'})
+            body = json.loads(event.get('body') or '{}')
+            full_name = (body.get('full_name') or '').strip()
+            phone = (body.get('phone') or '').strip()
+            if not full_name or len(full_name.split()) < 2:
+                return resp(400, {'error': 'Укажите полное ФИО — оно будет напечатано на сертификате'})
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"UPDATE camp_students SET full_name = {esc(full_name)}, phone = {esc(phone)} "
+                    f"WHERE id = {esc(student['id'])}"
+                )
+            conn.commit()
+            return resp(200, {'student': {**student, 'full_name': full_name, 'phone': phone}})
 
         # ══════════════════════════════════════════════════════
         # ПУБЛИЧНО: СПИСОК ПРОГРАММ

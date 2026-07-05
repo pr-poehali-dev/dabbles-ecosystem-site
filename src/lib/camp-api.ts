@@ -142,6 +142,8 @@ export const campApi = {
     campRequest<{ token: string; student: CampStudent }>("login", { method: "POST", body: { email, password } }),
   logout: () => campRequest("logout", { method: "POST" }),
   me: () => campRequest<{ student: CampStudent }>("me"),
+  profileUpdate: (full_name: string, phone: string) =>
+    campRequest<{ student: CampStudent }>("profile-update", { method: "POST", body: { full_name, phone } }),
 
   programs: () => campRequest<{ programs: CampProgram[] }>("programs"),
   program: (id: number) => campRequest<{ program: CampProgram & { modules: { id: number; title: string; lectures: { id: number; title: string }[] }[] } }>("program", { query: { id } }),

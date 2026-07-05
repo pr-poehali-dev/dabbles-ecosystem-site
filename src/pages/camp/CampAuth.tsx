@@ -18,6 +18,10 @@ export default function CampAuth() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    if (mode === "register" && fullName.trim().split(/\s+/).filter(Boolean).length < 2) {
+      setError("Укажите полное ФИО (фамилия и имя) — оно попадёт на сертификат");
+      return;
+    }
     setLoading(true);
     try {
       const r = mode === "login"
@@ -61,11 +65,14 @@ export default function CampAuth() {
 
         <form onSubmit={submit} className="space-y-3">
           {mode === "register" && (
-            <input
-              type="text" required placeholder="Ваше имя"
-              value={fullName} onChange={(e) => setFullName(e.target.value)}
-              className="w-full px-4 py-3.5 rounded-2xl bg-[#f5f5f7] border border-black/8 text-[15px] focus:outline-none focus:ring-2 focus:ring-[#DAB332]/40"
-            />
+            <div>
+              <input
+                type="text" required placeholder="Фамилия Имя Отчество"
+                value={fullName} onChange={(e) => setFullName(e.target.value)}
+                className="w-full px-4 py-3.5 rounded-2xl bg-[#f5f5f7] border border-black/8 text-[15px] focus:outline-none focus:ring-2 focus:ring-[#DAB332]/40"
+              />
+              <p className="text-[11px] text-black/35 mt-1.5 px-1">Укажите полностью — это имя будет напечатано на сертификате</p>
+            </div>
           )}
           <input
             type="email" required placeholder="Email"
