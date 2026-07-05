@@ -1,3 +1,4 @@
 psycopg2-binary
 boto3
 fpdf2
+PyMuPDF==1.24.10

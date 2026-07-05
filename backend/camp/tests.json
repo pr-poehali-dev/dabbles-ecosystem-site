@@ -24,6 +24,18 @@
       "method": "GET",
       "path": "/?action=me",
       "expectedStatus": 401
+    },
+    {
+      "name": "Admin cert template without token unauthorized",
+      "method": "GET",
+      "path": "/?action=admin-cert-template",
+      "expectedStatus": 401
+    },
+    {
+      "name": "Admin certificates without token unauthorized",
+      "method": "GET",
+      "path": "/?action=admin-certificates",
+      "expectedStatus": 401
     }
   ]
 }

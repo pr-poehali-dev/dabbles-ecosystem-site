@@ -115,6 +115,26 @@ export interface CampCertificate {
   program_title: string;
 }
 
+export interface CampCertTemplate {
+  template_url: string;
+  preview_url: string;
+  page_width: number;
+  page_height: number;
+  name_x: number; name_y: number; name_size: number; name_color: string; name_align: string;
+  date_x: number; date_y: number; date_size: number; date_color: string; date_align: string;
+  number_x: number; number_y: number; number_size: number; number_color: string; number_align: string;
+}
+
+export interface CampAdminCertificate {
+  id: number;
+  cert_number: string;
+  pdf_url: string;
+  issued_at: string;
+  student_name: string;
+  student_email: string;
+  program_title: string;
+}
+
 export const campApi = {
   register: (email: string, password: string, full_name: string) =>
     campRequest<{ token: string; student: CampStudent }>("register", { method: "POST", body: { email, password, full_name } }),
@@ -163,6 +183,17 @@ export const campApi = {
   adminStudents: (search?: string) => campRequest<{ students: { id: number; email: string; full_name: string; phone: string; is_active: boolean; created_at: string; enrollments: number; certificates: number }[] }>("admin-students", { query: search ? { search } : {}, useAdminToken: true }),
 
   upload: (file: string, ext: string) => campRequest<{ url: string }>("upload", { method: "POST", body: { file, ext }, useAdminToken: true }),
+
+  adminCertTemplate: () => campRequest<{ template: CampCertTemplate | null }>("admin-cert-template", { useAdminToken: true }),
+  adminCertTemplateUpload: (file: string) =>
+    campRequest<{ template_url: string; preview_url: string; page_width: number; page_height: number }>(
+      "admin-cert-template-upload", { method: "POST", body: { file }, useAdminToken: true }
+    ),
+  adminCertTemplateSave: (data: Record<string, unknown>) =>
+    campRequest<{ ok: boolean }>("admin-cert-template-save", { method: "POST", body: data, useAdminToken: true }),
+  adminCertTemplateTest: () =>
+    campRequest<{ url: string }>("admin-cert-template-test", { method: "POST", useAdminToken: true }),
+  adminCertificates: () => campRequest<{ certificates: CampAdminCertificate[] }>("admin-certificates", { useAdminToken: true }),
 };
 
 export function formatCampDate(s: string | null): string {

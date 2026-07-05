@@ -3,8 +3,9 @@ import Icon from "@/components/ui/icon";
 import AdminCampPrograms from "./AdminCampPrograms";
 import AdminCampProgramEditor from "./AdminCampProgramEditor";
 import AdminCampStudents from "./AdminCampStudents";
+import AdminCampCertificates from "./AdminCampCertificates";
 
-type Tab = "programs" | "students";
+type Tab = "programs" | "students" | "certificates";
 
 export default function AdminCamp() {
   const [tab, setTab] = useState<Tab>("programs");
@@ -21,7 +22,7 @@ export default function AdminCamp() {
         <p className="text-black/50">Образовательная платформа — программы, лекции, тесты, студенты</p>
       </div>
 
-      <div className="flex bg-black/5 rounded-2xl p-1 mb-6 max-w-sm">
+      <div className="flex bg-black/5 rounded-2xl p-1 mb-6 max-w-md">
         <button
           onClick={() => setTab("programs")}
           className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[13px] font-bold transition-all ${
@@ -38,10 +39,19 @@ export default function AdminCamp() {
         >
           <Icon name="Users" size={14} /> Студенты
         </button>
+        <button
+          onClick={() => setTab("certificates")}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-[13px] font-bold transition-all ${
+            tab === "certificates" ? "bg-white text-black shadow-sm" : "text-black/40"
+          }`}
+        >
+          <Icon name="Award" size={14} /> Сертификаты
+        </button>
       </div>
 
       {tab === "programs" && <AdminCampPrograms onEdit={setEditingProgramId} />}
       {tab === "students" && <AdminCampStudents />}
+      {tab === "certificates" && <AdminCampCertificates />}
     </div>
   );
 }

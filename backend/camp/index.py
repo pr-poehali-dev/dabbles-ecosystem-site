@@ -2,7 +2,9 @@ import json, os, secrets, hashlib, random
 from datetime import datetime, timezone, timedelta
 import psycopg2
 import boto3
+import urllib.request
 from certificate import build_certificate_pdf
+from cert_template import build_certificate_from_template, render_template_preview
 
 CORS = {
     'Access-Control-Allow-Origin': '*',
@@ -79,8 +81,30 @@ def gen_cert_number():
     return f"CAMP-{datetime.now().year}-{random.randint(100000, 999999)}"
 
 
+def get_cert_template(conn):
+    """Возвращает настройки шаблона сертификата, если он загружен, иначе None."""
+    with conn.cursor() as cur:
+        cur.execute(
+            "SELECT template_url, name_x, name_y, name_size, name_color, name_align, "
+            "date_x, date_y, date_size, date_color, date_align, "
+            "number_x, number_y, number_size, number_color, number_align "
+            "FROM camp_certificate_template WHERE id = 1 LIMIT 1"
+        )
+        row = cur.fetchone()
+    if not row or not row[0]:
+        return None
+    return {
+        'template_url': row[0],
+        'name_x': row[1], 'name_y': row[2], 'name_size': row[3], 'name_color': row[4], 'name_align': row[5],
+        'date_x': row[6], 'date_y': row[7], 'date_size': row[8], 'date_color': row[9], 'date_align': row[10],
+        'number_x': row[11], 'number_y': row[12], 'number_size': row[13], 'number_color': row[14], 'number_align': row[15],
+    }
+
+
 def issue_certificate(conn, student_id, program_id, full_name, program_title):
-    """Создаёт запись сертификата и генерирует PDF, кладёт в S3."""
+    """Создаёт запись сертификата и генерирует PDF, кладёт в S3.
+    Если в camp_certificate_template загружен PDF-шаблон — накладывает поля на него,
+    иначе используется встроенная генерация через fpdf2."""
     with conn.cursor() as cur:
         cur.execute(
             f"SELECT id, cert_number, pdf_url FROM camp_certificates "
@@ -92,7 +116,15 @@ def issue_certificate(conn, student_id, program_id, full_name, program_title):
 
     cert_number = gen_cert_number()
     issued_at = datetime.now(timezone.utc).isoformat()
-    pdf_bytes = build_certificate_pdf(full_name, program_title, cert_number, issued_at)
+    date_str = datetime.now(timezone.utc).strftime('%d.%m.%Y')
+
+    template = get_cert_template(conn)
+    if template:
+        with urllib.request.urlopen(template['template_url']) as f:
+            template_bytes = f.read()
+        pdf_bytes = build_certificate_from_template(template_bytes, template, full_name, cert_number, date_str)
+    else:
+        pdf_bytes = build_certificate_pdf(full_name, program_title, cert_number, issued_at)
 
     key = f"camp/certificates/{cert_number}.pdf"
     s3 = s3_client()
@@ -778,6 +810,121 @@ def handler(event: dict, context) -> dict:
             return resp(200, {'students': [{
                 'id': r[0], 'email': r[1], 'full_name': r[2], 'phone': r[3],
                 'is_active': r[4], 'created_at': str(r[5]), 'enrollments': r[6], 'certificates': r[7],
+            } for r in rows]})
+
+        # ══════════════════════════════════════════════════════
+        # АДМИНКА: ШАБЛОН СЕРТИФИКАТА
+        # ══════════════════════════════════════════════════════
+
+        if action == 'admin-cert-template' and method == 'GET':
+            admin = get_admin(conn, event)
+            if not admin: return resp(401, {'error': 'Нет доступа'})
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT template_url, preview_url, page_width, page_height, "
+                    "name_x, name_y, name_size, name_color, name_align, "
+                    "date_x, date_y, date_size, date_color, date_align, "
+                    "number_x, number_y, number_size, number_color, number_align "
+                    "FROM camp_certificate_template WHERE id = 1 LIMIT 1"
+                )
+                r = cur.fetchone()
+            if not r: return resp(200, {'template': None})
+            return resp(200, {'template': {
+                'template_url': r[0], 'preview_url': r[1], 'page_width': r[2], 'page_height': r[3],
+                'name_x': r[4], 'name_y': r[5], 'name_size': r[6], 'name_color': r[7], 'name_align': r[8],
+                'date_x': r[9], 'date_y': r[10], 'date_size': r[11], 'date_color': r[12], 'date_align': r[13],
+                'number_x': r[14], 'number_y': r[15], 'number_size': r[16], 'number_color': r[17], 'number_align': r[18],
+            }})
+
+        if action == 'admin-cert-template-upload' and method == 'POST':
+            """Загружает PDF-шаблон сертификата, кладёт в S3, рендерит превью-картинку и сохраняет размеры страницы."""
+            admin = get_admin(conn, event)
+            if not admin: return resp(403, {'error': 'Только для админа'})
+            import base64, uuid
+            data = json.loads(event.get('body') or '{}')
+            file_b64 = data.get('file') or ''
+            file_bytes = base64.b64decode(file_b64)
+
+            png_bytes, page_w, page_h = render_template_preview(file_bytes)
+
+            uid = uuid.uuid4()
+            template_key = f"camp/cert-template/{uid}.pdf"
+            preview_key = f"camp/cert-template/{uid}.png"
+            s3 = s3_client()
+            s3.put_object(Bucket='files', Key=template_key, Body=file_bytes, ContentType='application/pdf')
+            s3.put_object(Bucket='files', Key=preview_key, Body=png_bytes, ContentType='image/png')
+            base = f"https://cdn.poehali.dev/projects/{os.environ['AWS_ACCESS_KEY_ID']}/bucket"
+            template_url = f"{base}/{template_key}"
+            preview_url = f"{base}/{preview_key}"
+
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"UPDATE camp_certificate_template SET template_url = {esc(template_url)}, "
+                    f"preview_url = {esc(preview_url)}, page_width = {esc(page_w)}, page_height = {esc(page_h)}, "
+                    f"updated_at = NOW() WHERE id = 1"
+                )
+            conn.commit()
+            return resp(200, {'template_url': template_url, 'preview_url': preview_url, 'page_width': page_w, 'page_height': page_h})
+
+        if action == 'admin-cert-template-save' and method == 'POST':
+            """Сохраняет координаты и стили полей ФИО/даты/номера на шаблоне."""
+            admin = get_admin(conn, event)
+            if not admin: return resp(401, {'error': 'Нет доступа'})
+            body = json.loads(event.get('body') or '{}')
+            fields = {
+                'name_x': float(body.get('name_x', 0.5)), 'name_y': float(body.get('name_y', 0.45)),
+                'name_size': int(body.get('name_size', 28)), 'name_color': body.get('name_color', '#141414'),
+                'name_align': body.get('name_align', 'center'),
+                'date_x': float(body.get('date_x', 0.25)), 'date_y': float(body.get('date_y', 0.85)),
+                'date_size': int(body.get('date_size', 12)), 'date_color': body.get('date_color', '#6e6e6e'),
+                'date_align': body.get('date_align', 'left'),
+                'number_x': float(body.get('number_x', 0.75)), 'number_y': float(body.get('number_y', 0.85)),
+                'number_size': int(body.get('number_size', 12)), 'number_color': body.get('number_color', '#6e6e6e'),
+                'number_align': body.get('number_align', 'right'),
+            }
+            sets = ', '.join(f"{k} = {esc(v)}" for k, v in fields.items())
+            with conn.cursor() as cur:
+                cur.execute(f"UPDATE camp_certificate_template SET {sets}, updated_at = NOW() WHERE id = 1")
+            conn.commit()
+            return resp(200, {'ok': True})
+
+        if action == 'admin-cert-template-test' and method == 'POST':
+            """Генерирует тестовый PDF с демо-данными для проверки расположения полей, не сохраняя в БД."""
+            admin = get_admin(conn, event)
+            if not admin: return resp(401, {'error': 'Нет доступа'})
+            template = get_cert_template(conn)
+            if not template: return resp(400, {'error': 'Сначала загрузите шаблон'})
+            with urllib.request.urlopen(template['template_url']) as f:
+                template_bytes = f.read()
+            pdf_bytes = build_certificate_from_template(
+                template_bytes, template, 'Иван Иванов', 'CAMP-2026-000000', datetime.now().strftime('%d.%m.%Y')
+            )
+            import base64
+            key = f"camp/cert-template/test-preview-{secrets.token_hex(6)}.pdf"
+            s3 = s3_client()
+            s3.put_object(Bucket='files', Key=key, Body=pdf_bytes, ContentType='application/pdf')
+            url = f"https://cdn.poehali.dev/projects/{os.environ['AWS_ACCESS_KEY_ID']}/bucket/{key}"
+            return resp(200, {'url': url})
+
+        # ══════════════════════════════════════════════════════
+        # АДМИНКА: ВЫДАННЫЕ СЕРТИФИКАТЫ
+        # ══════════════════════════════════════════════════════
+
+        if action == 'admin-certificates' and method == 'GET':
+            admin = get_admin(conn, event)
+            if not admin: return resp(401, {'error': 'Нет доступа'})
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT c.id, c.cert_number, c.pdf_url, c.issued_at, s.full_name, s.email, p.title "
+                    "FROM camp_certificates c "
+                    "JOIN camp_students s ON s.id = c.student_id "
+                    "JOIN camp_programs p ON p.id = c.program_id "
+                    "ORDER BY c.issued_at DESC LIMIT 300"
+                )
+                rows = cur.fetchall()
+            return resp(200, {'certificates': [{
+                'id': r[0], 'cert_number': r[1], 'pdf_url': r[2], 'issued_at': str(r[3]),
+                'student_name': r[4], 'student_email': r[5], 'program_title': r[6],
             } for r in rows]})
 
         # ══════════════════════════════════════════════════════
