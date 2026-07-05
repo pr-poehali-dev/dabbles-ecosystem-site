@@ -5,8 +5,12 @@ import { FadeIn } from "@/components/shared";
 const LOGO_URL = "https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/bucket/2ede612a-f390-4cb5-ba31-5fe12cd283c1.png";
 const NEURAL_BG = "https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/files/21df7a33-73dd-4e18-a8b2-eadb81d1272a.jpg";
 const FACE_SCAN = "https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/files/20124642-3bda-4783-bb98-c1c3da01782d.jpg";
-const SHIELD_NODES = "https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/files/642f972d-c45b-4d1a-a1b8-767763fa06cf.jpg";
-const HERO_ILLUSTRATION = "https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/files/30cc5606-4eae-40b0-8f39-3660c6aa14a8.jpg";
+
+const NAV_LINKS = [
+  { label: "О системе Sinc.all", href: "#sinc-all" },
+  { label: "Направления работы", href: "#directions" },
+  { label: "Контакты", href: "#contacts" },
+];
 
 const ORANGE = "#F2A672";
 
@@ -111,24 +115,36 @@ function FloatingOrbs() {
 export default function Security() {
   return (
     <div className="min-h-screen bg-white text-black font-body overflow-x-hidden">
-      {/* NAV */}
-      <nav className="fixed top-0 left-0 right-0 z-50 h-[68px] bg-black/95 backdrop-blur-lg border-b border-white/10 flex items-center px-6 md:px-10">
-        <Link to="/" className="flex items-center gap-2 text-white/50 hover:text-white transition-colors text-sm font-medium">
-          <Icon name="ArrowLeft" size={16} />
-          На главную
-        </Link>
-        <div className="flex-1 flex justify-center items-center gap-2.5">
-          <div className="bg-white rounded-xl p-1.5 flex items-center justify-center">
+      {/* NAV — в стиле Т-Банка */}
+      <nav className="sticky top-0 z-50 bg-black flex items-center h-[64px] px-6 md:px-10 gap-8">
+        <Link to="/" className="flex items-center gap-2.5 shrink-0">
+          <div className="bg-white rounded-lg p-1 flex items-center justify-center">
             <img src={LOGO_URL} alt="Корпоративная безопасность" className="h-6 w-auto object-contain" />
           </div>
-          <span className="hidden sm:inline text-white/70 text-xs font-semibold uppercase tracking-[0.2em]">
-            Корпоративная безопасность
-          </span>
+        </Link>
+
+        <div className="hidden md:flex items-center gap-1 flex-1">
+          {NAV_LINKS.map((n) => (
+            <a
+              key={n.href}
+              href={n.href}
+              className="px-3.5 py-2 rounded-lg text-white/70 hover:text-white hover:bg-white/5 text-[14px] font-medium transition-colors"
+            >
+              {n.label}
+            </a>
+          ))}
         </div>
-        <div className="w-24" />
+
+        <Link
+          to="/"
+          className="ml-auto flex items-center gap-2 text-white/50 hover:text-white transition-colors text-sm font-medium shrink-0"
+        >
+          <Icon name="ArrowLeft" size={16} />
+          <span className="hidden sm:inline">На главную</span>
+        </Link>
       </nav>
 
-      <div className="pt-[68px]">
+      <div>
         {/* HERO */}
         <section className="relative bg-black overflow-hidden">
           <div className="absolute inset-0 opacity-20">
@@ -137,7 +153,7 @@ export default function Security() {
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/80 to-black" />
           <FloatingOrbs />
 
-          <div className="relative max-w-5xl mx-auto px-5 md:px-10 pt-14 md:pt-20 pb-0">
+          <div className="relative max-w-5xl mx-auto px-5 md:px-10 pt-14 md:pt-20 pb-16 md:pb-24">
             <FadeIn>
               <div className="flex items-center gap-2 text-white/35 text-sm mb-8">
                 <span>Даббл — технологии для бизнеса</span>
@@ -165,17 +181,6 @@ export default function Security() {
               >
                 Узнать про Sinc.all
               </a>
-            </FadeIn>
-
-            <FadeIn delay={400}>
-              <div className="relative mt-14 md:mt-16 -mb-1 flex justify-center">
-                <img
-                  src={HERO_ILLUSTRATION}
-                  alt=""
-                  className="w-full max-w-2xl object-contain"
-                  style={{ animation: "floatSlow 7s ease-in-out infinite" }}
-                />
-              </div>
             </FadeIn>
           </div>
         </section>
@@ -317,7 +322,7 @@ export default function Security() {
         </section>
 
         {/* НАПРАВЛЕНИЯ БЕЗОПАСНОСТИ */}
-        <section className="bg-[#fafafa] px-5 md:px-10 py-16 md:py-24">
+        <section id="directions" className="bg-[#fafafa] px-5 md:px-10 py-16 md:py-24">
           <div className="max-w-5xl mx-auto">
             <FadeIn>
               <div className="flex items-center gap-2 text-sm font-bold mb-4" style={{ color: "#c97a3d" }}>
@@ -347,50 +352,8 @@ export default function Security() {
           </div>
         </section>
 
-        {/* ДОВЕРИЕ / ГЕРОИЧЕСКИЙ БЛОК */}
-        <section className="relative bg-black px-5 md:px-10 py-16 md:py-24 overflow-hidden">
-          <div className="absolute inset-0 opacity-20">
-            <img src={SHIELD_NODES} alt="" className="w-full h-full object-cover" />
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-black" />
-          <FloatingOrbs />
-          <div className="relative max-w-5xl mx-auto grid md:grid-cols-2 gap-10 items-center">
-            <FadeIn>
-              <h2 className="font-display text-3xl md:text-4xl font-black text-white mb-5 leading-tight">
-                Нам доверяют организаторы крупнейших мероприятий
-              </h2>
-              <p className="text-white/55 text-base leading-relaxed mb-8">
-                Наши технологии безопасности прошли проверку на реальных событиях с тысячами участников и продолжают
-                развиваться вместе с масштабом задач.
-              </p>
-              <div
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-full font-bold text-sm"
-                style={{ background: `linear-gradient(120deg, ${ORANGE} 0%, #d98a52 100%)`, color: "#1a1210" }}
-              >
-                <Icon name="ShieldCheck" size={16} />
-                Проверено на практике
-              </div>
-            </FadeIn>
-            <FadeIn delay={150}>
-              <div className="grid grid-cols-2 gap-4">
-                {[
-                  { icon: "Building2", label: "Крупные компании" },
-                  { icon: "Users2", label: "Массовые события" },
-                  { icon: "Calendar", label: "Регулярные проекты" },
-                  { icon: "Globe2", label: "Федеральный масштаб" },
-                ].map((item) => (
-                  <div key={item.label} className="p-5 rounded-2xl bg-white/5 border border-white/10 text-center">
-                    <Icon name={item.icon} size={22} className="mx-auto mb-2.5" style={{ color: ORANGE }} />
-                    <div className="text-white/60 text-xs font-medium leading-snug">{item.label}</div>
-                  </div>
-                ))}
-              </div>
-            </FadeIn>
-          </div>
-        </section>
-
         {/* КОНТАКТЫ */}
-        <section className="bg-white px-5 md:px-10 py-16 md:py-20 border-t border-black/6">
+        <section id="contacts" className="bg-white px-5 md:px-10 py-16 md:py-20 border-t border-black/6">
           <div className="max-w-5xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">
             <FadeIn>
               <div>
@@ -414,6 +377,18 @@ export default function Security() {
             </FadeIn>
           </div>
         </section>
+
+        {/* ПОДВАЛ */}
+        <footer className="bg-black px-5 md:px-10 py-8 flex flex-col sm:flex-row items-center justify-center sm:justify-between gap-4">
+          <div className="flex items-center gap-2.5">
+            <div className="bg-white rounded-lg p-1 flex items-center justify-center">
+              <img src={LOGO_URL} alt="Департамент корпоративной безопасности" className="h-5 w-auto object-contain" />
+            </div>
+            <span className="text-white/40 text-xs">
+              © {new Date().getFullYear()} Департамент корпоративной безопасности корпорации «Даббл»
+            </span>
+          </div>
+        </footer>
       </div>
     </div>
   );
