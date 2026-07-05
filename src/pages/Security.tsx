@@ -9,7 +9,6 @@ const FACE_SCAN = "https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766
 const NAV_LINKS = [
   { label: "О системе Sinc.all", href: "#sinc-all" },
   { label: "Направления работы", href: "#directions" },
-  { label: "Контакты", href: "#contacts" },
 ];
 
 const ORANGE = "#F2A672";
@@ -154,14 +153,6 @@ export default function Security() {
           <FloatingOrbs />
 
           <div className="relative max-w-5xl mx-auto px-5 md:px-10 pt-14 md:pt-20 pb-16 md:pb-24">
-            <FadeIn>
-              <div className="flex items-center gap-2 text-white/35 text-sm mb-8">
-                <span>Даббл — технологии для бизнеса</span>
-                <Icon name="ChevronRight" size={14} />
-                <span>Департамент корпоративной безопасности</span>
-              </div>
-            </FadeIn>
-
             <FadeIn delay={100}>
               <h1 className="font-display text-4xl md:text-6xl font-black text-white leading-[1.08] mb-6 max-w-3xl">
                 Безопасность, которая влияет на доверие, репутацию и рост компании
@@ -349,32 +340,6 @@ export default function Security() {
                 </FadeIn>
               ))}
             </div>
-          </div>
-        </section>
-
-        {/* КОНТАКТЫ */}
-        <section id="contacts" className="bg-white px-5 md:px-10 py-16 md:py-20 border-t border-black/6">
-          <div className="max-w-5xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <FadeIn>
-              <div>
-                <h2 className="font-display text-2xl md:text-3xl font-black text-black mb-2">
-                  Вопросы по безопасности мероприятия?
-                </h2>
-                <p className="text-black/45 text-sm md:text-base">
-                  Департамент корпоративной безопасности готов проконсультировать по интеграции Sinc.all в ваш проект.
-                </p>
-              </div>
-            </FadeIn>
-            <FadeIn delay={100}>
-              <a
-                href="mailto:security@dabbl.ru"
-                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full font-bold text-sm text-black shrink-0"
-                style={{ background: `linear-gradient(120deg, ${ORANGE} 0%, #d98a52 100%)` }}
-              >
-                <Icon name="Mail" size={16} />
-                Написать в департамент
-              </a>
-            </FadeIn>
           </div>
         </section>
 
