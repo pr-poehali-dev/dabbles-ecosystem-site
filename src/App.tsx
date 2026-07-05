@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import Cabinet from "./pages/Cabinet";
 import Vibe from "./pages/Vibe";
 import About from "./pages/About";
+import Security from "./pages/Security";
 import Director from "./pages/Director";
 import Privacy from "./pages/Privacy";
 import Legal from "./pages/Legal";
@@ -39,6 +40,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/about" element={<About />} />
+            <Route path="/security" element={<Security />} />
             <Route path="/director" element={<Director />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/legal" element={<Legal />} />
