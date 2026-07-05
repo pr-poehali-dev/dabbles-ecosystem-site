@@ -61,9 +61,7 @@ export default function CampLanding() {
           <span className="absolute right-[12%] bottom-[12%] text-[42px] md:text-[52px] rotate-[-10deg] select-none pointer-events-none drop-shadow-sm hidden sm:block">💡</span>
 
           <div className="relative z-10 max-w-2xl mx-auto">
-            <h1 className="font-display text-white text-[32px] md:text-[52px] font-black leading-[1.1] mb-6">
-              Найди новую профессию<br />в Кэмпе
-            </h1>
+            <h1 className="font-display text-white text-[32px] md:text-[52px] font-black leading-[1.1] mb-6">Учись новому и создавай будущее</h1>
 
             <div className="flex flex-col sm:flex-row gap-3 justify-center mb-10">
               <Link
