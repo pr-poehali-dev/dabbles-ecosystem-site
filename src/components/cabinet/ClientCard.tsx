@@ -180,6 +180,17 @@ export default function ClientCard({ clientId, onClose, onChanged }: Props) {
     loadPayments();
   };
 
+  const deletePayment = async (id: number) => {
+    if (!confirm("Удалить счёт? Если он оплачен, баланс клиента будет пересчитан.")) return;
+    try {
+      await cpApi.adminPaymentDelete(id);
+      toast({ title: "Счёт удалён" });
+      loadPayments();
+    } catch {
+      toast({ title: "Ошибка", variant: "destructive" });
+    }
+  };
+
   const saveDoc = async (e: React.FormEvent) => {
     e.preventDefault();
     await cpApi.adminDocumentSave({ ...docForm, client_id: clientId });
@@ -361,6 +372,9 @@ export default function ClientCard({ clientId, onClose, onChanged }: Props) {
                       </div>
                       <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${ps.cls}`}>{ps.label}</span>
                       {p.status === "pending" && <button onClick={() => markPaid(p.id)} className="shrink-0 px-3 py-1.5 rounded-lg bg-green-100 text-green-700 text-[12px] font-semibold hover:bg-green-200">Оплачено</button>}
+                      <button onClick={() => deletePayment(p.id)} className="shrink-0 p-1.5 rounded-lg text-red-400 hover:bg-red-50 hover:text-red-600" title="Удалить счёт">
+                        <Icon name="Trash2" size={15} />
+                      </button>
                     </div>
                   );
                 })}

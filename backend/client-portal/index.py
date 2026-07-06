@@ -782,6 +782,37 @@ def handler(event: dict, context) -> dict:
                 conn.commit()
             return resp(200, {'ok': True})
 
+        if action == 'admin-payment-delete' and method == 'POST':
+            """Удаляет счёт. Если он был оплачен — откатывает его влияние на баланс клиента."""
+            admin = get_admin(conn, event)
+            if not admin: return resp(401, {'error': 'Нет доступа'})
+            body = json.loads(event.get('body') or '{}')
+            pay_id = int(body.get('id', 0))
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"SELECT client_id, amount, status, payment_type FROM cp_payments WHERE id = {esc(pay_id)} LIMIT 1"
+                )
+                row = cur.fetchone()
+            if not row:
+                return resp(404, {'error': 'Счёт не найден'})
+            client_id, amount, status, ptype = row
+            if status == 'paid':
+                with conn.cursor() as cur:
+                    if ptype == 'topup':
+                        cur.execute(
+                            f"UPDATE cp_accounts SET balance = balance - {esc(float(amount))}, updated_at = NOW() "
+                            f"WHERE client_id = {esc(client_id)}"
+                        )
+                    elif ptype == 'charge':
+                        cur.execute(
+                            f"UPDATE cp_accounts SET balance = balance + {esc(float(amount))}, updated_at = NOW() "
+                            f"WHERE client_id = {esc(client_id)}"
+                        )
+            with conn.cursor() as cur:
+                cur.execute(f"DELETE FROM cp_payments WHERE id = {esc(pay_id)}")
+            conn.commit()
+            return resp(200, {'ok': True})
+
         # ══════════════════════════════════════════════════════════
         # ADMIN: ДОКУМЕНТЫ
         # ══════════════════════════════════════════════════════════

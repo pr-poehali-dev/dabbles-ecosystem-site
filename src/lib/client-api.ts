@@ -148,6 +148,9 @@ export const cpApi = {
   adminPaymentUpdate: (data: { id: number; status?: string; payment_date?: string; amount?: number; basis?: string }) =>
     cpRequest<{ ok: boolean }>("admin-payment-update", { method: "POST", body: data, useAdminToken: true }),
 
+  adminPaymentDelete: (id: number) =>
+    cpRequest<{ ok: boolean }>("admin-payment-delete", { method: "POST", body: { id }, useAdminToken: true }),
+
   adminDocuments: (client_id: number) =>
     cpRequest<{ documents: CpDocument[] }>("admin-documents", { query: { client_id }, useAdminToken: true }),
 

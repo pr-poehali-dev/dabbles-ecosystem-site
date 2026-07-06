@@ -56,6 +56,17 @@ export default function AdminClientsPayments({
     loadPayments();
   };
 
+  const handleDelete = async (id: number) => {
+    if (!confirm("Удалить счёт? Если он оплачен, баланс клиента будет пересчитан.")) return;
+    try {
+      await cpApi.adminPaymentDelete(id);
+      toast({ title: "Счёт удалён" });
+      loadPayments();
+    } catch {
+      toast({ title: "Ошибка", variant: "destructive" });
+    }
+  };
+
   const handleReminders = async () => {
     try {
       const r = await cpApi.adminPaymentReminders();
@@ -112,6 +123,13 @@ export default function AdminClientsPayments({
                     Оплачено
                   </button>
                 )}
+                <button
+                  onClick={() => handleDelete(p.id)}
+                  className="shrink-0 p-1.5 rounded-lg text-red-400 hover:bg-red-50 hover:text-red-600"
+                  title="Удалить счёт"
+                >
+                  <Icon name="Trash2" size={15} />
+                </button>
               </div>
             );
           })}
