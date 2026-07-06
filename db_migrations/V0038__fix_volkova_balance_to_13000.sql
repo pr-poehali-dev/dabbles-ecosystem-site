@@ -1,0 +1,1 @@
+UPDATE cp_accounts SET balance = 13000, updated_at = NOW() WHERE client_id = 4;

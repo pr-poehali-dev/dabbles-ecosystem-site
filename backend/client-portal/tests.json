@@ -40,6 +40,15 @@
       "expectedStatus": 401,
       "expectedBody": {"error": "Нет доступа"},
       "bodyMatcher": "partial"
+    },
+    {
+      "name": "Admin balance charge without token",
+      "method": "POST",
+      "path": "/?action=admin-balance-charge",
+      "body": {"client_id": 1, "amount": 100, "basis": "test"},
+      "expectedStatus": 401,
+      "expectedBody": {"error": "Нет доступа"},
+      "bodyMatcher": "partial"
     }
   ]
 }

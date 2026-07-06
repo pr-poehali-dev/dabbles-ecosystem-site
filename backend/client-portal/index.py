@@ -455,10 +455,14 @@ def handler(event: dict, context) -> dict:
                 )
                 row = cur.fetchone()
             if not row: return resp(404, {'error': 'Клиент не найден'})
+            with conn.cursor() as cur:
+                cur.execute(f"SELECT balance FROM cp_accounts WHERE client_id = {esc(client_id)} LIMIT 1")
+                acc_row = cur.fetchone()
             return resp(200, {'client': {
                 'id': row[0], 'email': row[1], 'full_name': row[2], 'phone': row[3],
                 'address': row[4], 'passport': row[5], 'inn': row[6],
                 'notes': row[7], 'is_active': row[8], 'created_at': str(row[9]),
+                'balance': float(acc_row[0]) if acc_row else 0,
             }})
 
         if action == 'admin-client-create' and method == 'POST':
@@ -730,6 +734,49 @@ def handler(event: dict, context) -> dict:
                         })
             conn.commit()
             return resp(201, {'id': pay_id})
+
+        if action == 'admin-balance-charge' and method == 'POST':
+            """Списывает сумму с баланса клиента в счёт услуг. Создаёт уже оплаченный платёж и сразу уменьшает баланс."""
+            admin = get_admin(conn, event)
+            if not admin: return resp(401, {'error': 'Нет доступа'})
+            body = json.loads(event.get('body') or '{}')
+            client_id = int(body.get('client_id', 0))
+            amount = body.get('amount')
+            basis = (body.get('basis') or 'Списание с баланса за услуги').strip()
+            if not client_id or not amount or float(amount) <= 0:
+                return resp(400, {'error': 'client_id и amount (> 0) обязательны'})
+            amount = float(amount)
+            with conn.cursor() as cur:
+                cur.execute(f"SELECT full_name FROM cp_clients WHERE id = {esc(client_id)} LIMIT 1")
+                client_row = cur.fetchone()
+            if not client_row:
+                return resp(404, {'error': 'Клиент не найден'})
+            with conn.cursor() as cur:
+                cur.execute(f"SELECT id, balance FROM cp_accounts WHERE client_id = {esc(client_id)} LIMIT 1")
+                acc_row = cur.fetchone()
+            if not acc_row:
+                create_account_and_card(conn, client_id, client_row[0])
+                with conn.cursor() as cur:
+                    cur.execute(f"SELECT id, balance FROM cp_accounts WHERE client_id = {esc(client_id)} LIMIT 1")
+                    acc_row = cur.fetchone()
+            from datetime import date
+            today = date.today().isoformat()
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"INSERT INTO cp_payments (client_id, case_id, amount, basis, status, payment_type, payment_date, created_by) "
+                    f"VALUES ({esc(client_id)}, {esc(body.get('case_id') or None)}, {esc(amount)}, "
+                    f"{esc(basis)}, 'paid', 'charge', {esc(today)}, {esc(admin['id'])}) RETURNING id"
+                )
+                pay_id = cur.fetchone()[0]
+                cur.execute(
+                    f"UPDATE cp_accounts SET balance = balance - {esc(amount)}, updated_at = NOW() "
+                    f"WHERE client_id = {esc(client_id)}"
+                )
+            conn.commit()
+            with conn.cursor() as cur:
+                cur.execute(f"SELECT balance FROM cp_accounts WHERE client_id = {esc(client_id)} LIMIT 1")
+                new_balance = float(cur.fetchone()[0])
+            return resp(201, {'id': pay_id, 'balance': new_balance})
 
         if action == 'admin-payment-update' and method == 'POST':
             admin = get_admin(conn, event)

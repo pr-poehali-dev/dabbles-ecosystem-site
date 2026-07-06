@@ -104,7 +104,7 @@ export const cpApi = {
     cpRequest<{ clients: (CpClient & { created_at: string })[] }>("admin-clients", { query: search ? { search } : {}, useAdminToken: true }),
 
   adminClientGet: (id: number) =>
-    cpRequest<{ client: CpClient & { notes: string; is_active: string; created_at: string } }>("admin-client-get", { query: { id }, useAdminToken: true }),
+    cpRequest<{ client: CpClient & { notes: string; is_active: string; created_at: string; balance: number } }>("admin-client-get", { query: { id }, useAdminToken: true }),
 
   adminClientCreate: (data: Partial<CpClient> & { notes?: string }) =>
     cpRequest<{ id: number; password: string }>("admin-client-create", { method: "POST", body: data, useAdminToken: true }),
@@ -150,6 +150,9 @@ export const cpApi = {
 
   adminPaymentDelete: (id: number) =>
     cpRequest<{ ok: boolean }>("admin-payment-delete", { method: "POST", body: { id }, useAdminToken: true }),
+
+  adminBalanceCharge: (data: { client_id: number; amount: number; basis: string; case_id?: number }) =>
+    cpRequest<{ id: number; balance: number }>("admin-balance-charge", { method: "POST", body: data, useAdminToken: true }),
 
   adminDocuments: (client_id: number) =>
     cpRequest<{ documents: CpDocument[] }>("admin-documents", { query: { client_id }, useAdminToken: true }),

@@ -5,7 +5,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 type CardTab = "profile" | "cases" | "payments" | "documents" | "requests" | "email";
 
-type ClientFull = CpClient & { notes: string; is_active: string; created_at: string };
+type ClientFull = CpClient & { notes: string; is_active: string; created_at: string; balance: number };
 type CaseRow = CpCase & { client_name: string; client_email: string };
 type PaymentRow = CpPayment & { client_name: string };
 type DocRow = { id?: number; doc_type: string; title: string; content: string; file_url: string; file_name?: string; is_active?: string; sort_order: number; created_at?: string };
@@ -54,6 +54,11 @@ export default function ClientCard({ clientId, onClose, onChanged }: Props) {
   // Оплата
   const [showPayForm, setShowPayForm] = useState(false);
   const [payForm, setPayForm] = useState({ case_id: "", amount: "", basis: "", due_date: "", notify: true });
+
+  // Списание с баланса
+  const [showChargeForm, setShowChargeForm] = useState(false);
+  const [chargeForm, setChargeForm] = useState({ case_id: "", amount: "", basis: "" });
+  const [charging, setCharging] = useState(false);
 
   // Документ
   const [showDocForm, setShowDocForm] = useState(false);
@@ -188,6 +193,26 @@ export default function ClientCard({ clientId, onClose, onChanged }: Props) {
       loadPayments();
     } catch {
       toast({ title: "Ошибка", variant: "destructive" });
+    }
+  };
+
+  const chargeBalance = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCharging(true);
+    try {
+      const r = await cpApi.adminBalanceCharge({
+        client_id: clientId, amount: Number(chargeForm.amount), basis: chargeForm.basis,
+        case_id: chargeForm.case_id ? Number(chargeForm.case_id) : undefined,
+      });
+      toast({ title: "Списано с баланса", description: `Новый баланс: ${formatMoney(r.balance)}` });
+      setShowChargeForm(false);
+      setChargeForm({ case_id: "", amount: "", basis: "" });
+      loadPayments();
+      loadClient();
+    } catch (err: unknown) {
+      toast({ title: "Ошибка", description: err instanceof Error ? err.message : "", variant: "destructive" });
+    } finally {
+      setCharging(false);
     }
   };
 
@@ -340,9 +365,32 @@ export default function ClientCard({ clientId, onClose, onChanged }: Props) {
           {/* ── ОПЛАТЫ ── */}
           {tab === "payments" && (
             <div>
-              <div className="flex justify-end mb-3">
-                <button onClick={() => setShowPayForm(true)} className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1a0a6e] text-white text-sm font-semibold"><Icon name="Plus" size={14} /> Выставить счёт</button>
+              <div className="flex items-center justify-between gap-3 mb-3 bg-[#f5f5f7] rounded-2xl p-4">
+                <div>
+                  <div className="text-[11px] text-black/40 font-semibold">Баланс клиента</div>
+                  <div className={`text-[20px] font-black ${(client?.balance ?? 0) < 0 ? "text-red-600" : "text-black"}`}>
+                    {formatMoney(client?.balance ?? 0)}
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <button onClick={() => setShowChargeForm(true)} className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-[#1a0a6e]/20 text-[#1a0a6e] text-sm font-semibold hover:bg-[#1a0a6e]/5"><Icon name="MinusCircle" size={14} /> Списать с баланса</button>
+                  <button onClick={() => setShowPayForm(true)} className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1a0a6e] text-white text-sm font-semibold"><Icon name="Plus" size={14} /> Выставить счёт</button>
+                </div>
               </div>
+              {showChargeForm && (
+                <form onSubmit={chargeBalance} className="bg-[#f5f5f7] rounded-2xl p-4 mb-4 space-y-2">
+                  <select className={input} value={chargeForm.case_id} onChange={e => setChargeForm(p => ({ ...p, case_id: e.target.value }))}>
+                    <option value="">— Без привязки к делу —</option>
+                    {cases.map(c => <option key={c.id} value={c.id}>{c.case_number || c.title}</option>)}
+                  </select>
+                  <input className={input} type="number" placeholder="Сумма *" required value={chargeForm.amount} onChange={e => setChargeForm(p => ({ ...p, amount: e.target.value }))} />
+                  <input className={input} placeholder="Основание *" required value={chargeForm.basis} onChange={e => setChargeForm(p => ({ ...p, basis: e.target.value }))} />
+                  <div className="flex gap-2">
+                    <button type="button" onClick={() => setShowChargeForm(false)} className="flex-1 py-2 rounded-xl border border-black/10 text-sm font-semibold text-black/60">Отмена</button>
+                    <button type="submit" disabled={charging} className="flex-1 py-2 rounded-xl bg-[#1a0a6e] text-white text-sm font-semibold disabled:opacity-50">{charging ? "Списываем..." : "Списать"}</button>
+                  </div>
+                </form>
+              )}
               {showPayForm && (
                 <form onSubmit={createPayment} className="bg-[#f5f5f7] rounded-2xl p-4 mb-4 space-y-2">
                   <select className={input} value={payForm.case_id} onChange={e => setPayForm(p => ({ ...p, case_id: e.target.value }))}>
