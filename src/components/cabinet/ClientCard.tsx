@@ -106,6 +106,19 @@ export default function ClientCard({ clientId, onClose, onChanged }: Props) {
     toast({ title: "Пароль сброшен", description: `Новый пароль: ${r.password} — отправлен клиенту` });
   };
 
+  const [loggingIn, setLoggingIn] = useState(false);
+  const loginAsClient = async () => {
+    setLoggingIn(true);
+    try {
+      const r = await cpApi.adminLoginAsClient(clientId);
+      window.open(`/client/token-login?token=${r.token}`, "_blank");
+    } catch (err: unknown) {
+      toast({ title: "Ошибка", description: err instanceof Error ? err.message : "", variant: "destructive" });
+    } finally {
+      setLoggingIn(false);
+    }
+  };
+
   const [sendingCreds, setSendingCreds] = useState(false);
   const sendCredentials = async () => {
     setSendingCreds(true);
@@ -255,6 +268,7 @@ export default function ClientCard({ clientId, onClose, onChanged }: Props) {
                 )}
                 <div className="flex gap-2 flex-wrap pt-1">
                   <button onClick={() => setEditProfile(true)} className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#1a0a6e] text-white text-sm font-semibold"><Icon name="Pencil" size={14} /> Редактировать</button>
+                  <button onClick={loginAsClient} disabled={loggingIn || client.is_active !== "yes"} className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-semibold disabled:opacity-50"><Icon name="LogIn" size={14} /> {loggingIn ? "Открываем..." : "Войти как клиент"}</button>
                   <button onClick={sendCredentials} disabled={sendingCreds} className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-green-600 text-white text-sm font-semibold disabled:opacity-50"><Icon name="Mail" size={14} /> {sendingCreds ? "Отправка..." : "Отправить доступ"}</button>
                   <button onClick={resetPassword} className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-black/10 text-sm font-semibold text-black/70 hover:bg-black/5"><Icon name="KeyRound" size={14} /> Сбросить пароль</button>
                   <button onClick={toggleActive} className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-black/10 text-sm font-semibold text-red-500 hover:bg-red-50"><Icon name="Ban" size={14} /> {client.is_active === "yes" ? "Заблокировать" : "Разблокировать"}</button>

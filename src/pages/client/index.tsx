@@ -9,6 +9,7 @@ import ClientCaseView from "./ClientCaseView";
 import ClientPayments from "./ClientPayments";
 import ClientDocuments from "./ClientDocuments";
 import ClientSubmit from "./ClientSubmit";
+import ClientTokenLogin from "./ClientTokenLogin";
 
 function ProtectedRoutes() {
   const navigate = useNavigate();
@@ -36,6 +37,8 @@ export default function ClientPortal() {
     <Routes>
       {/* /client → логин */}
       <Route index element={<ClientLogin />} />
+      {/* /client/token-login?token=... → вход админа от имени клиента */}
+      <Route path="token-login" element={<ClientTokenLogin />} />
       {/* /client/* → защищённые страницы */}
       <Route path="/*" element={<ProtectedRoutes />} />
     </Routes>

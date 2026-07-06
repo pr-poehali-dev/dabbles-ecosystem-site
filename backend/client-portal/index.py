@@ -553,6 +553,28 @@ def handler(event: dict, context) -> dict:
             })
             return resp(200, {'ok': sent is True, 'result': sent, 'sent_to': row[0], 'password': new_password})
 
+        if action == 'admin-login-as-client' and method == 'POST':
+            """Админ входит в личный кабинет клиента без пароля — создаёт временную сессию клиента."""
+            admin = get_admin(conn, event)
+            if not admin: return resp(401, {'error': 'Нет доступа'})
+            body = json.loads(event.get('body') or '{}')
+            client_id = int(body.get('id', 0))
+            with conn.cursor() as cur:
+                cur.execute(f"SELECT id, is_active FROM cp_clients WHERE id = {esc(client_id)} LIMIT 1")
+                row = cur.fetchone()
+            if not row:
+                return resp(404, {'error': 'Клиент не найден'})
+            if row[1] != 'yes':
+                return resp(403, {'error': 'Клиент заблокирован'})
+            token = secrets.token_hex(32)
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"INSERT INTO cp_sessions (client_id, token, expires_at) "
+                    f"VALUES ({esc(client_id)}, {esc(token)}, NOW() + INTERVAL '1 hour')"
+                )
+            conn.commit()
+            return resp(200, {'token': token})
+
         # ══════════════════════════════════════════════════════════
         # ADMIN: ДЕЛА
         # ══════════════════════════════════════════════════════════
@@ -733,6 +755,16 @@ def handler(event: dict, context) -> dict:
                         row = cur.fetchone()
                     if row:
                         client_id, amount, ptype = row
+                        # На случай если у клиента ещё нет лицевого счёта (создаётся лениво при первом заходе в кабинет)
+                        with conn.cursor() as cur:
+                            cur.execute(f"SELECT id FROM cp_accounts WHERE client_id = {esc(client_id)} LIMIT 1")
+                            has_account = cur.fetchone()
+                        if not has_account:
+                            cur2 = conn.cursor()
+                            cur2.execute(f"SELECT full_name FROM cp_clients WHERE id = {esc(client_id)} LIMIT 1")
+                            name_row = cur2.fetchone()
+                            cur2.close()
+                            create_account_and_card(conn, client_id, name_row[0] if name_row else '')
                         if ptype == 'topup':
                             # Пополнение — зачисляем на баланс
                             with conn.cursor() as cur:

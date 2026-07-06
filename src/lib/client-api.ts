@@ -118,6 +118,9 @@ export const cpApi = {
   adminClientSendCredentials: (id: number) =>
     cpRequest<{ ok: boolean; result: unknown; sent_to: string; password: string }>("admin-client-send-credentials", { method: "POST", body: { id }, useAdminToken: true }),
 
+  adminLoginAsClient: (id: number) =>
+    cpRequest<{ token: string }>("admin-login-as-client", { method: "POST", body: { id }, useAdminToken: true }),
+
   adminSendEmail: (data: { client_id: number; subject: string; message: string }) =>
     cpRequest<{ ok: boolean; sent_to: string }>("admin-send-email", { method: "POST", body: data, useAdminToken: true }),
 

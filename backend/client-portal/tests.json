@@ -22,6 +22,15 @@
       "expectedStatus": 401,
       "expectedBody": {"error": "Не авторизован"},
       "bodyMatcher": "partial"
+    },
+    {
+      "name": "Admin login-as-client without token",
+      "method": "POST",
+      "path": "/?action=admin-login-as-client",
+      "body": {"id": 1},
+      "expectedStatus": 401,
+      "expectedBody": {"error": "Нет доступа"},
+      "bodyMatcher": "partial"
     }
   ]
 }
