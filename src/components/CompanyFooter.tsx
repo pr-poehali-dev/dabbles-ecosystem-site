@@ -11,6 +11,12 @@ const REQUISITES = [
   { label: "ИНН", value: "890500558522" },
 ];
 
+const LINKS = [
+  { label: "Политика конфиденциальности", to: "/privacy" },
+  { label: "Публичная оферта", to: "/offer" },
+  { label: "Реквизиты", to: "/legal" },
+];
+
 interface Props {
   className?: string;
 }
@@ -21,15 +27,39 @@ export default function CompanyFooter({ className = "" }: Props) {
   return (
     <>
       <footer
-        className={`mx-3 mb-3 md:mx-6 md:mb-6 rounded-3xl bg-white border border-black/8 shadow-sm px-5 py-4 flex items-center justify-between gap-3 ${className}`}
+        className={`mx-3 mb-3 md:mx-6 md:mb-6 rounded-3xl bg-white border border-black/8 shadow-sm px-5 py-5 md:px-7 md:py-6 ${className}`}
       >
-        <img src={LOGO_URL} alt="Даббл" className="h-6 w-auto object-contain" />
-        <button
-          onClick={() => setOpen(true)}
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#f5f5f7] text-black/70 text-[13px] font-semibold hover:bg-black/10 transition-colors shrink-0"
-        >
-          <Icon name="Info" size={14} /> О компании
-        </button>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <img src={LOGO_URL} alt="Даббл" className="h-6 w-auto object-contain" />
+            <button
+              onClick={() => setOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#f5f5f7] text-black/70 text-[12px] font-semibold hover:bg-black/10 transition-colors shrink-0"
+            >
+              <Icon name="Info" size={13} /> О компании
+            </button>
+          </div>
+
+          <nav className="flex flex-wrap items-center gap-x-5 gap-y-2">
+            {LINKS.map(l => (
+              <Link key={l.to} to={l.to} className="text-[12px] text-black/45 hover:text-black transition-colors">
+                {l.label}
+              </Link>
+            ))}
+            <a href="mailto:info@dabbl.ru" className="text-[12px] text-black/45 hover:text-black transition-colors">
+              info@dabbl.ru
+            </a>
+          </nav>
+        </div>
+
+        <div className="mt-4 pt-4 border-t border-black/6 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <p className="text-[11px] text-black/30 text-center sm:text-left">
+            © 2026 ИП Серебренникова Г.С. · ОГРНИП 325890000028798
+          </p>
+          <p className="text-[11px] text-black/25">
+            Работает на экосистеме «Даббл»
+          </p>
+        </div>
       </footer>
 
       <Dialog open={open} onOpenChange={setOpen}>

@@ -17,26 +17,19 @@ export default function Privacy() {
       </nav>
       <div className="pt-[68px] max-w-3xl mx-auto px-5 md:px-6 py-10 md:py-14">
         <h1 className="font-display text-3xl md:text-4xl font-black text-black mb-2">Политика конфиденциальности</h1>
-        <p className="text-black/40 text-sm mb-10">Последнее обновление: 15 января 2025 г.</p>
+        <p className="text-black/40 text-sm mb-10">Последнее обновление: 09 июля 2026 г.</p>
 
         <div className="prose prose-neutral max-w-none text-black/70 leading-relaxed space-y-8">
 
           <section>
             <h2 className="font-display text-xl font-bold text-black mb-3">1. Общие положения</h2>
-            <p>Настоящая Политика конфиденциальности (далее — «Политика») определяет порядок обработки персональных данных пользователей сайта, принадлежащего ООО «ДАББЛ РУС» (далее — «Компания», «мы»).</p>
-            <p className="mt-3">Компания обрабатывает персональные данные в соответствии с Федеральным законом от 27.07.2006 № 152-ФЗ «О персональных данных».</p>
+            <p>Настоящая Политика конфиденциальности (далее — «Политика») определяет порядок обработки персональных данных пользователей сайта, принадлежащего ИП Серебренниковой Галине Сергеевне (далее — «Оператор», «мы»).</p>
+            <p className="mt-3">Оператор обрабатывает персональные данные в соответствии с Федеральным законом от 27.07.2006 № 152-ФЗ «О персональных данных».</p>
           </section>
 
           <section>
             <h2 className="font-display text-xl font-bold text-black mb-3">2. Оператор персональных данных</h2>
             <div className="bg-[#f5f5f7] rounded-2xl p-5 md:p-6 text-sm space-y-1.5">
-              <div><span className="text-black/45">Наименование:</span> <strong className="text-black">ООО «ДАББЛ РУС»</strong></div>
-              <div><span className="text-black/45">ОГРН:</span> 1258900000050</div>
-              <div><span className="text-black/45">ИНН:</span> 8905069677</div>
-              <div><span className="text-black/45">Адрес:</span> ЯНАО, г. Ноябрьск, ул. Магистральная, д. 119, кв. 212</div>
-            </div>
-            <p className="mt-4">В части персональных данных, обрабатываемых при оказании услуг через личный кабинет клиента, оператором выступает:</p>
-            <div className="bg-[#f5f5f7] rounded-2xl p-5 md:p-6 text-sm space-y-1.5 mt-3">
               <div><span className="text-black/45">ИП:</span> <strong className="text-black">Серебренникова Галина Сергеевна</strong></div>
               <div><span className="text-black/45">ОГРНИП:</span> 325890000028798</div>
               <div><span className="text-black/45">ИНН:</span> 890500558522</div>
@@ -58,7 +51,7 @@ export default function Privacy() {
             <h2 className="font-display text-xl font-bold text-black mb-3">4. Цели обработки данных</h2>
             <ul className="list-disc list-inside space-y-1.5 text-black/65">
               <li>Обработка обращений и заявок через форму на сайте</li>
-              <li>Предоставление доступа к сервисам экосистемы «Даббл»</li>
+              <li>Оказание услуг через личный кабинет</li>
               <li>Улучшение качества сервисов</li>
               <li>Соблюдение требований законодательства РФ</li>
             </ul>
@@ -71,7 +64,7 @@ export default function Privacy() {
 
           <section>
             <h2 className="font-display text-xl font-bold text-black mb-3">6. Передача данных третьим лицам</h2>
-            <p>Компания не передаёт персональные данные третьим лицам без согласия субъекта, за исключением случаев, предусмотренных законодательством Российской Федерации.</p>
+            <p>Оператор не передаёт персональные данные третьим лицам без согласия субъекта, за исключением случаев, предусмотренных законодательством Российской Федерации.</p>
           </section>
 
           <section>
@@ -81,7 +74,7 @@ export default function Privacy() {
 
           <section>
             <h2 className="font-display text-xl font-bold text-black mb-3">8. Защита данных</h2>
-            <p>Компания принимает необходимые организационные и технические меры для защиты персональных данных от несанкционированного доступа, изменения, раскрытия или уничтожения.</p>
+            <p>Оператор принимает необходимые организационные и технические меры для защиты персональных данных от несанкционированного доступа, изменения, раскрытия или уничтожения.</p>
           </section>
 
           <section>
@@ -108,7 +101,7 @@ export default function Privacy() {
         </div>
       </div>
       <footer className="bg-black px-6 py-6">
-        <p className="text-center text-white/20 text-sm">© 2025 ООО «ДАББЛ РУС»</p>
+        <p className="text-center text-white/20 text-sm">© 2026 ИП Серебренникова Г.С.</p>
       </footer>
     </div>
   );
