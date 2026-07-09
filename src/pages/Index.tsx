@@ -4,6 +4,7 @@ import SberHome from "@/components/SberHome";
 import QuickLinksBar from "@/components/QuickLinksBar";
 import EcosystemSection from "@/components/EcosystemSection";
 import DabblDiscover from "@/components/DabblDiscover";
+import CompanyFooter from "@/components/CompanyFooter";
 
 export default function Index() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -29,6 +30,7 @@ export default function Index() {
       <QuickLinksBar />
       <EcosystemSection />
       <DabblDiscover />
+      <CompanyFooter />
     </div>
   );
 }
