@@ -41,6 +41,7 @@ const FOOTER_LINKS = [
     title: "Документы",
     links: [
       { label: "Политика конфиденциальности", to: "/privacy" },
+      { label: "Публичная оферта", to: "/offer" },
     ],
   },
 ];

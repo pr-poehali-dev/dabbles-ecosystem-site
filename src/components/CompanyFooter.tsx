@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import Icon from "@/components/ui/icon";
 
@@ -46,6 +47,14 @@ export default function CompanyFooter({ className = "" }: Props) {
                 <div className="text-[13px] text-black font-medium">{r.value}</div>
               </div>
             ))}
+          </div>
+          <div className="flex items-center justify-center gap-4 pt-2 border-t border-black/6 mt-1">
+            <Link to="/privacy" className="text-[12px] text-black/45 hover:text-black underline" onClick={() => setOpen(false)}>
+              Политика конфиденциальности
+            </Link>
+            <Link to="/offer" className="text-[12px] text-black/45 hover:text-black underline" onClick={() => setOpen(false)}>
+              Публичная оферта
+            </Link>
           </div>
         </DialogContent>
       </Dialog>

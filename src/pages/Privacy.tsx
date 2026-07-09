@@ -35,6 +35,12 @@ export default function Privacy() {
               <div><span className="text-black/45">ИНН:</span> 8905069677</div>
               <div><span className="text-black/45">Адрес:</span> ЯНАО, г. Ноябрьск, ул. Магистральная, д. 119, кв. 212</div>
             </div>
+            <p className="mt-4">В части персональных данных, обрабатываемых при оказании услуг через личный кабинет клиента, оператором выступает:</p>
+            <div className="bg-[#f5f5f7] rounded-2xl p-5 md:p-6 text-sm space-y-1.5 mt-3">
+              <div><span className="text-black/45">ИП:</span> <strong className="text-black">Серебренникова Галина Сергеевна</strong></div>
+              <div><span className="text-black/45">ОГРНИП:</span> 325890000028798</div>
+              <div><span className="text-black/45">ИНН:</span> 890500558522</div>
+            </div>
           </section>
 
           <section>
@@ -92,6 +98,12 @@ export default function Privacy() {
           <section>
             <h2 className="font-display text-xl font-bold text-black mb-3">10. Контакты</h2>
             <p>По вопросам обработки персональных данных обращайтесь: <a href="mailto:info@dabbl.ru" className="text-[#0077FF] hover:underline">info@dabbl.ru</a></p>
+          </section>
+
+          <section>
+            <p className="text-sm text-black/45">
+              Условия оказания услуг закреплены в <Link to="/offer" className="text-[#0077FF] hover:underline">Публичной оферте</Link>.
+            </p>
           </section>
         </div>
       </div>

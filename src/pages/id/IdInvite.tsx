@@ -16,6 +16,7 @@ export default function IdInvite() {
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
   const [password2, setPassword2] = useState("");
+  const [consent, setConsent] = useState(false);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -30,6 +31,7 @@ export default function IdInvite() {
     setErr("");
     if (password.length < 6) { setErr("Минимум 6 символов"); return; }
     if (password !== password2) { setErr("Пароли не совпадают"); return; }
+    if (!consent) { setErr("Необходимо согласие на обработку персональных данных"); return; }
     setBusy(true);
     try {
       const r = await request<{ token: string; user: User }>("dabbl-id", {
@@ -115,6 +117,20 @@ export default function IdInvite() {
                     className="w-full px-4 py-3 rounded-xl border border-black/10 focus:border-black/30 outline-none text-black"
                   />
                 </div>
+                <label className="flex items-start gap-2.5 text-[12px] text-black/55 leading-snug cursor-pointer pt-1">
+                  <input
+                    type="checkbox"
+                    checked={consent}
+                    onChange={(e) => setConsent(e.target.checked)}
+                    className="mt-0.5 shrink-0"
+                  />
+                  <span>
+                    Я даю согласие на обработку персональных данных в соответствии с{" "}
+                    <Link to="/privacy" target="_blank" className="underline hover:text-black/80">Политикой конфиденциальности</Link>
+                    {" "}и принимаю условия{" "}
+                    <Link to="/offer" target="_blank" className="underline hover:text-black/80">Публичной оферты</Link>
+                  </span>
+                </label>
                 {err && (
                   <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded-xl text-sm">{err}</div>
                 )}

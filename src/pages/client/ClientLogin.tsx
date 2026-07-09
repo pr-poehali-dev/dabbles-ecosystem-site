@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { cpApi, setCpToken } from "@/lib/client-api";
 import Icon from "@/components/ui/icon";
 
@@ -80,6 +80,12 @@ export default function ClientLogin() {
 
         <p className="text-center text-[12px] text-black/30 mt-6">
           Доступ только по приглашению. Если возникли проблемы со входом — обратитесь к вашему менеджеру.
+        </p>
+        <p className="text-center text-[11px] text-black/25 mt-3 leading-relaxed">
+          Используя личный кабинет, вы соглашаетесь с{" "}
+          <Link to="/privacy" className="underline hover:text-black/50">Политикой конфиденциальности</Link>
+          {" "}и условиями{" "}
+          <Link to="/offer" className="underline hover:text-black/50">Публичной оферты</Link>
         </p>
       </div>
     </div>

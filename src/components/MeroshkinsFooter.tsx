@@ -16,6 +16,10 @@ export default function MeroshkinsFooter() {
             Политика конфиденциальности
           </Link>
           <span className="text-black/15 text-[12px]">·</span>
+          <Link to="/offer?from=meroshkins" className="text-[12px] text-black/35 hover:text-black/60 transition-colors">
+            Публичная оферта
+          </Link>
+          <span className="text-black/15 text-[12px]">·</span>
           <Link to="/meroshkins/promo" className="text-[12px] text-black/35 hover:text-black/60 transition-colors">
             О сервисе
           </Link>

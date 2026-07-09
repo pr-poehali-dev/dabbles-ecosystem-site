@@ -12,6 +12,7 @@ import Security from "./pages/Security";
 import Director from "./pages/Director";
 import Privacy from "./pages/Privacy";
 import Legal from "./pages/Legal";
+import Offer from "./pages/Offer";
 import Meroshkins from "./pages/Meroshkins";
 import MeroshkinsShare from "./pages/MeroshkinsShare";
 import MeroshkinsPromo from "./pages/meroshkins/PromoPage";
@@ -27,6 +28,7 @@ import EdoApp from "./pages/edo/index";
 import ClientPortal from "./pages/client/index";
 import CampPortal from "./pages/camp/index";
 import { AuthProvider } from "@/lib/auth";
+import CookieBanner from "@/components/CookieBanner";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +46,7 @@ const App = () => (
             <Route path="/director" element={<Director />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/legal" element={<Legal />} />
+            <Route path="/offer" element={<Offer />} />
             <Route path="/login" element={<Login />} />
             <Route path="/cabinet" element={<Cabinet />} />
             <Route path="/meroshkins" element={<Meroshkins />} />
@@ -63,6 +66,7 @@ const App = () => (
             <Route path="/id/invite/:token" element={<IdInvite />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <CookieBanner />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>

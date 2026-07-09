@@ -70,6 +70,7 @@ export default function KP() {
   const [docNumber, setDocNumber] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [denied, setDenied] = useState(false);
+  const [consent, setConsent] = useState(false);
 
   const updateItem = (id: number, field: keyof Item, value: string) => {
     setItems(prev => prev.map(it => it.id === id ? { ...it, [field]: value } : it));
@@ -89,6 +90,10 @@ export default function KP() {
 
     if (!items.every(it => it.name.trim() && it.price.trim())) {
       setError("Заполните наименование и цену для каждой позиции");
+      return;
+    }
+    if (!consent) {
+      setError("Необходимо согласие на обработку персональных данных");
       return;
     }
 
@@ -246,6 +251,23 @@ export default function KP() {
               </div>
             </div>
 
+            <label className="flex items-start gap-2.5 px-2 text-[13px] text-black/55 leading-relaxed cursor-pointer">
+              <input
+                type="checkbox"
+                checked={consent}
+                onChange={(e) => setConsent(e.target.checked)}
+                className="mt-0.5 shrink-0"
+              />
+              <span>
+                Я даю согласие на обработку персональных данных в соответствии с{" "}
+                <Link to="/privacy" target="_blank" className="underline hover:text-black/80 transition-colors">Политикой конфиденциальности</Link>
+                , соглашаюсь с{" "}
+                <Link to="/kp-rules" target="_blank" className="underline hover:text-black/80 transition-colors">правилами сервиса</Link>
+                {" "}и условиями{" "}
+                <Link to="/offer" target="_blank" className="underline hover:text-black/80 transition-colors">Публичной оферты</Link>
+              </span>
+            </label>
+
             {error && (
               <div className="flex items-center gap-2 bg-red-50 text-red-600 rounded-2xl px-5 py-4 text-sm">
                 <Icon name="AlertCircle" size={16} /> {error}
@@ -259,14 +281,6 @@ export default function KP() {
                 : <><Icon name="FileDown" size={18} /> Сформировать КП</>
               }
             </button>
-
-            <p className="text-center text-black/30 text-xs pb-4 leading-relaxed px-2">
-              Нажимая кнопку, вы даёте согласие на обработку персональных данных, соглашаетесь с{" "}
-              <Link to="/kp-rules" target="_blank" className="underline hover:text-black/50 transition-colors">
-                правилами сервиса
-              </Link>
-              {" "}и подтверждаете, что ознакомлены с требованиями и основными видами экономической деятельности нашей компании.
-            </p>
           </form>
         )}
       </div>

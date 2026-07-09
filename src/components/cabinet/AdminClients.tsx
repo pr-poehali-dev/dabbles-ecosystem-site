@@ -21,6 +21,7 @@ export default function AdminClients() {
   const [showClientForm, setShowClientForm] = useState(false);
   const [clientForm, setClientForm] = useState({ full_name: "", email: "", phone: "", address: "", passport: "", inn: "", notes: "" });
   const [clientSaving, setClientSaving] = useState(false);
+  const [clientConsent, setClientConsent] = useState(false);
 
   // Cases
   const [cases, setCases] = useState<(CpCase & { client_name: string; client_email: string })[]>([]);
@@ -86,12 +87,17 @@ export default function AdminClients() {
   // Create client
   const handleCreateClient = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!clientConsent) {
+      toast({ title: "Подтвердите согласие клиента на обработку персональных данных", variant: "destructive" });
+      return;
+    }
     setClientSaving(true);
     try {
       const r = await cpApi.adminClientCreate(clientForm);
       toast({ title: "Клиент создан", description: `Пароль: ${r.password} — отправлен на email` });
       setShowClientForm(false);
       setClientForm({ full_name: "", email: "", phone: "", address: "", passport: "", inn: "", notes: "" });
+      setClientConsent(false);
       loadClients();
     } catch (err: unknown) {
       toast({ title: "Ошибка", description: err instanceof Error ? err.message : "Ошибка", variant: "destructive" });
@@ -310,6 +316,15 @@ export default function AdminClients() {
               <Icon name="Info" size={12} className="inline mr-1" />
               Клиенту автоматически отправится письмо с логином и паролем
             </div>
+            <label className="flex items-start gap-2.5 text-[12px] text-black/60 leading-snug cursor-pointer">
+              <input
+                type="checkbox"
+                checked={clientConsent}
+                onChange={e => setClientConsent(e.target.checked)}
+                className="mt-0.5 shrink-0"
+              />
+              <span>Подтверждаю, что согласие клиента на обработку персональных данных получено в соответствии с 152-ФЗ</span>
+            </label>
             <ModalButtons onClose={() => setShowClientForm(false)} loading={clientSaving} label="Создать клиента" />
           </form>
         </Modal>

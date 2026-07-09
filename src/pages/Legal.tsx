@@ -56,6 +56,11 @@ export default function Legal() {
             </p>
           </div>
         </div>
+
+        <div className="flex flex-wrap items-center gap-4 mt-6 text-sm">
+          <Link to="/privacy" className="text-[#0077FF] hover:underline">Политика конфиденциальности</Link>
+          <Link to="/offer" className="text-[#0077FF] hover:underline">Публичная оферта на оказание услуг</Link>
+        </div>
       </div>
       <footer className="bg-black px-6 py-6 mt-10">
         <p className="text-center text-white/20 text-sm">© 2025 ООО «ДАББЛ РУС»</p>

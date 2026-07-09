@@ -1,7 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/lib/auth";
 import Icon from "@/components/ui/icon";
-import CookieBanner from "@/components/CookieBanner";
 import MeroshkinsFooter from "@/components/MeroshkinsFooter";
 
 const FEATURES = [
@@ -216,7 +215,6 @@ export default function PromoPage() {
         </div>
       </section>
 
-      <CookieBanner />
       <MeroshkinsFooter />
     </div>
   );
