@@ -2,18 +2,20 @@ import { useEffect, useRef, useState } from "react";
 import Icon from "@/components/ui/icon";
 import { campApi, CampCertTemplate, CampAdminCertificate, formatCampDate } from "@/lib/camp-api";
 
-type FieldKey = "name" | "date" | "number";
+type FieldKey = "name" | "date" | "number" | "course";
 
 const FIELD_LABELS: Record<FieldKey, string> = {
   name: "ФИО",
   date: "Дата",
   number: "Номер сертификата",
+  course: "Название курса",
 };
 
 const FIELD_DEMO: Record<FieldKey, string> = {
   name: "Иван Иванов",
   date: "05.07.2026",
   number: "CAMP-2026-000000",
+  course: "Название программы обучения",
 };
 
 function defaultTemplate(): CampCertTemplate {
@@ -22,6 +24,7 @@ function defaultTemplate(): CampCertTemplate {
     name_x: 0.5, name_y: 0.45, name_size: 28, name_color: "#141414", name_align: "center",
     date_x: 0.25, date_y: 0.85, date_size: 12, date_color: "#6e6e6e", date_align: "left",
     number_x: 0.75, number_y: 0.85, number_size: 12, number_color: "#6e6e6e", number_align: "right",
+    course_x: 0.5, course_y: 0.62, course_size: 16, course_color: "#141414", course_align: "center",
   };
 }
 
@@ -160,7 +163,7 @@ export default function AdminCampCertificates() {
                     onPointerUp={onPointerUp}
                   >
                     <img src={tpl.preview_url} alt="Шаблон сертификата" className="absolute inset-0 w-full h-full object-contain bg-white pointer-events-none" />
-                    {(["name", "date", "number"] as FieldKey[]).map((f) => (
+                    {(["name", "course", "date", "number"] as FieldKey[]).map((f) => (
                       <div
                         key={f}
                         onPointerDown={onPointerDown(f)}
@@ -198,7 +201,7 @@ export default function AdminCampCertificates() {
 
             {tpl.preview_url && (
               <div className="space-y-4">
-                {(["name", "date", "number"] as FieldKey[]).map((f) => (
+                {(["name", "course", "date", "number"] as FieldKey[]).map((f) => (
                   <div key={f} className={`bg-white rounded-2xl p-4 border transition-colors ${activeField === f ? "border-[#DAB332]" : "border-black/6"}`}
                     onMouseEnter={() => setActiveField(f)}>
                     <h3 className="font-bold text-black text-sm mb-3 flex items-center gap-1.5">

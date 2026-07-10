@@ -123,6 +123,7 @@ export interface CampCertTemplate {
   name_x: number; name_y: number; name_size: number; name_color: string; name_align: string;
   date_x: number; date_y: number; date_size: number; date_color: string; date_align: string;
   number_x: number; number_y: number; number_size: number; number_color: string; number_align: string;
+  course_x: number; course_y: number; course_size: number; course_color: string; course_align: string;
 }
 
 export interface CampAdminCertificate {

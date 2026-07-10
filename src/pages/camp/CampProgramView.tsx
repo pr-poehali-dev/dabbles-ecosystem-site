@@ -21,7 +21,7 @@ function LectureRow({ lecture, onComplete }: { lecture: CampLecture; onComplete:
               <video src={lecture.video_url} controls className="w-full h-full" />
             </div>
           )}
-          <p className="text-black/60 text-[13px] leading-relaxed whitespace-pre-line mb-3">{lecture.content}</p>
+          <div className="camp-rte text-black/60 text-[13px] mb-3" dangerouslySetInnerHTML={{ __html: lecture.content }} />
           {lecture.file_url && (
             <a href={lecture.file_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-black/60 hover:text-black mb-3">
               <Icon name="Paperclip" size={13} /> Скачать материал

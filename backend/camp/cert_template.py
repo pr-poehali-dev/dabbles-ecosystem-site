@@ -72,8 +72,9 @@ def build_certificate_from_template(
     full_name: str,
     cert_number: str,
     date_str: str,
+    course_title: str = '',
 ) -> bytes:
-    """Накладывает ФИО, дату и номер на PDF-шаблон по координатам из конфига (доли 0..1 от размера страницы)."""
+    """Накладывает ФИО, дату, номер и название курса на PDF-шаблон по координатам из конфига (доли 0..1 от размера страницы)."""
     font_path = _resolve_font()
     doc = fitz.open(stream=template_bytes, filetype='pdf')
     page = doc[0]
@@ -84,6 +85,9 @@ def build_certificate_from_template(
                 config['date_size'], config['date_color'], config['date_align'])
     _draw_field(page, font_path, cert_number, config['number_x'], config['number_y'],
                 config['number_size'], config['number_color'], config['number_align'])
+    if course_title and 'course_x' in config:
+        _draw_field(page, font_path, course_title, config['course_x'], config['course_y'],
+                    config['course_size'], config['course_color'], config['course_align'])
 
     out = doc.tobytes()
     doc.close()

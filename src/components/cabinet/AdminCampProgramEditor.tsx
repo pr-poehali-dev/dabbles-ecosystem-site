@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Icon from "@/components/ui/icon";
 import { campApi } from "@/lib/camp-api";
 import AdminCampTestEditor from "./AdminCampTestEditor";
+import RichTextEditor from "@/components/ui/rich-text-editor";
 
 type Module = { id: number; title: string; sort_order: number; is_active: boolean };
 type Lecture = { id: number; title: string; content: string; video_url: string; file_url: string; sort_order: number; is_active: boolean };
@@ -213,9 +214,17 @@ function LectureModal({ lecture, onChange, onSave, onClose }: {
 }) {
   const set = (k: keyof Lecture, v: unknown) => onChange({ ...lecture, [k]: v });
 
+  const uploadImage = async (file: File) => {
+    const buf = await file.arrayBuffer();
+    const b64 = btoa(new Uint8Array(buf).reduce((acc, b) => acc + String.fromCharCode(b), ""));
+    const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+    const res = await campApi.upload(b64, ext);
+    return res.url;
+  };
+
   return (
     <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-3xl p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+      <div className="bg-white rounded-3xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <h2 className="font-display text-xl font-black text-black mb-5">
           {lecture.id ? "Редактирование лекции" : "Новая лекция"}
         </h2>
@@ -227,8 +236,12 @@ function LectureModal({ lecture, onChange, onSave, onClose }: {
           </div>
           <div>
             <label className="text-xs text-black/40 font-semibold block mb-1.5">Текст лекции</label>
-            <textarea value={lecture.content || ""} onChange={(e) => set("content", e.target.value)} rows={6}
-              className="w-full px-3.5 py-2.5 rounded-xl bg-[#f5f5f7] border border-black/8 text-sm focus:outline-none resize-none" />
+            <RichTextEditor
+              value={lecture.content || ""}
+              onChange={(html) => set("content", html)}
+              onUploadImage={uploadImage}
+              placeholder="Начните писать текст лекции — можно выделять жирным, добавлять заголовки, списки, ссылки и картинки..."
+            />
           </div>
           <div>
             <label className="text-xs text-black/40 font-semibold block mb-1.5">Ссылка на видео (необязательно)</label>

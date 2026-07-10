@@ -2,6 +2,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { campApi, clearCampToken, CampStudent } from "@/lib/camp-api";
+import CampFooter from "@/components/camp/CampFooter";
 
 const LOGO = "https://cdn.poehali.dev/projects/91e153cd-c52b-485f-a2cb-7766288caf61/bucket/a4c91874-6ec5-442c-be38-6a949286b9b1.png";
 
@@ -72,6 +73,10 @@ export default function CampLayout({ children }: { children: ReactNode }) {
       <main className="max-w-6xl mx-auto px-4 md:px-6 py-6 pb-24 md:pb-6">
         {children}
       </main>
+
+      <div className="max-w-6xl mx-auto">
+        <CampFooter />
+      </div>
 
       {/* Мобильный таб-бар */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-black/6 flex z-30">

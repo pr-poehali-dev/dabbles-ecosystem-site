@@ -87,7 +87,8 @@ def get_cert_template(conn):
         cur.execute(
             "SELECT template_url, name_x, name_y, name_size, name_color, name_align, "
             "date_x, date_y, date_size, date_color, date_align, "
-            "number_x, number_y, number_size, number_color, number_align "
+            "number_x, number_y, number_size, number_color, number_align, "
+            "course_x, course_y, course_size, course_color, course_align "
             "FROM camp_certificate_template WHERE id = 1 LIMIT 1"
         )
         row = cur.fetchone()
@@ -98,6 +99,7 @@ def get_cert_template(conn):
         'name_x': row[1], 'name_y': row[2], 'name_size': row[3], 'name_color': row[4], 'name_align': row[5],
         'date_x': row[6], 'date_y': row[7], 'date_size': row[8], 'date_color': row[9], 'date_align': row[10],
         'number_x': row[11], 'number_y': row[12], 'number_size': row[13], 'number_color': row[14], 'number_align': row[15],
+        'course_x': row[16], 'course_y': row[17], 'course_size': row[18], 'course_color': row[19], 'course_align': row[20],
     }
 
 
@@ -122,7 +124,7 @@ def issue_certificate(conn, student_id, program_id, full_name, program_title):
     if template:
         with urllib.request.urlopen(template['template_url']) as f:
             template_bytes = f.read()
-        pdf_bytes = build_certificate_from_template(template_bytes, template, full_name, cert_number, date_str)
+        pdf_bytes = build_certificate_from_template(template_bytes, template, full_name, cert_number, date_str, program_title)
     else:
         pdf_bytes = build_certificate_pdf(full_name, program_title, cert_number, issued_at)
 
@@ -843,7 +845,8 @@ def handler(event: dict, context) -> dict:
                     "SELECT template_url, preview_url, page_width, page_height, "
                     "name_x, name_y, name_size, name_color, name_align, "
                     "date_x, date_y, date_size, date_color, date_align, "
-                    "number_x, number_y, number_size, number_color, number_align "
+                    "number_x, number_y, number_size, number_color, number_align, "
+                    "course_x, course_y, course_size, course_color, course_align "
                     "FROM camp_certificate_template WHERE id = 1 LIMIT 1"
                 )
                 r = cur.fetchone()
@@ -853,6 +856,7 @@ def handler(event: dict, context) -> dict:
                 'name_x': r[4], 'name_y': r[5], 'name_size': r[6], 'name_color': r[7], 'name_align': r[8],
                 'date_x': r[9], 'date_y': r[10], 'date_size': r[11], 'date_color': r[12], 'date_align': r[13],
                 'number_x': r[14], 'number_y': r[15], 'number_size': r[16], 'number_color': r[17], 'number_align': r[18],
+                'course_x': r[19], 'course_y': r[20], 'course_size': r[21], 'course_color': r[22], 'course_align': r[23],
             }})
 
         if action == 'admin-cert-template-upload' and method == 'POST':
@@ -912,6 +916,9 @@ def handler(event: dict, context) -> dict:
                 'number_x': float(body.get('number_x', 0.75)), 'number_y': float(body.get('number_y', 0.85)),
                 'number_size': int(body.get('number_size', 12)), 'number_color': body.get('number_color', '#6e6e6e'),
                 'number_align': body.get('number_align', 'right'),
+                'course_x': float(body.get('course_x', 0.5)), 'course_y': float(body.get('course_y', 0.62)),
+                'course_size': int(body.get('course_size', 16)), 'course_color': body.get('course_color', '#141414'),
+                'course_align': body.get('course_align', 'center'),
             }
             sets = ', '.join(f"{k} = {esc(v)}" for k, v in fields.items())
             with conn.cursor() as cur:
@@ -928,7 +935,8 @@ def handler(event: dict, context) -> dict:
             with urllib.request.urlopen(template['template_url']) as f:
                 template_bytes = f.read()
             pdf_bytes = build_certificate_from_template(
-                template_bytes, template, 'Иван Иванов', 'CAMP-2026-000000', datetime.now().strftime('%d.%m.%Y')
+                template_bytes, template, 'Иван Иванов', 'CAMP-2026-000000',
+                datetime.now().strftime('%d.%m.%Y'), 'Название программы обучения'
             )
             import base64
             key = f"camp/cert-template/test-preview-{secrets.token_hex(6)}.pdf"
