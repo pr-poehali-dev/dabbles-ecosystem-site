@@ -8,11 +8,10 @@
       "bodyMatcher": "partial"
     },
     {
-      "name": "Login without credentials",
+      "name": "Login redirects to Dabbl ID",
       "method": "POST",
       "path": "/?action=login",
-      "expectedStatus": 400,
-      "expectedBody": {"error": "Email и пароль обязательны"},
+      "expectedStatus": 410,
       "bodyMatcher": "partial"
     },
     {

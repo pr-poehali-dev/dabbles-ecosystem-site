@@ -1,13 +1,12 @@
 const FN_URL_KEY = "client-portal";
 import urls from "../../backend/func2url.json";
 
-const TOKEN_KEY = "cp_token";
-const ADMIN_TOKEN_KEY = "dabbl_token";
+const DABBL_TOKEN_KEY = "dabbl_token";
 
-export const getCpToken = () => localStorage.getItem(TOKEN_KEY) || "";
-export const setCpToken = (t: string) => localStorage.setItem(TOKEN_KEY, t);
-export const clearCpToken = () => localStorage.removeItem(TOKEN_KEY);
-const getAdminToken = () => localStorage.getItem(ADMIN_TOKEN_KEY) || "";
+// Клиентский портал теперь авторизуется через единый Даббл ID — токен общий для всех сервисов.
+export const getCpToken = () => localStorage.getItem(DABBL_TOKEN_KEY) || "";
+export const setCpToken = (t: string) => localStorage.setItem(DABBL_TOKEN_KEY, t);
+export const clearCpToken = () => localStorage.removeItem(DABBL_TOKEN_KEY);
 
 const BASE = (urls as Record<string, string>)[FN_URL_KEY];
 
@@ -17,10 +16,10 @@ async function cpRequest<T>(action: string, options: {
   query?: Record<string, string | number>;
   useAdminToken?: boolean;
 } = {}): Promise<T> {
-  const { method = "GET", body, query = {}, useAdminToken = false } = options;
+  const { method = "GET", body, query = {} } = options;
   const params = new URLSearchParams({ action, ...Object.fromEntries(Object.entries(query).map(([k, v]) => [k, String(v)])) });
   const url = `${BASE}?${params}`;
-  const token = useAdminToken ? getAdminToken() : getCpToken();
+  const token = localStorage.getItem(DABBL_TOKEN_KEY) || "";
   const res = await fetch(url, {
     method,
     headers: {
@@ -68,9 +67,6 @@ export interface CpRequest {
 }
 
 export const cpApi = {
-  login: (email: string, password: string) =>
-    cpRequest<{ token: string; client: CpClient }>("login", { method: "POST", body: { email, password } }),
-
   logout: () => cpRequest<{ ok: boolean }>("logout", { method: "POST" }),
 
   me: () => cpRequest<{ client: CpClient }>("me"),

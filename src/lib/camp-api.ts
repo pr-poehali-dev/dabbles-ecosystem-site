@@ -1,11 +1,10 @@
 const BASE = "https://functions.poehali.dev/28a12976-085a-453f-98a4-4f98e91bb5a5";
-const TOKEN_KEY = "camp_token";
-const ADMIN_TOKEN_KEY = "dabbl_token";
+const DABBL_TOKEN_KEY = "dabbl_token";
 
-export const getCampToken = () => localStorage.getItem(TOKEN_KEY) || "";
-export const setCampToken = (t: string) => localStorage.setItem(TOKEN_KEY, t);
-export const clearCampToken = () => localStorage.removeItem(TOKEN_KEY);
-const getAdminToken = () => localStorage.getItem(ADMIN_TOKEN_KEY) || "";
+// Кэмп теперь авторизуется через единый Даббл ID — токен общий для всех сервисов.
+export const getCampToken = () => localStorage.getItem(DABBL_TOKEN_KEY) || "";
+export const setCampToken = (t: string) => localStorage.setItem(DABBL_TOKEN_KEY, t);
+export const clearCampToken = () => localStorage.removeItem(DABBL_TOKEN_KEY);
 
 async function campRequest<T>(
   action: string,
@@ -16,10 +15,10 @@ async function campRequest<T>(
     useAdminToken?: boolean;
   } = {}
 ): Promise<T> {
-  const { method = "GET", body, query = {}, useAdminToken = false } = options;
+  const { method = "GET", body, query = {} } = options;
   const params = new URLSearchParams({ action, ...(query as Record<string, string>) });
   const url = `${BASE}?${params}`;
-  const token = useAdminToken ? getAdminToken() : getCampToken();
+  const token = localStorage.getItem(DABBL_TOKEN_KEY) || "";
   const res = await fetch(url, {
     method,
     headers: {
@@ -137,10 +136,6 @@ export interface CampAdminCertificate {
 }
 
 export const campApi = {
-  register: (email: string, password: string, full_name: string) =>
-    campRequest<{ token: string; student: CampStudent }>("register", { method: "POST", body: { email, password, full_name } }),
-  login: (email: string, password: string) =>
-    campRequest<{ token: string; student: CampStudent }>("login", { method: "POST", body: { email, password } }),
   logout: () => campRequest("logout", { method: "POST" }),
   me: () => campRequest<{ student: CampStudent }>("me"),
   profileUpdate: (full_name: string, phone: string) =>

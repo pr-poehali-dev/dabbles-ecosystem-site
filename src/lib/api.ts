@@ -45,7 +45,7 @@ export type User = {
   email: string;
   full_name: string;
   position: string;
-  role: "admin" | "employee";
+  role: "admin" | "employee" | "user" | "client";
   must_change_password: boolean;
   access_tasks: boolean;
   access_documents: boolean;

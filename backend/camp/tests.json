@@ -13,11 +13,11 @@
       "expectedStatus": 200
     },
     {
-      "name": "Login without credentials fails",
+      "name": "Login redirects to Dabbl ID",
       "method": "POST",
       "path": "/?action=login",
       "body": {},
-      "expectedStatus": 401
+      "expectedStatus": 410
     },
     {
       "name": "Me without token unauthorized",
@@ -38,11 +38,11 @@
       "expectedStatus": 401
     },
     {
-      "name": "Register without full name rejected",
+      "name": "Register redirects to Dabbl ID",
       "method": "POST",
       "path": "/?action=register",
       "body": {"email": "test@example.com", "password": "123456", "full_name": "Иван"},
-      "expectedStatus": 400
+      "expectedStatus": 410
     },
     {
       "name": "Profile update without token unauthorized",

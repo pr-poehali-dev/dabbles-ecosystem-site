@@ -6,18 +6,21 @@ import { request } from "@/lib/api";
 import { redirectToYandex } from "@/lib/yandexAuth";
 
 type ClientInfo = { name: string; description: string; logo_url: string; is_internal: boolean };
+type Mode = "login" | "register";
 
 export default function IdAuth() {
-  const { user, login, verifyTfa, loading } = useAuth();
+  const { user, login, register, verifyTfa, loading } = useAuth();
   const nav = useNavigate();
   const [params] = useSearchParams();
   const clientId = params.get("client_id") || "cabinet";
   const redirectUri = params.get("redirect_uri") || "/cabinet";
 
   const [client, setClient] = useState<ClientInfo | null>(null);
+  const [mode, setMode] = useState<Mode>("login");
   const [step, setStep] = useState<"login" | "tfa" | "consent">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [code, setCode] = useState("");
   const [tfaUserId, setTfaUserId] = useState<number | null>(null);
   const [emailHint, setEmailHint] = useState("");
@@ -59,6 +62,22 @@ export default function IdAuth() {
     }
   };
 
+  const onSubmitRegister = async (e: FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    setError("");
+    try {
+      if (password.length < 6) throw new Error("Пароль должен быть не короче 6 символов");
+      if (!fullName.trim()) throw new Error("Укажите имя");
+      await register(email, password, fullName, clientId);
+      setStep("consent");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Ошибка регистрации");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const onSubmitTfa = async (e: FormEvent) => {
     e.preventDefault();
     if (!tfaUserId) return;
@@ -79,7 +98,7 @@ export default function IdAuth() {
     setError("");
     try {
       // Для внутренних клиентов просто редиректим
-      if (client?.is_internal || ["cabinet", "vibe"].includes(clientId)) {
+      if (client?.is_internal || ["cabinet", "vibe", "camp", "client-portal"].includes(clientId)) {
         nav(redirectUri);
         return;
       }
@@ -99,8 +118,20 @@ export default function IdAuth() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a0535] via-[#1a0a6e] to-[#2d0060] flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen relative flex items-center justify-center px-4 py-8 overflow-hidden bg-[#0a0535]">
+      {/* Фоновое сияние в духе референса (полярное сияние) */}
+      <div
+        className="absolute inset-0 opacity-70"
+        style={{
+          background:
+            "radial-gradient(60% 50% at 20% 15%, rgba(193,240,137,0.25) 0%, transparent 60%)," +
+            "radial-gradient(50% 40% at 85% 20%, rgba(0,119,255,0.25) 0%, transparent 60%)," +
+            "radial-gradient(70% 60% at 50% 100%, rgba(45,0,96,0.6) 0%, transparent 70%)," +
+            "linear-gradient(180deg, #0a0535 0%, #1a0a6e 55%, #2d0060 100%)",
+        }}
+      />
+
+      <div className="w-full max-w-[420px] relative">
         {/* DABBL ID HEADER */}
         <div className="text-center mb-6">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur border border-white/15 mb-4">
@@ -110,7 +141,7 @@ export default function IdAuth() {
           <div className="text-white/60 text-sm">Единый вход во все сервисы Даббл</div>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-10">
+        <div className="bg-white rounded-[28px] shadow-2xl p-8 md:p-10">
           {/* CLIENT BLOCK */}
           {client && (
             <div className="mb-7 pb-6 border-b border-black/8">
@@ -135,36 +166,65 @@ export default function IdAuth() {
 
           {step === "login" && (
             <>
-              <h1 className="font-display text-2xl font-black text-black mb-1">Вход</h1>
-              <p className="text-black/50 text-sm mb-7">Введите рабочий email и пароль</p>
-
-              <form onSubmit={onSubmitLogin} className="space-y-3">
-                <Field
-                  label="Email"
-                  type="email"
-                  value={email}
-                  onChange={setEmail}
-                  placeholder="name@dabbl.ru"
-                />
-                <Field
-                  label="Пароль"
-                  type="password"
-                  value={password}
-                  onChange={setPassword}
-                  placeholder="••••••••"
-                />
-                {error && <Err msg={error} />}
+              <div className="flex bg-black/5 rounded-2xl p-1 mb-6">
                 <button
-                  type="submit"
-                  disabled={busy}
-                  className="w-full py-3 rounded-xl bg-[#1a0a6e] hover:bg-[#0a0535] disabled:opacity-60 text-white font-semibold transition-colors mt-2"
+                  type="button"
+                  onClick={() => { setMode("login"); setError(""); }}
+                  className={`flex-1 py-2.5 rounded-xl text-[14px] font-bold transition-all ${
+                    mode === "login" ? "bg-white text-black shadow-sm" : "text-black/40"
+                  }`}
                 >
-                  {busy ? "Входим…" : "Войти"}
+                  Вход
                 </button>
-                <p className="text-[11px] text-black/35 text-center pt-1">
-                  Нет учётной записи? Попросите администратора прислать приглашение.
-                </p>
-              </form>
+                <button
+                  type="button"
+                  onClick={() => { setMode("register"); setError(""); }}
+                  className={`flex-1 py-2.5 rounded-xl text-[14px] font-bold transition-all ${
+                    mode === "register" ? "bg-white text-black shadow-sm" : "text-black/40"
+                  }`}
+                >
+                  Регистрация
+                </button>
+              </div>
+
+              {mode === "login" ? (
+                <>
+                  <h1 className="font-display text-2xl font-black text-black mb-1">Вход</h1>
+                  <p className="text-black/50 text-sm mb-7">Введите email и пароль от Даббл ID</p>
+
+                  <form onSubmit={onSubmitLogin} className="space-y-3">
+                    <Field label="Email" type="email" value={email} onChange={setEmail} placeholder="name@dabbl.ru" />
+                    <Field label="Пароль" type="password" value={password} onChange={setPassword} placeholder="••••••••" />
+                    {error && <Err msg={error} />}
+                    <button
+                      type="submit"
+                      disabled={busy}
+                      className="w-full py-3.5 rounded-2xl bg-[#1a0a6e] hover:bg-[#0a0535] disabled:opacity-60 text-white font-semibold transition-colors mt-2"
+                    >
+                      {busy ? "Входим…" : "Войти"}
+                    </button>
+                  </form>
+                </>
+              ) : (
+                <>
+                  <h1 className="font-display text-2xl font-black text-black mb-1">Создать Даббл ID</h1>
+                  <p className="text-black/50 text-sm mb-7">Один аккаунт — доступ ко всем сервисам экосистемы</p>
+
+                  <form onSubmit={onSubmitRegister} className="space-y-3">
+                    <Field label="Имя и фамилия" value={fullName} onChange={setFullName} placeholder="Иван Иванов" />
+                    <Field label="Email" type="email" value={email} onChange={setEmail} placeholder="name@mail.ru" />
+                    <Field label="Пароль" type="password" value={password} onChange={setPassword} placeholder="Минимум 6 символов" />
+                    {error && <Err msg={error} />}
+                    <button
+                      type="submit"
+                      disabled={busy}
+                      className="w-full py-3.5 rounded-2xl bg-[#1a0a6e] hover:bg-[#0a0535] disabled:opacity-60 text-white font-semibold transition-colors mt-2"
+                    >
+                      {busy ? "Создаём аккаунт…" : "Создать аккаунт"}
+                    </button>
+                  </form>
+                </>
+              )}
 
               {clientId === "meroshkins" && (
                 <>

@@ -9,6 +9,7 @@ type AuthState = {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string, clientId?: string) => Promise<LoginResult>;
+  register: (email: string, password: string, fullName: string, clientId?: string) => Promise<User>;
   verifyTfa: (user_id: number, code: string, clientId?: string) => Promise<User>;
   logout: () => Promise<void>;
   refresh: () => Promise<void>;
@@ -67,6 +68,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     throw new Error("Неожиданный ответ сервера");
   };
 
+  const register: AuthState["register"] = async (email, password, fullName, clientId = "cabinet") => {
+    const { token, user } = await request<{ token: string; user: User }>("dabbl-id", {
+      method: "POST",
+      query: { action: "register" },
+      body: { email, password, full_name: fullName, client_id: clientId },
+      auth: false,
+    });
+    saveToken(token);
+    setUser(user);
+    return user;
+  };
+
   const verifyTfa: AuthState["verifyTfa"] = async (user_id, code, clientId = "cabinet") => {
     const { token, user } = await request<{ token: string; user: User }>("dabbl-id", {
       method: "POST",
@@ -90,7 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthCtx.Provider value={{ user, loading, login, verifyTfa, logout, refresh, setUser }}>
+    <AuthCtx.Provider value={{ user, loading, login, register, verifyTfa, logout, refresh, setUser }}>
       {children}
     </AuthCtx.Provider>
   );

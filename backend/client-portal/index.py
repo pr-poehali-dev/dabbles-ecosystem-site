@@ -89,14 +89,21 @@ def hash_pw(pw):
 
 
 def get_client(conn, event):
+    """Клиент портала = пользователь Даббл ID, привязанный к записи cp_clients (создаётся админом через invite)."""
     headers = event.get('headers') or {}
     raw = (headers.get('X-Auth-Token') or headers.get('X-Authorization') or '').replace('Bearer ', '').strip()
     if not raw: return None
     with conn.cursor() as cur:
         cur.execute(
+            f"SELECT u.id FROM sessions s JOIN users u ON u.id = s.user_id "
+            f"WHERE s.token = {esc(raw)} AND s.expires_at > NOW() AND u.is_active = TRUE LIMIT 1"
+        )
+        urow = cur.fetchone()
+    if not urow: return None
+    with conn.cursor() as cur:
+        cur.execute(
             f"SELECT c.id, c.email, c.full_name, c.phone, c.address, c.passport, c.inn "
-            f"FROM cp_sessions s JOIN cp_clients c ON c.id = s.client_id "
-            f"WHERE s.token = {esc(raw)} AND s.expires_at > NOW() AND c.is_active = 'yes' LIMIT 1"
+            f"FROM cp_clients c WHERE c.user_id = {esc(urow[0])} AND c.is_active = 'yes' LIMIT 1"
         )
         row = cur.fetchone()
     if not row: return None
@@ -191,38 +198,11 @@ def handler(event: dict, context) -> dict:
         # КЛИЕНТ: АВТОРИЗАЦИЯ
         # ══════════════════════════════════════════════════════════
 
+        # Вход в портал теперь только через единый Даббл ID (см. get_client)
         if action == 'login' and method == 'POST':
-            body = json.loads(event.get('body') or '{}')
-            email = (body.get('email') or '').strip().lower()
-            password = body.get('password') or ''
-            if not email or not password:
-                return resp(400, {'error': 'Email и пароль обязательны'})
-            with conn.cursor() as cur:
-                cur.execute(
-                    f"SELECT id, email, full_name, password_hash, is_active "
-                    f"FROM cp_clients WHERE email = {esc(email)} LIMIT 1"
-                )
-                row = cur.fetchone()
-            if not row or row[3] != hash_pw(password):
-                return resp(401, {'error': 'Неверный email или пароль'})
-            if row[4] != 'yes':
-                return resp(403, {'error': 'Аккаунт заблокирован'})
-            token = secrets.token_hex(32)
-            with conn.cursor() as cur:
-                cur.execute(
-                    f"INSERT INTO cp_sessions (client_id, token, expires_at) "
-                    f"VALUES ({esc(row[0])}, {esc(token)}, NOW() + INTERVAL '30 days')"
-                )
-            conn.commit()
-            return resp(200, {'token': token, 'client': {'id': row[0], 'email': row[1], 'full_name': row[2]}})
+            return resp(410, {'error': 'Вход в портал теперь через единый Даббл ID', 'redirect': '/id/auth?client_id=client-portal&redirect_uri=/client/home'})
 
         if action == 'logout' and method == 'POST':
-            headers = event.get('headers') or {}
-            raw = (headers.get('X-Auth-Token') or headers.get('X-Authorization') or '').replace('Bearer ', '').strip()
-            if raw:
-                with conn.cursor() as cur:
-                    cur.execute(f"UPDATE cp_sessions SET expires_at = NOW() WHERE token = {esc(raw)}")
-                conn.commit()
             return resp(200, {'ok': True})
 
         if action == 'me' and method == 'GET':
@@ -466,6 +446,8 @@ def handler(event: dict, context) -> dict:
             }})
 
         if action == 'admin-client-create' and method == 'POST':
+            """Создаёт карточку клиента портала и приглашение в единый Даббл ID.
+            Клиент сам задаёт пароль по ссылке-приглашению — отдельного пароля портала больше нет."""
             admin = get_admin(conn, event)
             if not admin: return resp(401, {'error': 'Нет доступа'})
             body = json.loads(event.get('body') or '{}')
@@ -473,30 +455,49 @@ def handler(event: dict, context) -> dict:
             full_name = (body.get('full_name') or '').strip()
             if not email or not full_name:
                 return resp(400, {'error': 'Email и ФИО обязательны'})
-            # Генерируем пароль
-            password = secrets.token_urlsafe(8)
             with conn.cursor() as cur:
                 cur.execute(f"SELECT id FROM cp_clients WHERE email = {esc(email)} LIMIT 1")
                 if cur.fetchone():
                     return resp(409, {'error': 'Клиент с таким email уже существует'})
+                # Если пользователь Даббл ID с таким email уже есть — сразу привязываем
+                cur.execute(f"SELECT id FROM users WHERE LOWER(email) = {esc(email)} LIMIT 1")
+                existing_user = cur.fetchone()
                 cur.execute(
-                    f"INSERT INTO cp_clients (email, password_hash, full_name, phone, address, passport, inn, notes) "
-                    f"VALUES ({esc(email)}, {esc(hash_pw(password))}, {esc(full_name)}, "
+                    f"INSERT INTO cp_clients (email, password_hash, full_name, phone, address, passport, inn, notes, user_id) "
+                    f"VALUES ({esc(email)}, '', {esc(full_name)}, "
                     f"{esc(body.get('phone',''))}, {esc(body.get('address',''))}, "
-                    f"{esc(body.get('passport',''))}, {esc(body.get('inn',''))}, {esc(body.get('notes',''))}) RETURNING id"
+                    f"{esc(body.get('passport',''))}, {esc(body.get('inn',''))}, {esc(body.get('notes',''))}, "
+                    f"{esc(existing_user[0]) if existing_user else 'NULL'}) RETURNING id"
                 )
                 client_id = cur.fetchone()[0]
             create_account_and_card(conn, client_id, full_name)
             conn.commit()
-            # Отправляем welcome-письмо
+
+            if existing_user:
+                # Пользователь Даббл ID уже существует — просто уведомляем, приглашение не требуется
+                send_email(email, f'Доступ в личный кабинет — {os.environ.get("SMTP_FROM_NAME","Кабинет")}',
+                    f'<p>Здравствуйте, <b>{full_name}</b>!</p>'
+                    f'<p>Вам открыт доступ в личный кабинет клиента. Войдите через Даббл ID своим обычным паролем.</p>'
+                    f'<p>Вход: <a href="{PORTAL_URL}">{PORTAL_URL}</a></p>')
+                return resp(201, {'id': client_id, 'invited': False}, )
+
+            inv_token = secrets.token_urlsafe(24)
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"INSERT INTO invites (token, email, full_name, target_role, link_table, link_id, redirect_uri, invited_by, expires_at) "
+                    f"VALUES ({esc(inv_token)}, {esc(email)}, {esc(full_name)}, 'client', 'cp_clients', {esc(client_id)}, "
+                    f"'/client/home', {esc(admin['id'])}, NOW() + INTERVAL '30 days')"
+                )
+            conn.commit()
+            invite_url = f"{PORTAL_URL.rsplit('/client', 1)[0]}/id/invite/{inv_token}"
             send_from_template(conn, 'welcome', email, {
                 'full_name': full_name,
                 'email': email,
-                'password': password,
-                'portal_url': PORTAL_URL,
+                'password': '',
+                'portal_url': invite_url,
                 'company_name': os.environ.get('SMTP_FROM_NAME', 'Личный кабинет'),
             })
-            return resp(201, {'id': client_id, 'password': password})
+            return resp(201, {'id': client_id, 'invited': True, 'invite_url': invite_url})
 
         if action == 'admin-client-update' and method == 'POST':
             admin = get_admin(conn, event)
@@ -515,66 +516,84 @@ def handler(event: dict, context) -> dict:
             return resp(200, {'ok': True})
 
         if action == 'admin-client-reset-password' and method == 'POST':
+            """Пароль теперь общий с Даббл ID — сбрасывать password_hash в cp_clients больше не нужно.
+            Если клиент ещё не привязан к Даббл ID (нет user_id), пересоздаём ему приглашение."""
             admin = get_admin(conn, event)
             if not admin: return resp(401, {'error': 'Нет доступа'})
             body = json.loads(event.get('body') or '{}')
             client_id = int(body.get('id', 0))
-            new_password = secrets.token_urlsafe(8)
+            with conn.cursor() as cur:
+                cur.execute(f"SELECT email, full_name, user_id FROM cp_clients WHERE id = {esc(client_id)} LIMIT 1")
+                row = cur.fetchone()
+            if not row:
+                return resp(404, {'error': 'Клиент не найден'})
+            if row[2]:
+                return resp(200, {'ok': True, 'message': 'Клиент уже привязан к Даббл ID — смена пароля через /id/profile'})
+            inv_token = secrets.token_urlsafe(24)
             with conn.cursor() as cur:
                 cur.execute(
-                    f"UPDATE cp_clients SET password_hash = {esc(hash_pw(new_password))}, updated_at = NOW() WHERE id = {esc(client_id)}"
+                    f"INSERT INTO invites (token, email, full_name, target_role, link_table, link_id, redirect_uri, invited_by, expires_at) "
+                    f"VALUES ({esc(inv_token)}, {esc(row[0])}, {esc(row[1])}, 'client', 'cp_clients', {esc(client_id)}, "
+                    f"'/client/home', {esc(admin['id'])}, NOW() + INTERVAL '30 days')"
                 )
-                cur.execute(f"SELECT email, full_name FROM cp_clients WHERE id = {esc(client_id)} LIMIT 1")
-                row = cur.fetchone()
             conn.commit()
-            if row:
-                send_email(row[0], f'Новый пароль — {os.environ.get("SMTP_FROM_NAME","Кабинет")}',
-                    f'<p>Здравствуйте, <b>{row[1]}</b>!</p><p>Ваш новый пароль: <b>{new_password}</b></p>'
-                    f'<p>Вход: <a href="{PORTAL_URL}">{PORTAL_URL}</a></p>')
-            return resp(200, {'ok': True, 'password': new_password})
+            invite_url = f"{PORTAL_URL.rsplit('/client', 1)[0]}/id/invite/{inv_token}"
+            send_email(row[0], f'Ссылка для входа — {os.environ.get("SMTP_FROM_NAME","Кабинет")}',
+                f'<p>Здравствуйте, <b>{row[1]}</b>!</p><p>Перейдите по ссылке и задайте пароль: <a href="{invite_url}">{invite_url}</a></p>')
+            return resp(200, {'ok': True, 'invite_url': invite_url})
 
         if action == 'admin-client-send-credentials' and method == 'POST':
             admin = get_admin(conn, event)
             if not admin: return resp(401, {'error': 'Нет доступа'})
             body = json.loads(event.get('body') or '{}')
             client_id = int(body.get('id', 0))
-            new_password = secrets.token_urlsafe(8)
             with conn.cursor() as cur:
-                cur.execute(
-                    f"UPDATE cp_clients SET password_hash = {esc(hash_pw(new_password))}, updated_at = NOW() WHERE id = {esc(client_id)}"
-                )
-                cur.execute(f"SELECT email, full_name FROM cp_clients WHERE id = {esc(client_id)} LIMIT 1")
+                cur.execute(f"SELECT email, full_name, user_id FROM cp_clients WHERE id = {esc(client_id)} LIMIT 1")
                 row = cur.fetchone()
-            conn.commit()
             if not row:
                 return resp(404, {'error': 'Клиент не найден'})
+            if row[2]:
+                sent = send_email(row[0], f'Доступ в личный кабинет — {os.environ.get("SMTP_FROM_NAME","Кабинет")}',
+                    f'<p>Здравствуйте, <b>{row[1]}</b>!</p><p>Войдите в личный кабинет через Даббл ID: <a href="{PORTAL_URL}">{PORTAL_URL}</a></p>')
+                return resp(200, {'ok': sent is True, 'sent_to': row[0]})
+            inv_token = secrets.token_urlsafe(24)
+            with conn.cursor() as cur:
+                cur.execute(
+                    f"INSERT INTO invites (token, email, full_name, target_role, link_table, link_id, redirect_uri, invited_by, expires_at) "
+                    f"VALUES ({esc(inv_token)}, {esc(row[0])}, {esc(row[1])}, 'client', 'cp_clients', {esc(client_id)}, "
+                    f"'/client/home', {esc(admin['id'])}, NOW() + INTERVAL '30 days')"
+                )
+            conn.commit()
+            invite_url = f"{PORTAL_URL.rsplit('/client', 1)[0]}/id/invite/{inv_token}"
             sent = send_from_template(conn, 'welcome', row[0], {
                 'full_name': row[1],
                 'email': row[0],
-                'password': new_password,
-                'portal_url': PORTAL_URL,
+                'password': '',
+                'portal_url': invite_url,
                 'company_name': os.environ.get('SMTP_FROM_NAME', 'Личный кабинет'),
             })
-            return resp(200, {'ok': sent is True, 'result': sent, 'sent_to': row[0], 'password': new_password})
+            return resp(200, {'ok': sent is True, 'result': sent, 'sent_to': row[0], 'invite_url': invite_url})
 
         if action == 'admin-login-as-client' and method == 'POST':
-            """Админ входит в личный кабинет клиента без пароля — создаёт временную сессию клиента."""
+            """Админ входит в личный кабинет клиента без пароля — создаёт временную сессию Даббл ID от имени клиента."""
             admin = get_admin(conn, event)
             if not admin: return resp(401, {'error': 'Нет доступа'})
             body = json.loads(event.get('body') or '{}')
             client_id = int(body.get('id', 0))
             with conn.cursor() as cur:
-                cur.execute(f"SELECT id, is_active FROM cp_clients WHERE id = {esc(client_id)} LIMIT 1")
+                cur.execute(f"SELECT id, is_active, user_id FROM cp_clients WHERE id = {esc(client_id)} LIMIT 1")
                 row = cur.fetchone()
             if not row:
                 return resp(404, {'error': 'Клиент не найден'})
             if row[1] != 'yes':
                 return resp(403, {'error': 'Клиент заблокирован'})
+            if not row[2]:
+                return resp(400, {'error': 'Клиент ещё не завершил регистрацию по приглашению'})
             token = secrets.token_hex(32)
             with conn.cursor() as cur:
                 cur.execute(
-                    f"INSERT INTO cp_sessions (client_id, token, expires_at) "
-                    f"VALUES ({esc(client_id)}, {esc(token)}, NOW() + INTERVAL '1 hour')"
+                    f"INSERT INTO sessions (token, user_id, expires_at, client_id) "
+                    f"VALUES ({esc(token)}, {esc(row[2])}, NOW() + INTERVAL '1 hour', 'client-portal')"
                 )
             conn.commit()
             return resp(200, {'token': token})

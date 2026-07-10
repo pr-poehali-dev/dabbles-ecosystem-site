@@ -93,6 +93,31 @@ def handler(event, context):
 
     conn = db()
     try:
+        # === REGISTER: самостоятельная регистрация обычного пользователя ===
+        if action == 'register' and method == 'POST':
+            data = json.loads(event.get('body') or '{}')
+            email = (data.get('email') or '').strip().lower()
+            password = data.get('password') or ''
+            full_name = (data.get('full_name') or '').strip()
+            client_id = data.get('client_id') or 'cabinet'
+            if not email or not password or not full_name:
+                return resp(400, {'error': 'Заполните все поля'})
+            if len(password) < 6:
+                return resp(400, {'error': 'Пароль должен быть не короче 6 символов'})
+            with conn.cursor() as cur:
+                cur.execute(f"SELECT id FROM users WHERE LOWER(email) = {esc(email)}")
+                if cur.fetchone():
+                    return resp(409, {'error': 'Такой email уже зарегистрирован'})
+                cur.execute(
+                    f"INSERT INTO users (email, password_hash, full_name, role, must_change_password, is_active) "
+                    f"VALUES ({esc(email)}, {esc(sha(password))}, {esc(full_name)}, 'user', FALSE, TRUE) RETURNING id"
+                )
+                user_id = cur.fetchone()[0]
+            conn.commit()
+            new_token = make_session(conn, user_id, client_id, user_agent, ip)
+            user = get_user_by_token(conn, new_token)
+            return resp(201, {'token': new_token, 'user': user})
+
         # === LOGIN: email + password → session или 2FA challenge ===
         if action == 'login' and method == 'POST':
             data = json.loads(event.get('body') or '{}')
@@ -319,16 +344,17 @@ def handler(event, context):
             inv_token = qs.get('token') or ''
             with conn.cursor() as cur:
                 cur.execute(
-                    f"SELECT email, full_name, position, used, expires_at FROM invites WHERE token = {esc(inv_token)}"
+                    f"SELECT email, full_name, position, used, expires_at, target_role "
+                    f"FROM invites WHERE token = {esc(inv_token)}"
                 )
                 row = cur.fetchone()
             if not row:
                 return resp(404, {'error': 'Приглашение не найдено'})
             if row[3]:
                 return resp(400, {'error': 'Приглашение уже использовано'})
-            return resp(200, {'email': row[0], 'full_name': row[1], 'position': row[2]})
+            return resp(200, {'email': row[0], 'full_name': row[1], 'position': row[2], 'target_role': row[5]})
 
-        # === INVITE ACCEPT (сотрудник задаёт пароль) ===
+        # === INVITE ACCEPT (сотрудник/клиент/студент задаёт пароль) ===
         if action == 'invite-accept' and method == 'POST':
             data = json.loads(event.get('body') or '{}')
             inv_token = data.get('token') or ''
@@ -338,7 +364,8 @@ def handler(event, context):
                 return resp(400, {'error': 'Минимум 6 символов в пароле'})
             with conn.cursor() as cur:
                 cur.execute(
-                    f"SELECT email, full_name, position, access_tasks, access_documents, access_crm, used, expires_at "
+                    f"SELECT email, full_name, position, access_tasks, access_documents, access_crm, used, expires_at, "
+                    f"target_role, link_table, link_id, redirect_uri "
                     f"FROM invites WHERE token = {esc(inv_token)} AND used = FALSE AND expires_at > NOW()"
                 )
                 inv = cur.fetchone()
@@ -347,31 +374,53 @@ def handler(event, context):
             email = inv[0].lower()
             ph = sha(password)
             name = full_name or inv[1]
+            target_role = inv[8] or 'employee'
+            link_table = inv[9] or ''
+            link_id = inv[10]
+            redirect_uri = inv[11] or '/cabinet'
             with conn.cursor() as cur:
                 cur.execute(f"SELECT id FROM users WHERE LOWER(email) = {esc(email)}")
                 existing = cur.fetchone()
             if existing:
-                with conn.cursor() as cur:
-                    cur.execute(
-                        f"UPDATE users SET password_hash = {esc(ph)}, full_name = {esc(name)}, "
-                        f"position = {esc(inv[2])}, access_tasks = {esc(bool(inv[3]))}, "
-                        f"access_documents = {esc(bool(inv[4]))}, access_crm = {esc(bool(inv[5]))}, "
-                        f"must_change_password = FALSE, is_active = TRUE WHERE id = {existing[0]}"
-                    )
-                    user_id = existing[0]
+                user_id = existing[0]
+                if target_role == 'employee':
+                    with conn.cursor() as cur:
+                        cur.execute(
+                            f"UPDATE users SET password_hash = {esc(ph)}, full_name = {esc(name)}, "
+                            f"position = {esc(inv[2])}, access_tasks = {esc(bool(inv[3]))}, "
+                            f"access_documents = {esc(bool(inv[4]))}, access_crm = {esc(bool(inv[5]))}, "
+                            f"must_change_password = FALSE, is_active = TRUE WHERE id = {user_id}"
+                        )
+                else:
+                    with conn.cursor() as cur:
+                        cur.execute(
+                            f"UPDATE users SET password_hash = {esc(ph)}, full_name = {esc(name)}, "
+                            f"is_active = TRUE WHERE id = {user_id}"
+                        )
             else:
                 with conn.cursor() as cur:
-                    cur.execute(
-                        f"INSERT INTO users (email, password_hash, full_name, position, role, must_change_password, "
-                        f"access_tasks, access_documents, access_crm, is_active) "
-                        f"VALUES ({esc(email)}, {esc(ph)}, {esc(name)}, {esc(inv[2])}, 'employee', FALSE, "
-                        f"{esc(bool(inv[3]))}, {esc(bool(inv[4]))}, {esc(bool(inv[5]))}, TRUE) RETURNING id"
-                    )
+                    if target_role == 'employee':
+                        cur.execute(
+                            f"INSERT INTO users (email, password_hash, full_name, position, role, must_change_password, "
+                            f"access_tasks, access_documents, access_crm, is_active) "
+                            f"VALUES ({esc(email)}, {esc(ph)}, {esc(name)}, {esc(inv[2])}, 'employee', FALSE, "
+                            f"{esc(bool(inv[3]))}, {esc(bool(inv[4]))}, {esc(bool(inv[5]))}, TRUE) RETURNING id"
+                        )
+                    else:
+                        cur.execute(
+                            f"INSERT INTO users (email, password_hash, full_name, role, must_change_password, is_active) "
+                            f"VALUES ({esc(email)}, {esc(ph)}, {esc(name)}, {esc(target_role)}, FALSE, TRUE) RETURNING id"
+                        )
                     user_id = cur.fetchone()[0]
+            # Привязываем к внешней записи (cp_clients / camp_students), если приглашение целевое
+            if link_table in ('cp_clients', 'camp_students') and link_id:
+                with conn.cursor() as cur:
+                    cur.execute(f"UPDATE {link_table} SET user_id = {esc(user_id)} WHERE id = {esc(link_id)}")
             with conn.cursor() as cur:
                 cur.execute(f"UPDATE invites SET used = TRUE WHERE token = {esc(inv_token)}")
             conn.commit()
-            new_token = make_session(conn, user_id, 'cabinet', user_agent, ip)
+            client_id_for_session = 'client-portal' if link_table == 'cp_clients' else ('camp' if link_table == 'camp_students' else 'cabinet')
+            new_token = make_session(conn, user_id, client_id_for_session, user_agent, ip)
             user = get_user_by_token(conn, new_token)
             return resp(200, {'token': new_token, 'user': user})
 

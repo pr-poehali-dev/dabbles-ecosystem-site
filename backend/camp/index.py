@@ -42,17 +42,48 @@ def get_token(event):
     return (headers.get('X-Auth-Token') or headers.get('X-Authorization') or '').replace('Bearer ', '').strip()
 
 
-def get_student(conn, event):
-    token = get_token(event)
+def get_dabbl_user(conn, token):
+    """Проверяет токен единого Даббл ID (общая таблица sessions/users) и возвращает базовые поля пользователя."""
     if not token: return None
     with conn.cursor() as cur:
         cur.execute(
-            f"SELECT s.id, s.email, s.full_name, s.phone, s.avatar_url "
-            f"FROM camp_sessions cs JOIN camp_students s ON s.id = cs.student_id "
-            f"WHERE cs.token = {esc(token)} AND cs.expires_at > NOW() AND s.is_active = TRUE LIMIT 1"
+            f"SELECT u.id, u.email, u.full_name, u.phone, u.avatar_url FROM sessions s "
+            f"JOIN users u ON u.id = s.user_id "
+            f"WHERE s.token = {esc(token)} AND s.expires_at > NOW() AND u.is_active = TRUE LIMIT 1"
+        )
+        return cur.fetchone()
+
+
+def get_student(conn, event):
+    """Студент Кэмпа = пользователь Даббл ID. При первом обращении создаём/связываем запись camp_students."""
+    token = get_token(event)
+    if not token: return None
+    dabbl = get_dabbl_user(conn, token)
+    if not dabbl: return None
+    user_id, email, full_name, phone, avatar_url = dabbl
+    with conn.cursor() as cur:
+        cur.execute(
+            f"SELECT id, email, full_name, phone, avatar_url FROM camp_students WHERE user_id = {esc(user_id)} LIMIT 1"
         )
         row = cur.fetchone()
-    if not row: return None
+        if not row:
+            # Ищем по email старую запись без user_id (миграция существующих) — иначе создаём новую
+            cur.execute(f"SELECT id FROM camp_students WHERE email = {esc(email)} AND user_id IS NULL LIMIT 1")
+            legacy = cur.fetchone()
+            if legacy:
+                cur.execute(f"UPDATE camp_students SET user_id = {esc(user_id)} WHERE id = {esc(legacy[0])}")
+                cur.execute(
+                    f"SELECT id, email, full_name, phone, avatar_url FROM camp_students WHERE id = {esc(legacy[0])}"
+                )
+                row = cur.fetchone()
+            else:
+                cur.execute(
+                    f"INSERT INTO camp_students (user_id, email, password_hash, full_name, phone, avatar_url, is_active) "
+                    f"VALUES ({esc(user_id)}, {esc(email)}, '', {esc(full_name)}, {esc(phone or '')}, {esc(avatar_url or '')}, TRUE) "
+                    f"RETURNING id, email, full_name, phone, avatar_url"
+                )
+                row = cur.fetchone()
+    conn.commit()
     return {'id': row[0], 'email': row[1], 'full_name': row[2], 'phone': row[3], 'avatar_url': row[4]}
 
 
@@ -163,64 +194,13 @@ def handler(event: dict, context) -> dict:
         # СТУДЕНТ: АВТОРИЗАЦИЯ
         # ══════════════════════════════════════════════════════
 
-        if action == 'register' and method == 'POST':
-            body = json.loads(event.get('body') or '{}')
-            email = (body.get('email') or '').strip().lower()
-            password = body.get('password') or ''
-            full_name = (body.get('full_name') or '').strip()
-            if not email or not password or not full_name:
-                return resp(400, {'error': 'Заполните все поля'})
-            if len(password) < 6:
-                return resp(400, {'error': 'Пароль должен быть не короче 6 символов'})
-            if len(full_name.split()) < 2:
-                return resp(400, {'error': 'Укажите полное ФИО — оно будет напечатано на сертификате'})
-            with conn.cursor() as cur:
-                cur.execute(f"SELECT id FROM camp_students WHERE email = {esc(email)} LIMIT 1")
-                if cur.fetchone():
-                    return resp(409, {'error': 'Такой email уже зарегистрирован'})
-                cur.execute(
-                    f"INSERT INTO camp_students (email, password_hash, full_name) "
-                    f"VALUES ({esc(email)}, {esc(hash_pw(password))}, {esc(full_name)}) RETURNING id"
-                )
-                student_id = cur.fetchone()[0]
-                token = secrets.token_hex(32)
-                expires = (datetime.now(timezone.utc) + timedelta(days=60)).isoformat()
-                cur.execute(
-                    f"INSERT INTO camp_sessions (student_id, token, expires_at) "
-                    f"VALUES ({esc(student_id)}, {esc(token)}, {esc(expires)})"
-                )
-            conn.commit()
-            return resp(201, {'token': token, 'student': {'id': student_id, 'email': email, 'full_name': full_name}})
-
-        if action == 'login' and method == 'POST':
-            body = json.loads(event.get('body') or '{}')
-            email = (body.get('email') or '').strip().lower()
-            password = body.get('password') or ''
-            with conn.cursor() as cur:
-                cur.execute(
-                    f"SELECT id, email, full_name, password_hash, is_active FROM camp_students "
-                    f"WHERE email = {esc(email)} LIMIT 1"
-                )
-                row = cur.fetchone()
-            if not row or row[3] != hash_pw(password):
-                return resp(401, {'error': 'Неверный email или пароль'})
-            if not row[4]:
-                return resp(403, {'error': 'Аккаунт заблокирован'})
-            token = secrets.token_hex(32)
-            expires = (datetime.now(timezone.utc) + timedelta(days=60)).isoformat()
-            with conn.cursor() as cur:
-                cur.execute(
-                    f"INSERT INTO camp_sessions (student_id, token, expires_at) "
-                    f"VALUES ({esc(row[0])}, {esc(token)}, {esc(expires)})"
-                )
-            conn.commit()
-            return resp(200, {'token': token, 'student': {'id': row[0], 'email': row[1], 'full_name': row[2]}})
+        # Регистрация и вход теперь производятся только через единый Даббл ID (/id/auth).
+        # Эндпоинты оставлены для обратной совместимости старых клиентов и явно на это указывают.
+        if action in ('register', 'login') and method == 'POST':
+            return resp(410, {'error': 'Вход в Кэмп теперь через единый Даббл ID', 'redirect': '/id/auth?client_id=camp&redirect_uri=/camp/app'})
 
         if action == 'logout' and method == 'POST':
-            token = get_token(event)
-            with conn.cursor() as cur:
-                cur.execute(f"DELETE FROM camp_sessions WHERE token = {esc(token)}")
-            conn.commit()
+            # Сессия общая (Даббл ID) — реальный logout выполняется через dabbl-id?action=logout
             return resp(200, {'ok': True})
 
         if action == 'me' and method == 'GET':
@@ -229,21 +209,10 @@ def handler(event: dict, context) -> dict:
             return resp(200, {'student': student})
 
         if action == 'profile-update' and method == 'POST':
-            """Студент может поправить своё ФИО и телефон — ФИО используется при печати сертификата."""
+            """ФИО и телефон теперь редактируются в едином профиле Даббл ID (/id/profile) — здесь только чтение актуальных данных."""
             student = get_student(conn, event)
             if not student: return resp(401, {'error': 'Не авторизован'})
-            body = json.loads(event.get('body') or '{}')
-            full_name = (body.get('full_name') or '').strip()
-            phone = (body.get('phone') or '').strip()
-            if not full_name or len(full_name.split()) < 2:
-                return resp(400, {'error': 'Укажите полное ФИО — оно будет напечатано на сертификате'})
-            with conn.cursor() as cur:
-                cur.execute(
-                    f"UPDATE camp_students SET full_name = {esc(full_name)}, phone = {esc(phone)} "
-                    f"WHERE id = {esc(student['id'])}"
-                )
-            conn.commit()
-            return resp(200, {'student': {**student, 'full_name': full_name, 'phone': phone}})
+            return resp(200, {'student': student})
 
         # ══════════════════════════════════════════════════════
         # ПУБЛИЧНО: СПИСОК ПРОГРАММ

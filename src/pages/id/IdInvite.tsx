@@ -5,7 +5,12 @@ import { request, setToken } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import type { User } from "@/lib/api";
 
-type InviteInfo = { email: string; full_name: string; position: string };
+type InviteInfo = { email: string; full_name: string; position: string; target_role?: string };
+
+const ROLE_REDIRECT: Record<string, string> = {
+  client: "/client/home",
+  employee: "/cabinet",
+};
 
 export default function IdInvite() {
   const { token } = useParams();
@@ -42,7 +47,7 @@ export default function IdInvite() {
       });
       setToken(r.token);
       setUser(r.user);
-      nav("/cabinet");
+      nav(ROLE_REDIRECT[info?.target_role || "employee"] || "/cabinet");
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Ошибка");
     } finally {
