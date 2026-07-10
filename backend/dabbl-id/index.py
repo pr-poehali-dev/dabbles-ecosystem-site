@@ -63,6 +63,55 @@ def get_user_by_token(conn, token: str):
         'is_active': row[9], 'avatar_url': row[10], 'phone': row[11], 'tfa_enabled': row[12],
     }
 
+def try_legacy_login(conn, email, password):
+    """Совместимость со старыми паролями, выданными ДО перехода на единый Даббл ID:
+    - клиенты юр.портала (cp_clients.password_hash)
+    - студенты Кэмпа (camp_students.password_hash)
+    Если пароль совпадает со старым — создаёт/привязывает запись в users и возвращает user_id."""
+    pw_hash = sha(password)
+
+    with conn.cursor() as cur:
+        cur.execute(
+            f"SELECT id, full_name, user_id, password_hash FROM cp_clients "
+            f"WHERE LOWER(email) = {esc(email)} AND is_active = 'yes' LIMIT 1"
+        )
+        row = cur.fetchone()
+    if row and not row[2] and row[3] and row[3] == pw_hash:
+        return _link_legacy_user(conn, email, row[1], pw_hash, 'cp_clients', row[0])
+
+    with conn.cursor() as cur:
+        cur.execute(
+            f"SELECT id, full_name, user_id, password_hash FROM camp_students "
+            f"WHERE LOWER(email) = {esc(email)} AND is_active = TRUE LIMIT 1"
+        )
+        row = cur.fetchone()
+    if row and not row[2] and row[3] and row[3] == pw_hash:
+        return _link_legacy_user(conn, email, row[1], pw_hash, 'camp_students', row[0])
+
+    return None
+
+
+def _link_legacy_user(conn, email, full_name, pw_hash, link_table, link_id):
+    with conn.cursor() as cur:
+        cur.execute(f"SELECT id FROM users WHERE LOWER(email) = {esc(email)} LIMIT 1")
+        u = cur.fetchone()
+    if u:
+        user_id = u[0]
+        with conn.cursor() as cur:
+            cur.execute(f"UPDATE users SET is_active = TRUE WHERE id = {user_id}")
+    else:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"INSERT INTO users (email, password_hash, full_name, role, must_change_password, is_active) "
+                f"VALUES ({esc(email)}, {esc(pw_hash)}, {esc(full_name)}, 'client', FALSE, TRUE) RETURNING id"
+            )
+            user_id = cur.fetchone()[0]
+    with conn.cursor() as cur:
+        cur.execute(f"UPDATE {link_table} SET user_id = {esc(user_id)} WHERE id = {esc(link_id)}")
+    conn.commit()
+    return user_id
+
+
 def make_session(conn, user_id, client_id, user_agent, ip):
     token = secrets.token_hex(32)
     exp = (datetime.now(timezone.utc) + timedelta(days=30)).isoformat()
@@ -129,11 +178,23 @@ def handler(event, context):
                     f"SELECT id, password_hash, is_active, tfa_enabled, email FROM users WHERE LOWER(email) = {esc(email)}"
                 )
                 row = cur.fetchone()
-            if not row or not row[2] or row[1] != sha(password):
-                return resp(401, {'error': 'Неверный email или пароль'})
-            user_id = row[0]
-            tfa = row[3]
-            user_email = row[4]
+
+            if row and row[2] and row[1] == sha(password):
+                user_id = row[0]
+                tfa = row[3]
+                user_email = row[4]
+            else:
+                # Пароль не совпал (или пользователя ещё нет в единой базе) — проверяем старые
+                # пароли, выданные клиентам/студентам ДО перехода на единый Даббл ID
+                legacy_user_id = try_legacy_login(conn, email, password)
+                if not legacy_user_id:
+                    return resp(401, {'error': 'Неверный email или пароль'})
+                user_id = legacy_user_id
+                with conn.cursor() as cur:
+                    cur.execute(f"SELECT tfa_enabled, email FROM users WHERE id = {user_id}")
+                    urow = cur.fetchone()
+                tfa = urow[0]
+                user_email = urow[1]
             if tfa:
                 code = f"{random.randint(0, 999999):06d}"
                 exp = (datetime.now(timezone.utc) + timedelta(minutes=10)).isoformat()
