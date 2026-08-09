@@ -29,6 +29,7 @@ import ClientPortal from "./pages/client/index";
 import CampPortal from "./pages/camp/index";
 import { AuthProvider } from "@/lib/auth";
 import CookieBanner from "@/components/CookieBanner";
+import MaintenanceBanner from "@/components/MaintenanceBanner";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
+          <MaintenanceBanner />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/about" element={<About />} />
